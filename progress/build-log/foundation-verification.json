@@ -1,0 +1,24 @@
+{
+  "checked_at": "2026-10-13T23:44:05.131710+07:00",
+  "scope": "Repository foundation only; not application or model evaluation",
+  "local_checks": "passed",
+  "publishable_file_count": 52,
+  "public_directory_count": 33,
+  "synthetic_case_count": 8,
+  "checks": [
+    "Nonempty publishable files and complete folder map",
+    "Relative Markdown links resolve within repository",
+    "JSON and JSONL parse",
+    "JSON Schema meta-validation and representative fixture validation",
+    "Evaluation IDs, categories, and evidence consistency",
+    "Nested checkout and private-path ignore rules",
+    "Credential-pattern scan of publishable text"
+  ],
+  "publication": "pending",
+  "limitations": [
+    "No hackathon application runtime exists",
+    "No OpenAI API or model evaluation run performed",
+    "Credential-pattern scanning is not a complete secret audit",
+    "Portal repo linking and final submission not performed"
+  ]
+}

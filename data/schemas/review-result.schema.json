@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Legal Reviewer result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document_id",
+    "input_status",
+    "limitations",
+    "findings"
+  ],
+  "properties": {
+    "document_id": {
+      "type": "string"
+    },
+    "input_status": {
+      "type": "string",
+      "enum": [
+        "readable",
+        "incomplete",
+        "unreadable",
+        "unsupported"
+      ]
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "category",
+          "title",
+          "evidence",
+          "explanation",
+          "confirmation_question",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "typo",
+              "missing_reference",
+              "undefined_term",
+              "contradiction",
+              "ambiguity"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "quote",
+                "page",
+                "section"
+              ],
+              "properties": {
+                "quote": {
+                  "type": "string"
+                },
+                "page": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "section": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "confirmation_question": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "needs_review",
+              "confirmed",
+              "dismissed",
+              "needs_clarification"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

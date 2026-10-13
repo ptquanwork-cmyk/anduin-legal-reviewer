@@ -1,0 +1,47 @@
+# Independent upstream repositories already present locally
+/contract-reader-agent/
+/laya/
+
+# Credentials and private/local material
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*credentials*.json
+*service-account*.json
+/data/private/
+/context/private/
+/demo/private/
+uploads/
+temp/
+tmp/
+*.sqlite
+*.sqlite3
+*.db
+*.log
+
+# Environments, caches, generated builds and model files
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+dist/
+build/
+.next/
+coverage/
+*.pt
+*.pth
+*.onnx
+*.safetensors
+
+# Local tool/OS state
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
