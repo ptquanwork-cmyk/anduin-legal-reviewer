@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-14 — Public page wording
+
+- Replaced vendor-specific navigation with Review design, linked to the architecture documentation.
+- Renamed the evaluation status to Review quality evaluation.
+- Recorded the provider-neutral public-page convention for future changes.
+
 ## 2026-10-13 — Project foundation
 
 - Created an English-first repository structure for Anduin Legal Reviewer.
