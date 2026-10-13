@@ -6,4 +6,6 @@ Read [challenge](challenge/brief.md), [MVP scope](product/mvp.md), [architecture
 
 [Deployment setup](deployment/setup.md) records the verified Vercel and Supabase projects.
 
-[Overall design](../design.md) describes the proposed 3D workflow hub. [UI 2 JSON](design/ui-2.json) records the web layout reference; [UI 3 JSON](design/ui-3.json) records the 3D reference and Blender-friendly module specification. These are design descriptions, not implemented screens or a Blender scene.
+[Overall design](../design/design.md) describes the proposed 3D workflow hub. [UI 2 JSON](../design/references/ui-2.json) records the web layout reference; [UI 3 JSON](../design/references/ui-3.json) records the 3D reference and Blender-friendly module specification. These are design descriptions, not implemented screens or a Blender scene.
+
+All design artifacts now live in [the design package](../design/README.md), including functional screen concepts and individual 3D modeling references.

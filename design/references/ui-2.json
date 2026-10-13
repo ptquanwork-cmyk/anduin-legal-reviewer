@@ -3,7 +3,8 @@
   "id": "ui-2-web-layout-reference",
   "status": "design reference; not implemented",
   "source": {
-    "filename": "ui (2).jpg",
+    "filename": "source-images/ui (2).jpg",
+    "path_base": "Relative to this JSON file; original source images are local-only.",
     "dimensions_px": {"width": 736, "height": 920},
     "sha256": "00fa631bab825b8f681b33cb6f6fdbc6622567e96c3689ef3434ee6f96ea0098",
     "provenance": "Owner-supplied visual reference; original remains local and untracked.",

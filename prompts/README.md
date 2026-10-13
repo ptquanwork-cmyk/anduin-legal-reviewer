@@ -7,6 +7,9 @@ Keep the exact reusable instructions here; store task background separately in `
 | DEV-001 | [development/build-task-v1.md](development/build-task-v1.md) | Implement a bounded task with context and validation | Draft |
 | REVIEW-001 | [review/contract-review-v1.md](review/contract-review-v1.md) | Produce source-backed contract findings | Draft; no model run |
 | EVAL-001 | [evaluation/grade-findings-v1.md](evaluation/grade-findings-v1.md) | Review output against the evaluation rubric | Draft; no model run |
-| DESIGN-001 | [design/3d-workflow-hub-v1.md](design/3d-workflow-hub-v1.md) | Generate/refine the 3D workflow homepage approval image | Concept generated; no application or Blender implementation |
+| DESIGN-001 | [design/3d-workflow-hub-v1.md](../design/prompts/3d-workflow-hub-v1.md) | Generate/refine the 3D workflow homepage approval image | Concept generated; no application or Blender implementation |
+| DESIGN-002 | [design/interfaces-components-v1.json](../design/prompts/interfaces-components-v1.json) | Generate nine functional interfaces and nine isolated 3D reference images | Design-only prompt matrix; per-asset output verification in design manifest |
+
+Design prompts are consolidated under `design/prompts/` at the owner's request. [Generation appendices and refinements](../design/prompts/generation-refinements-v1.json) record targeted navigation/source/field corrections to the base prompt matrix.
 
 For experiments record the prompt file/commit, model identifier, settings, input dataset, actual output, and human review. Preserve previous versions when introducing meaningful behavior changes. Do not publish private reasoning traces; use concise decision explanations and observable evidence.

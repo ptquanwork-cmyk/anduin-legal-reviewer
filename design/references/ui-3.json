@@ -3,7 +3,8 @@
   "id": "ui-3-retro-3d-reference",
   "status": "design reference; no Blender scene created",
   "source": {
-    "filename": "ui (3).jpg",
+    "filename": "source-images/ui (3).jpg",
+    "path_base": "Relative to this JSON file; original source images are local-only.",
     "dimensions_px": {"width": 736, "height": 883},
     "sha256": "1323d7f273b6e1b38ff650b0492d20f62c99ae6e2f278e2a484b462c9f722fa2",
     "provenance": "Owner-supplied visual reference; original remains local and untracked.",

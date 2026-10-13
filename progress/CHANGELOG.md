@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-14 — Interface and component design package
+
+- Consolidated design specifications, reference JSONs, homepage and prompts under `design/`; original supplied JPEGs are organized locally and remain untracked.
+- Preserved the approved homepage bytes and extended the section briefs from the local first overall plan.
+- Added nine distinct functional-screen concept images and nine individual transparent 3D modeling references, with exact prompts and per-asset verification.
+- Added design indexes and Blender scene/hover handoff notes; no runtime, mesh, Blender scene or animation was implemented.
+
 ## 2026-10-14 — 3D homepage design concept
 
 - Created a root design specification and structured descriptions of the supplied UI 2/web-layout and UI 3/retro-3D references.

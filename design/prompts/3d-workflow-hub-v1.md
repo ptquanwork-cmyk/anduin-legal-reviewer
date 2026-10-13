@@ -44,7 +44,7 @@ Art direction: crisp typography, high-end object render details, layered depth, 
 
 ## Final cleanup instruction
 
-The first blue hub concept was refined with the following exact instruction, using that generated concept as the edit target. The selected output is `demo/design/anduin-3d-workflow-hub-v1.png`. Earlier exploratory outputs remain outside the repository.
+The first blue hub concept was refined with the following exact instruction, using that generated concept as the edit target. The selected output is now organized as `design/homepage/anduin-3d-workflow-hub-v1.png`. Earlier exploratory outputs remain outside the repository.
 
 ```text
 Edit the supplied Anduin Legal Reviewer 3D workflow hub concept to make it CLEANER, more orderly and much easier to reconstruct as a modular Blender scene. Preserve its overall reference UI2 web shell, concave header notch, slim two-part left icon rail, dominant Anduin Blue #48AFF0 and Mint #96DBD4, all NINE named sections and exact English UI copy. Keep Legal review as the primary section, the beautiful retro resin CRT and chunky keyboard based on UI3, and keep the hover cue "Open workspace". This is still a homepage of 3D section objects, not a flat dashboard.

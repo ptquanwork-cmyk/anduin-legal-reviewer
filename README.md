@@ -22,7 +22,7 @@ Upload a contract, inspect findings tied to source passages, and record which is
 | --- | --- |
 | Public repository and project structure | Published; public visibility verified |
 | Challenge interpretation and proposed workflow | Documented |
-| 3D workflow homepage design | [Design specification](design.md), two reference JSONs and a concept image; no Blender scene or interactive implementation |
+| 3D workflow design package | [Design folder](design/README.md): approved homepage, two reference JSONs, nine interface concepts and nine component references; no Blender scene or interactive implementation |
 | Context packs and versioned prompt drafts | Seeded; not evaluated |
 | Synthetic evaluation cases and finding schema | Seeded; no model runs |
 | Hackathon application in `src/` | Planned; no runtime yet |
@@ -43,7 +43,7 @@ Two independent upstream checkouts already exist in the local workspace. They ar
 6. [Evaluation plan](evals/README.md) — cases, expected findings, and scoring.
 7. [Build log](progress/build-log/2026-10-13.md) and [roadmap](progress/roadmap.md) — actual progress and next steps.
 8. [Complete folder map](docs/repository-map.md) — every public folder and its purpose.
-9. [Overall design](design.md) — Anduin palette, reference roles, modular 3D homepage, proposed hover/click behavior and section screens. [Preview image](demo/design/anduin-3d-workflow-hub-v1.png).
+9. [Design package](design/README.md) — overall specification, approved homepage, nine functional interfaces, nine individual Blender object references and exact prompts. [Homepage preview](design/homepage/anduin-3d-workflow-hub-v1.png).
 
 ## Repository layout
 
@@ -51,6 +51,7 @@ Two independent upstream checkouts already exist in the local workspace. They ar
 anduin-legal-reviewer/
 ├── .github/ISSUE_TEMPLATE/        # Task intake and review template
 ├── docs/                        # Challenge, product, architecture, decisions
+├── design/                      # Approved hub, screen concepts, object references, prompts
 ├── context/                     # User briefs and source-backed research
 ├── prompts/                     # Versioned development/review/evaluation prompts
 ├── openai/                      # Concepts, integration plan, official sources

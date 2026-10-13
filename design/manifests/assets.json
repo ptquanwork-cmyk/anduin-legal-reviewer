@@ -1,0 +1,520 @@
+{
+  "schema_version": "1.0",
+  "date": "2026-10-14",
+  "package": "Anduin Legal Reviewer design package",
+  "status": "design references only; no application, Blender geometry or animation",
+  "generation_tool": "built-in image generation",
+  "homepage_preserved": true,
+  "homepage": {
+    "file": "homepage/anduin-3d-workflow-hub-v1.png",
+    "format": "PNG",
+    "width": 1536,
+    "height": 1024,
+    "mode": "RGB",
+    "bytes": 1781960,
+    "sha256": "81adc8ff26bfd7d09bdcef31821a1b672bdae8b9d591e7a7f56adfbd015b8bf9",
+    "png_decode": "passed"
+  },
+  "stages": [
+    {
+      "id": "01",
+      "name": "Intake",
+      "purpose": "Upload original PDF/Word, register version and scope, inspect resumable jobs and duplicate candidates.",
+      "source_plan_sections": "Plan steps 1 and 4; section 6.3 Intake",
+      "status": "synthetic static design concept",
+      "interface": {
+        "file": "interfaces/01-intake.png",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024,
+        "mode": "RGB",
+        "bytes": 1598406,
+        "sha256": "910d55bf3c6d7a6582704bce4985d3b1ff4edc6787f62873fc0a913733ed83b5",
+        "png_decode": "passed"
+      },
+      "component_3d": {
+        "file": "components-3d/01-intake.png",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGBA",
+        "bytes": 1074093,
+        "sha256": "aa8f68fc93102555fc8470168b66e0efba50e89380bca7f800eba338e5b2b823",
+        "png_decode": "passed",
+        "alpha": {
+          "range": [
+            0,
+            255
+          ],
+          "fully_transparent_pixels": 807956,
+          "fully_transparent_fraction": 0.513798,
+          "corners": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_bbox": [
+            0,
+            9,
+            1253,
+            1254
+          ],
+          "substantial_content_bbox_threshold_128": [
+            95,
+            147,
+            1175,
+            1079
+          ],
+          "substantial_content_inside_frame": true
+        }
+      },
+      "proposed_hover": "Raise top sheet slightly"
+    },
+    {
+      "id": "02",
+      "name": "Source quality",
+      "purpose": "Compare original Word and converted PDF, investigate text/font/layout issues and extraction gaps before proceeding.",
+      "source_plan_sections": "Plan steps 2-4; section 6.3 Source quality",
+      "status": "synthetic static design concept",
+      "interface": {
+        "file": "interfaces/02-source-quality.png",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024,
+        "mode": "RGB",
+        "bytes": 1715147,
+        "sha256": "38e91f62ab9c324b353209c3e620469aa05df8e0fc46f7e38dc40b60d647546f",
+        "png_decode": "passed"
+      },
+      "component_3d": {
+        "file": "components-3d/02-source-quality.png",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGBA",
+        "bytes": 1044191,
+        "sha256": "9f6329c3833e7f74a010b22c5eb7dc6717fed84a37dd86517cca6ad11b4b53aa",
+        "png_decode": "passed",
+        "alpha": {
+          "range": [
+            0,
+            255
+          ],
+          "fully_transparent_pixels": 868728,
+          "fully_transparent_fraction": 0.552445,
+          "corners": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_bbox": [
+            0,
+            67,
+            1156,
+            1238
+          ],
+          "substantial_content_bbox_threshold_128": [
+            121,
+            195,
+            1147,
+            1029
+          ],
+          "substantial_content_inside_frame": true
+        }
+      },
+      "proposed_hover": "Lens moves along paired source sheets"
+    },
+    {
+      "id": "03",
+      "name": "Document map",
+      "purpose": "Explore outline, relationship graph and page map, with every node anchored to exact source.",
+      "source_plan_sections": "Plan step 5; section 6.3 Document map",
+      "status": "synthetic static design concept",
+      "interface": {
+        "file": "interfaces/03-document-map.png",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024,
+        "mode": "RGB",
+        "bytes": 1604143,
+        "sha256": "d6e24be59f0e65136d99cf37ae64b805c8c42a4806ee9a34d89f7b8f25fd880e",
+        "png_decode": "passed"
+      },
+      "component_3d": {
+        "file": "components-3d/03-document-map.png",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGBA",
+        "bytes": 779832,
+        "sha256": "6d7b5156e2fbd41f08c145f47c54300bd282fa0968d545ca9064c57087d3f406",
+        "png_decode": "passed",
+        "alpha": {
+          "range": [
+            0,
+            255
+          ],
+          "fully_transparent_pixels": 1069959,
+          "fully_transparent_fraction": 0.680412,
+          "corners": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_bbox": [
+            41,
+            9,
+            1224,
+            1254
+          ],
+          "substantial_content_bbox_threshold_128": [
+            136,
+            202,
+            1121,
+            1053
+          ],
+          "substantial_content_inside_frame": true
+        }
+      },
+      "proposed_hover": "Highlight one selected node"
+    },
+    {
+      "id": "04",
+      "name": "Legal review",
+      "purpose": "Review source-grounded spelling/reference/contradiction/ambiguity findings and record human decisions.",
+      "source_plan_sections": "Plan steps 6-7; section 6.2 Legal Review Workspace",
+      "status": "synthetic static design concept",
+      "interface": {
+        "file": "interfaces/04-legal-review.png",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024,
+        "mode": "RGB",
+        "bytes": 1634411,
+        "sha256": "fa3b2799a2efb3f77aa07b91bf80179ebafbeb7f2fe801cc3b671702b7f6a6c4",
+        "png_decode": "passed"
+      },
+      "component_3d": {
+        "file": "components-3d/04-legal-review.png",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGBA",
+        "bytes": 1425482,
+        "sha256": "d2edd85f498afda8148b0d82e6b0d4c3eb8ca948784b83f26c06697e80d82af5",
+        "png_decode": "passed",
+        "alpha": {
+          "range": [
+            0,
+            255
+          ],
+          "fully_transparent_pixels": 672343,
+          "fully_transparent_fraction": 0.427559,
+          "corners": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_bbox": [
+            0,
+            40,
+            1237,
+            1254
+          ],
+          "substantial_content_bbox_threshold_128": [
+            62,
+            157,
+            1231,
+            1125
+          ],
+          "substantial_content_inside_frame": true
+        }
+      },
+      "proposed_hover": "Small workstation lift and quote-symbol glow"
+    },
+    {
+      "id": "05",
+      "name": "Decision / report",
+      "purpose": "Track confirmed/open versus resolved issues, clarification questions, revision evidence and report/handoff gates.",
+      "source_plan_sections": "Plan steps 7-8; section 6.3 Review decision/report",
+      "status": "synthetic static design concept",
+      "interface": {
+        "file": "interfaces/05-decision-report.png",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024,
+        "mode": "RGB",
+        "bytes": 1683476,
+        "sha256": "430a234e284a921a41711b50c99ffc828d837f9e844956f816e58fcd02e9a88e",
+        "png_decode": "passed"
+      },
+      "component_3d": {
+        "file": "components-3d/05-decision-report.png",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGBA",
+        "bytes": 1051342,
+        "sha256": "77db70ea8592379d14dc2998271548bb1ac17db9034c835c0866ee48eeb83776",
+        "png_decode": "passed",
+        "alpha": {
+          "range": [
+            0,
+            255
+          ],
+          "fully_transparent_pixels": 846160,
+          "fully_transparent_fraction": 0.538093,
+          "corners": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_bbox": [
+            25,
+            63,
+            1216,
+            1232
+          ],
+          "substantial_content_bbox_threshold_128": [
+            80,
+            179,
+            1210,
+            1111
+          ],
+          "substantial_content_inside_frame": true
+        }
+      },
+      "proposed_hover": "Stamp gently tilts without stamping approval"
+    },
+    {
+      "id": "06",
+      "name": "Annotation",
+      "purpose": "Create or transfer and verify exactly four annotation types, source anchors, field IDs/groups and geometry.",
+      "source_plan_sections": "Plan steps 9-10; section 6.3 Annotation workspace",
+      "status": "synthetic static design concept",
+      "interface": {
+        "file": "interfaces/06-annotation.png",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024,
+        "mode": "RGB",
+        "bytes": 1582587,
+        "sha256": "4ca2c09479bffc794535524a5a504482bb154b0a51856162111eb6fa205321dd",
+        "png_decode": "passed"
+      },
+      "component_3d": {
+        "file": "components-3d/06-annotation.png",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGBA",
+        "bytes": 1011824,
+        "sha256": "86e41f748204efff6df01f433287d4f481f10d0d09241532285580a458fc1ba7",
+        "png_decode": "passed",
+        "alpha": {
+          "range": [
+            0,
+            255
+          ],
+          "fully_transparent_pixels": 871612,
+          "fully_transparent_fraction": 0.554279,
+          "corners": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_bbox": [
+            49,
+            19,
+            1253,
+            1236
+          ],
+          "substantial_content_bbox_threshold_128": [
+            100,
+            194,
+            1218,
+            1082
+          ],
+          "substantial_content_inside_frame": true
+        }
+      },
+      "proposed_hover": "Stylus slides over one source region"
+    },
+    {
+      "id": "07",
+      "name": "Form preview",
+      "purpose": "Preview full original contract content and four approved control types alongside source; investigate missing coverage.",
+      "source_plan_sections": "Plan step 11; section 6.3 Form preview",
+      "status": "synthetic static design concept",
+      "interface": {
+        "file": "interfaces/07-form-preview.png",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024,
+        "mode": "RGB",
+        "bytes": 1689652,
+        "sha256": "c4a85f47d9cadc9d1a442a549baeb380d8272053aa3b225580a7f0e7f790fba9",
+        "png_decode": "passed"
+      },
+      "component_3d": {
+        "file": "components-3d/07-form-preview.png",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGBA",
+        "bytes": 1279026,
+        "sha256": "9f97b8b7e6db0e4c7f6fcdc68953ce575975eeb9c19f3324bdc8b4827a6dd0d8",
+        "png_decode": "passed",
+        "alpha": {
+          "range": [
+            0,
+            255
+          ],
+          "fully_transparent_pixels": 614606,
+          "fully_transparent_fraction": 0.390842,
+          "corners": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_bbox": [
+            0,
+            0,
+            1208,
+            1254
+          ],
+          "substantial_content_bbox_threshold_128": [
+            153,
+            102,
+            1155,
+            1214
+          ],
+          "substantial_content_inside_frame": true
+        }
+      },
+      "proposed_hover": "One input well rises slightly"
+    },
+    {
+      "id": "08",
+      "name": "Responses",
+      "purpose": "Fill, retain and inspect answers against the correct form/version; show missing required fields before PDF creation.",
+      "source_plan_sections": "Plan step 12; section 6.3 Responses",
+      "status": "synthetic static design concept",
+      "interface": {
+        "file": "interfaces/08-responses.png",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024,
+        "mode": "RGB",
+        "bytes": 1580779,
+        "sha256": "f720c22b52d5f24a0bb477bb2a2ef9d85111c91f2cde456a7304b57b42551786",
+        "png_decode": "passed"
+      },
+      "component_3d": {
+        "file": "components-3d/08-responses.png",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGBA",
+        "bytes": 1162335,
+        "sha256": "1f447bab4ff66abc0604b743da34fdae657e9c81592008423d051f527fec646f",
+        "png_decode": "passed",
+        "alpha": {
+          "range": [
+            0,
+            255
+          ],
+          "fully_transparent_pixels": 782627,
+          "fully_transparent_fraction": 0.497691,
+          "corners": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_bbox": [
+            25,
+            20,
+            1226,
+            1202
+          ],
+          "substantial_content_bbox_threshold_128": [
+            78,
+            216,
+            1211,
+            1154
+          ],
+          "substantial_content_inside_frame": true
+        }
+      },
+      "proposed_hover": "One key depresses gently"
+    },
+    {
+      "id": "09",
+      "name": "PDF QA / export",
+      "purpose": "Preview a filled draft, compare source/form/answers/PDF, surface clipping or mapping errors and gate final export.",
+      "source_plan_sections": "Plan steps 13-15; section 6.3 PDF QA/export",
+      "status": "synthetic static design concept",
+      "interface": {
+        "file": "interfaces/09-pdf-qa-export.png",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024,
+        "mode": "RGB",
+        "bytes": 1632860,
+        "sha256": "6c18b48037d138952a9f477ff1d436998a11dd52fd5a7a9d3a2cc8b7e8a472b2",
+        "png_decode": "passed"
+      },
+      "component_3d": {
+        "file": "components-3d/09-pdf-qa-export.png",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGBA",
+        "bytes": 1097248,
+        "sha256": "42b02b5c9a8b1d04129d6072085c6fab9e9a76d2ab44c2c99c9df5ba702daeef",
+        "png_decode": "passed",
+        "alpha": {
+          "range": [
+            0,
+            255
+          ],
+          "fully_transparent_pixels": 812119,
+          "fully_transparent_fraction": 0.516446,
+          "corners": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_bbox": [
+            0,
+            19,
+            1216,
+            1254
+          ],
+          "substantial_content_bbox_threshold_128": [
+            142,
+            146,
+            1191,
+            1111
+          ],
+          "substantial_content_inside_frame": true
+        }
+      },
+      "proposed_hover": "Download arrow rises without implying QA passed"
+    }
+  ],
+  "prompt_files": [
+    "prompts/3d-workflow-hub-v1.md",
+    "prompts/interfaces-components-v1.json",
+    "prompts/generation-refinements-v1.json"
+  ]
+}

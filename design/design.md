@@ -1,6 +1,6 @@
 # Anduin Legal Reviewer — overall design
 
-Date: 14 October 2026. Status: **design proposal for owner review**. This package contains two reference JSON descriptions and one generated homepage concept image. No website, Blender scene, animation, backend or functional section has been built by this task.
+Date: 14 October 2026. Status: **design proposal for owner review**. All design deliverables are organized in this `design/` folder. The package preserves the approved homepage, extends it with nine functional-screen concepts and nine isolated 3D object references, and retains the two reference JSONs and exact prompts. No website, Blender scene, animation, backend or functional section has been implemented.
 
 ## Design intent
 
@@ -103,7 +103,7 @@ Use one principal silhouette per module and at most one optional functional prop
 
 Use the same gently elevated three-quarter camera, common scale family, consistent bevels, soft key light and shared material library for all objects. Bases are simple white/light-blue rounded solids, with subtle contact shadows. The blue resin can transmit light, but the object silhouette must remain easy to read.
 
-Organize a future scene into `CAMERA`, `LIGHTS`, `STAGE` and `MODULE_01_INTAKE` through `MODULE_09_PDF_QA_EXPORT`, using the names in [ui-3.json](docs/design/ui-3.json). Each module has its own collection and root transform. Separate principal geometry, props and base. This lets a modeler work on one station, create a neutral/hover pose, and render the same station separately.
+Organize a future scene into `CAMERA`, `LIGHTS`, `STAGE` and `MODULE_01_INTAKE` through `MODULE_09_PDF_QA_EXPORT`, using the names in [ui-3.json](references/ui-3.json). Each module has its own collection and root transform. Separate principal geometry, props and base. This lets a modeler work on one station, create a neutral/hover pose, and render the same station separately.
 
 Keep labels, exact interface text, real source excerpts and logos out of the meshes/textures. Composite them as crisp UI after rendering. No shared cable network, opaque inter-module dependencies, or detailed office architecture is required.
 
@@ -117,11 +117,27 @@ Future QA must check text contrast, named targets, keyboard order, focus states,
 
 ## Files and review status
 
-- [UI 2 reference JSON](docs/design/ui-2.json)
-- [UI 3 reference JSON](docs/design/ui-3.json)
-- [Homepage concept image](demo/design/anduin-3d-workflow-hub-v1.png)
-- [Exact image-generation prompt](prompts/design/3d-workflow-hub-v1.md)
+- [UI 2 reference JSON](references/ui-2.json)
+- [UI 3 reference JSON](references/ui-3.json)
+- [Homepage concept image](homepage/anduin-3d-workflow-hub-v1.png)
+- [Exact image-generation prompt](prompts/3d-workflow-hub-v1.md)
+- [Nine functional interface images](interfaces/README.md)
+- [Nine isolated 3D component images](components-3d/README.md)
+- [Exact interface/component prompt matrix](prompts/interfaces-components-v1.json)
+- [Blender modeling and motion handoff](blender/README.md)
+- [Asset manifest](manifests/assets.json) and [verification record](manifests/validation.json)
+- [Archive verification](manifests/archive-validation.json)
 
-Selected image: PNG, 1536 × 1024 pixels, RGB. The generator produced this size rather than the 1920 × 1280 target; it has not been upscaled. Visual review confirms nine labeled 3D stations, the Anduin blue/mint direction, the reference header/rail grammar and the simplified two-lane studio setting. Mobile layouts, hover motion and functional destinations have not been built or tested.
+Approved homepage: PNG, 1536 × 1024 pixels, RGB. Its SHA-256 remains `81adc8ff26bfd7d09bdcef31821a1b672bdae8b9d591e7a7f56adfbd015b8bf9`; the image is moved, not regenerated or rescaled. The nine new screen stills illustrate click destinations, not working interfaces. The nine new component stills provide isolated modeling references, not exact recovered geometry or hidden-view blueprints. Actual dimensions and alpha checks are recorded per asset in validation. Mobile layouts and hover motion have not been built or tested.
+
+## Expanded functional screen brief
+
+The local first overall plan establishes the sequence and each section's responsibility. [The prompt matrix](prompts/interfaces-components-v1.json) maps every screen to the relevant plan steps and gives exact content/layout requirements. The private plan itself is not published.
+
+Intake registers immutable source/version and duplicate candidates. Source quality compares Word/PDF and exposes extraction, font and layout gaps. Document map separates outline, relationship graph and page map, keeping proposed edges distinct from parsed evidence. Legal review shows exact anchored findings and human actions. Decision/report separates confirmed/open from resolved after revision and records clarification/handoff gates.
+
+Annotation supports exactly paragraph, text box, radio box and checkbox, with source anchors and transfer uncertainty. Form preview preserves full original text and checks coverage. Responses retains answers against a specific form/version and exposes missing fields. PDF QA/export compares content, mapping, answers and page render before allowing final export.
+
+Examples intentionally show different synthetic workflow states, including unresolved prerequisites. They are not a claim that all steps have completed in a single real job. Component stills are generated independently to match the approved hub's object language; the hub itself remains unchanged.
 
 The image is an approval concept. It illustrates an intended composition and one hover state, not recovered geometry or a Blender render. Structured specifications remain authoritative when generative typography, proportions or small details vary. Approval of this package does not authorize an application build or hackathon submission.

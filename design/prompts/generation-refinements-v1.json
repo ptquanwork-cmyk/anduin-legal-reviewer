@@ -1,0 +1,81 @@
+{
+  "version": "1.0",
+  "tool": "built-in image generation",
+  "status": "Exact appended generation constraints and targeted refinements",
+  "interface_appendices": [
+    {
+      "id": "04",
+      "appendix": "\nSidebar active state MUST be 'Review' for this screen. Keep the stage number 04 active in the top stepper. No business facts are implied by synthetic screen data."
+    },
+    {
+      "id": "05",
+      "appendix": "\nSidebar active state MUST be 'Review' for this screen. Keep the stage number 05 active in the top stepper. No business facts are implied by synthetic screen data."
+    },
+    {
+      "id": "06",
+      "appendix": "\nSidebar active state MUST be 'Forms' for this screen. Keep the stage number 06 active in the top stepper. No business facts are implied by synthetic screen data."
+    },
+    {
+      "id": "07",
+      "appendix": "\nSidebar active state MUST be 'Forms' for this screen. Keep stage 07 active in the top stepper; other stages neutral, no completion ticks."
+    },
+    {
+      "id": "08",
+      "appendix": "\nSidebar active state MUST be 'Forms' for this screen. Keep stage 08 active in the top stepper; other stages neutral, no completion ticks."
+    },
+    {
+      "id": "09",
+      "appendix": "\nSidebar active state MUST be 'Export' for this screen. Keep stage 09 active in the top stepper; other stages neutral, no completion ticks."
+    }
+  ],
+  "interface_refinements": [
+    {
+      "id": "01",
+      "target": "interfaces/01-intake.png",
+      "input": "Initial generated interface for the same stage",
+      "prompt": "Edit this Intake interface concept. Preserve all design, typography, objects, layout and copy except TWO corrections. In the left rail make Documents the blue active item, and make Review neutral white with navy icon/text. In the dropzone replace 'Supports .pdf, .docx, .doc' with 'Supports .pdf and .docx'; no unconditional legacy .doc support. Keep stage 01 Intake active, retain SYNTHETIC DATA and no live processing labels. Do not alter the approved homepage, this is a separate interface screenshot."
+    },
+    {
+      "id": "02",
+      "target": "interfaces/02-source-quality.png",
+      "input": "Initial generated interface for the same stage",
+      "prompt": "Edit this Source quality interface concept. Preserve all design/layout/functionality except these corrections: left rail Documents is blue active; Review is neutral white with navy icon/text. The synthetic comparison fixture has TWO pages, so change both 'Page 1 of 8' captions to 'Page 1 of 2'. The original file is 'Demo agreement.docx' and converted file 'Demo agreement.pdf'; replace the existing services-agreement filenames accordingly. Keep the two exact 30 calendar days quotes, font issue, needs review banner, coverage not measured and disabled next action. The 100% labels are viewer ZOOM, not accuracy, and can stay. Keep stage02 active and synthetic concept labels."
+    },
+    {
+      "id": "03",
+      "target": "interfaces/03-document-map.png",
+      "input": "Initial generated interface for the same stage",
+      "prompt": "Edit this Document map interface concept. Preserve all composition, style, graph nodes, controls and exact source quote. Correct the synthetic source anchors and selected outline: Payment §2 and Payment §3 are BOTH on PAGE 1; Delivery §4 is PAGE 1; Liability §5 is PAGE 2; Parties §1 is PAGE 1. Change graph Payment §3 caption to 'Page 1 · Section 3', graph Liability §5 caption to 'Page 2 · Section 5', and corresponding left-outline captions accordingly. Highlight Payment in the outline instead of Parties, matching the selected Payment §2 source drawer. Right page map must show just TWO page thumbnails, 'Page 1' and 'Page 2', for this two-page fictional source; remove Page3/Page4 thumbnails and leave breathing room. Keep the dashed 'Proposed conflict' edge and Parsed/Proposed legend. Keep Map active in rail, stage03 active, and synthetic concept labels. Do not modify any quoted words."
+    },
+    {
+      "id": "04",
+      "target": "interfaces/04-legal-review.png",
+      "input": "Initial generated interface for the same stage",
+      "prompt": "Edit this Legal review screenshot with ONE localized correction only: the two-page fictional source viewer caption is 'Page 1 of 2', not 'Page 1 of 8'. Preserve every other visual element and all exact quoted clauses, anchor locations, finding/actions, status labels, typography and layout. Do not alter the approved homepage."
+    },
+    {
+      "id": "06",
+      "target": "interfaces/06-annotation.png",
+      "input": "Initial generated interface for the same stage",
+      "prompt": "Edit this Annotation screenshot with ONE localized correction only: the synthetic source version v2 has TWO pages, so replace the viewer's page count '1 / 4' with '1 / 2'. Preserve the Selected field count '1 of 8' because that counts fields, not pages. Preserve all geometry, original text, four annotation type controls, field ID client.identity.name, selected source region, transfer states, disabled approval gate, typography and layout. Do not alter any other element."
+    },
+    {
+      "id": "07",
+      "target": "interfaces/07-form-preview.png",
+      "input": "Initial generated interface for the same stage",
+      "prompt": "Edit this Form preview screenshot with ONE localized correction only: the two-page synthetic source version v2 has TWO pages, so the source viewer at upper right must say 'Page 1 of 2', replacing 'Page 1 of 8'. Preserve all other UI and document text, full-content form, Individual/Company radio group, Email/Post checkbox group, source highlight, unmapped block gate, all typography and layout."
+    },
+    {
+      "id": "08",
+      "target": "interfaces/08-responses.png",
+      "input": "Initial generated interface for the same stage",
+      "prompt": "Edit this Responses screenshot. Preserve all design/layout/values/status/gates and correct ONLY the Entity type radio options to match the original source and approved form: exactly TWO options 'Individual' and 'Company'; Company stays selected. Remove 'Partnership' entirely, do not leave an unlabeled radio dot. Keep 'Example Client Ltd', the required empty Agreement date, Email selected/Post unselected, form v2 trace, disabled Create draft PDF, and synthetic/no-live-processing labels. No other content changes."
+    },
+    {
+      "id": "09",
+      "target": "interfaces/09-pdf-qa-export.png",
+      "input": "Initial generated interface for the same stage",
+      "prompt": "Edit this PDF QA/export screenshot, preserving its layout, style and blocked final-export example. Correct the top stage navigation to exactly NINE stages with no duplicate or unlabeled extra circle: 01 Intake, 02 Source quality, 03 Document map, 04 Legal review, 05 Decision/report, 06 Annotation, 07 Form preview, 08 Responses, 09 PDF QA/export. 09 stays active; remove the extra duplicate 05 circle. This synthetic draft has TWO pages: viewer says '1 / 2', and left thumbnails show only Page1 and Page2; remove Page3/Page4 thumbnails. The displayed answer must match the saved answer 'Example Client Ltd' from Responses; replace the invented very long client name with 'Example Client Ltd'. To still illustrate clipping, make the red outlined field region visibly too narrow for that answer so the visible rendered answer truncates after 'Example Client'; keep issue 'Answer clipped in client.identity.name'. Keep all other QA checklist states, draft-not-verified badge, disabled Download final PDF, Download draft labeled Unverified, version trace and no live processing. Make localized corrections, do not redesign the screen."
+    }
+  ]
+}

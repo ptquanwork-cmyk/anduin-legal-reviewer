@@ -1,0 +1,146 @@
+{
+  "date": "2026-10-14",
+  "archive": "exports/anduin-design-package-2026-10-14.zip",
+  "entries": 33,
+  "crc_check": "passed",
+  "all_member_hashes_match_local": true,
+  "interface_pngs": 9,
+  "component_pngs": 9,
+  "homepage_pngs": 1,
+  "exclusions": [
+    "Original supplied JPEGs",
+    "Private first overall plan",
+    "Export ZIP directory"
+  ],
+  "hash_scope": "All non-report artifacts; this report is excluded from its own member hash list. Final ZIP hash is recorded in the build log and local exports receipt.",
+  "members": [
+    {
+      "file": "design/blender/README.md",
+      "sha256": "858064bbddf85b80f7b5626d8617dbb401621feac9260368b44a259afad5e44d"
+    },
+    {
+      "file": "design/components-3d/01-intake.png",
+      "sha256": "aa8f68fc93102555fc8470168b66e0efba50e89380bca7f800eba338e5b2b823"
+    },
+    {
+      "file": "design/components-3d/02-source-quality.png",
+      "sha256": "9f6329c3833e7f74a010b22c5eb7dc6717fed84a37dd86517cca6ad11b4b53aa"
+    },
+    {
+      "file": "design/components-3d/03-document-map.png",
+      "sha256": "6d7b5156e2fbd41f08c145f47c54300bd282fa0968d545ca9064c57087d3f406"
+    },
+    {
+      "file": "design/components-3d/04-legal-review.png",
+      "sha256": "d2edd85f498afda8148b0d82e6b0d4c3eb8ca948784b83f26c06697e80d82af5"
+    },
+    {
+      "file": "design/components-3d/05-decision-report.png",
+      "sha256": "77db70ea8592379d14dc2998271548bb1ac17db9034c835c0866ee48eeb83776"
+    },
+    {
+      "file": "design/components-3d/06-annotation.png",
+      "sha256": "86e41f748204efff6df01f433287d4f481f10d0d09241532285580a458fc1ba7"
+    },
+    {
+      "file": "design/components-3d/07-form-preview.png",
+      "sha256": "9f97b8b7e6db0e4c7f6fcdc68953ce575975eeb9c19f3324bdc8b4827a6dd0d8"
+    },
+    {
+      "file": "design/components-3d/08-responses.png",
+      "sha256": "1f447bab4ff66abc0604b743da34fdae657e9c81592008423d051f527fec646f"
+    },
+    {
+      "file": "design/components-3d/09-pdf-qa-export.png",
+      "sha256": "42b02b5c9a8b1d04129d6072085c6fab9e9a76d2ab44c2c99c9df5ba702daeef"
+    },
+    {
+      "file": "design/components-3d/README.md",
+      "sha256": "a68cdc1257c7572dabd9ac33980d5a56373764e6695e4a3e94429a6358d1e47c"
+    },
+    {
+      "file": "design/design.md",
+      "sha256": "bdd52cf98253abcb85c6a87e7a7da686a9d7d10e7a47490769e68aa1fdb6eeed"
+    },
+    {
+      "file": "design/homepage/anduin-3d-workflow-hub-v1.png",
+      "sha256": "81adc8ff26bfd7d09bdcef31821a1b672bdae8b9d591e7a7f56adfbd015b8bf9"
+    },
+    {
+      "file": "design/interfaces/01-intake.png",
+      "sha256": "910d55bf3c6d7a6582704bce4985d3b1ff4edc6787f62873fc0a913733ed83b5"
+    },
+    {
+      "file": "design/interfaces/02-source-quality.png",
+      "sha256": "38e91f62ab9c324b353209c3e620469aa05df8e0fc46f7e38dc40b60d647546f"
+    },
+    {
+      "file": "design/interfaces/03-document-map.png",
+      "sha256": "d6e24be59f0e65136d99cf37ae64b805c8c42a4806ee9a34d89f7b8f25fd880e"
+    },
+    {
+      "file": "design/interfaces/04-legal-review.png",
+      "sha256": "fa3b2799a2efb3f77aa07b91bf80179ebafbeb7f2fe801cc3b671702b7f6a6c4"
+    },
+    {
+      "file": "design/interfaces/05-decision-report.png",
+      "sha256": "430a234e284a921a41711b50c99ffc828d837f9e844956f816e58fcd02e9a88e"
+    },
+    {
+      "file": "design/interfaces/06-annotation.png",
+      "sha256": "4ca2c09479bffc794535524a5a504482bb154b0a51856162111eb6fa205321dd"
+    },
+    {
+      "file": "design/interfaces/07-form-preview.png",
+      "sha256": "c4a85f47d9cadc9d1a442a549baeb380d8272053aa3b225580a7f0e7f790fba9"
+    },
+    {
+      "file": "design/interfaces/08-responses.png",
+      "sha256": "f720c22b52d5f24a0bb477bb2a2ef9d85111c91f2cde456a7304b57b42551786"
+    },
+    {
+      "file": "design/interfaces/09-pdf-qa-export.png",
+      "sha256": "6c18b48037d138952a9f477ff1d436998a11dd52fd5a7a9d3a2cc8b7e8a472b2"
+    },
+    {
+      "file": "design/interfaces/README.md",
+      "sha256": "283b998596c732338f6a1b4d006d8fb66b91647f424e99ba5b471dd705877809"
+    },
+    {
+      "file": "design/manifests/assets.json",
+      "sha256": "abeabfdac6f82f5b30544d7b8bcad22744d1c3d326c105fae9b65f9e83cf6b5b"
+    },
+    {
+      "file": "design/manifests/validation.json",
+      "sha256": "1ec1ef85a9cf041fd32fb3a1295ec206b14ff436c9c2730d6398e17633c07bfb"
+    },
+    {
+      "file": "design/prompts/3d-workflow-hub-v1.md",
+      "sha256": "7249f98e0116580ac89f7f1649ac6de3cb75ae5631fc1a472e9c80d031532094"
+    },
+    {
+      "file": "design/prompts/generation-refinements-v1.json",
+      "sha256": "eea6d82bcf424a6b38165226cafb8bae7d8150c96f2260935463b26234d32f00"
+    },
+    {
+      "file": "design/prompts/interfaces-components-v1.json",
+      "sha256": "6494c3dafcbeaf9169fd13ceb004dec96689252d282ef934aa752ae1ba1a2ce6"
+    },
+    {
+      "file": "design/README.md",
+      "sha256": "4779cb58eb389930d1e9865181e47d04e158517281d605081f7d121f84d27a4c"
+    },
+    {
+      "file": "design/references/README.md",
+      "sha256": "697f78e926028c4d0f94291334cafc437162a983a986a9f315d601e19f94251a"
+    },
+    {
+      "file": "design/references/ui-2.json",
+      "sha256": "f90766ec66e65371760d5d948a9f39c4baa15e052741e7633970cef0e820ce3d"
+    },
+    {
+      "file": "design/references/ui-3.json",
+      "sha256": "64008550ed14dcc1708b8b9a2b83beee2f35dc4d17220b9fd5f8e1b89f273b1a"
+    }
+  ]
+}

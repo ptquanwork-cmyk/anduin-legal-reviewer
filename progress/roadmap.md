@@ -15,6 +15,8 @@ The owner-supplied portal screenshot displays a deadline of 18 October at 23:59 
 
 ## Next implementation task
 
-The owner requested a design-only 3D workflow hub package on 14 October. [The concept](../design.md) is ready for review; it is not a completed runtime or Blender scene. Source/review sections take priority, with later annotation/form/PDF stages represented as proposed destinations. Building these stages remains future work.
+The owner requested a design-only 3D workflow hub package on 14 October. [The concept](../design/design.md) is ready for review; it is not a completed runtime or Blender scene. Source/review sections take priority, with later annotation/form/PDF stages represented as proposed destinations. Building these stages remains future work.
+
+The follow-up design package organizes the approved hub, nine functional-screen concepts and nine separate object references in [design/](../design/README.md). These are visual briefs for future implementation/modeling, not completed application milestones.
 
 Choose a minimal runtime and implement extraction with stable page/section evidence before adding model analysis. Review upstream reuse and record actual run steps. Update this roadmap when scope or progress changes.

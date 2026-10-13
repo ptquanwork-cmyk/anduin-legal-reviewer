@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "date": "2026-10-14",
+  "checks": {
+    "approved_homepage_sha256_unchanged": true,
+    "interface_count": 9,
+    "individual_3d_component_count": 9,
+    "all_19_pngs_decode": true,
+    "all_components_rgba_with_real_transparency": true,
+    "all_component_corners_transparent": true,
+    "all_substantial_component_silhouettes_inside_frame": true,
+    "reference_source_identity": [
+      {
+        "reference": "design\\references\\ui-2.json",
+        "source_exists": true,
+        "recorded_sha256_matches": true
+      },
+      {
+        "reference": "design\\references\\ui-3.json",
+        "source_exists": true,
+        "recorded_sha256_matches": true
+      }
+    ],
+    "json_files_parsed": 5,
+    "active_markdown_missing_targets": []
+  },
+  "image_dimensions": {
+    "homepage": [
+      1536,
+      1024
+    ],
+    "interfaces": [
+      [
+        1536,
+        1024
+      ]
+    ],
+    "components": [
+      [
+        1254,
+        1254
+      ]
+    ]
+  },
+  "visual_review": {
+    "method": "Inspected every generated/refined screen and every component using tool image output; PNG alpha inspected separately.",
+    "stage_notes": [
+      {
+        "id": "01",
+        "interface": "Upload, original/version metadata, pending jobs and related-version comparison; Documents active and legacy .doc support removed.",
+        "component": "One isolated blue/mint/white station assembly, consistent product-render language; no surrounding hub UI."
+      },
+      {
+        "id": "02",
+        "interface": "Word/PDF comparison, font substitution, unmeasured coverage and blocked next action; two-page source and Documents active.",
+        "component": "One isolated blue/mint/white station assembly, consistent product-render language; no surrounding hub UI."
+      },
+      {
+        "id": "03",
+        "interface": "Source-linked outline/graph/page views with Parsed/Proposed legend; Page1 payment clauses and Page2 liability; Payment selected. Final graph contains payment/delivery/liability example nodes; missing-reference issue is illustrated in Legal review.",
+        "component": "One isolated blue/mint/white station assembly, consistent product-render language; no surrounding hub UI."
+      },
+      {
+        "id": "04",
+        "interface": "Exact 30-day and 60-day payment passages with Page1 section2/3 anchors; confirm/dismiss/clarification actions; confidence not calibrated and two-page source.",
+        "component": "One isolated blue/mint/white station assembly, consistent product-render language; no surrounding hub UI."
+      },
+      {
+        "id": "05",
+        "interface": "Confirmed/open, clarification and resolved-after-revision states; report/question preparation and blocked handoff; no external sending.",
+        "component": "One isolated blue/mint/white station assembly, consistent product-render language; no surrounding hub UI."
+      },
+      {
+        "id": "06",
+        "interface": "Exactly four annotation controls, source field identity, choice groups, version comparison, transfer uncertainty and disabled approval.",
+        "component": "One isolated blue/mint/white station assembly, consistent product-render language; no surrounding hub UI."
+      },
+      {
+        "id": "07",
+        "interface": "Full-content form and source comparison, distinct help, two radio options/two checkboxes and unmapped coverage gate.",
+        "component": "One isolated blue/mint/white station assembly, consistent product-render language; no surrounding hub UI."
+      },
+      {
+        "id": "08",
+        "interface": "Version-linked synthetic answers, Company selected, Individual alternative, missing required date and disabled draft creation.",
+        "component": "One isolated blue/mint/white station assembly, consistent product-render language; no surrounding hub UI."
+      },
+      {
+        "id": "09",
+        "interface": "Nine-stage navigation, two-page draft, truncated sample answer/QA issue, pending checks, unverified draft and disabled final export.",
+        "component": "One isolated blue/mint/white station assembly, consistent product-render language; no surrounding hub UI."
+      }
+    ]
+  },
+  "limitations": [
+    "Static concepts, not working UI or tested hover/click behavior.",
+    "Image references do not specify hidden geometry, topology, rigging or guarantee automatic Blender reconstruction.",
+    "Small generative text and illustrative graph details can differ from the exact prompt; source quotes and core workflow gates were reviewed.",
+    "Target and actual generated dimensions differ; no upscaling or raster editing was applied."
+  ]
+}

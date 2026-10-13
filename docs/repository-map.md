@@ -12,6 +12,14 @@ anduin-legal-reviewer/
 │   ├── architecture/
 │   ├── decisions/
 │   └── deployment/
+├── design/
+│   ├── homepage/
+│   ├── interfaces/
+│   ├── components-3d/
+│   ├── references/
+│   ├── prompts/
+│   ├── blender/
+│   └── manifests/
 ├── context/
 │   ├── briefs/
 │   └── research/
@@ -52,6 +60,14 @@ anduin-legal-reviewer/
 | `docs/architecture/` | Proposed system flow and component responsibilities |
 | `docs/decisions/` | Dated decisions, alternatives when relevant, consequences |
 | `docs/deployment/` | Actual Vercel/Supabase setup, links, and reproduction steps |
+| `design/` | Overall visual specification and complete design package index |
+| `design/homepage/` | Approved homepage image, preserved byte-for-byte |
+| `design/interfaces/` | Nine synthetic functional-screen concept stills |
+| `design/components-3d/` | Nine individual transparent object modeling references |
+| `design/references/` | Structured UI 2/web and UI 3/object reference descriptions |
+| `design/prompts/` | Exact image prompts and targeted refinement records |
+| `design/blender/` | Future modeling/scene/motion handoff; no implemented scene |
+| `design/manifests/` | Actual asset metadata, integrity/alpha checks and archive verification |
 | `context/` | Development context conventions |
 | `context/briefs/` | Public-safe user request summaries and reusable context packs |
 | `context/research/` | Sources, observations, and implications |
@@ -93,3 +109,5 @@ anduin-legal-reviewer/
 ## Local-only existing folders
 
 `contract-reader-agent/` and `laya/` remain in the local workspace as independent repositories. They are excluded from this public repository and listed in [the reference register](../references/upstream.md). The hidden root `.git/` contains repository metadata and is not published as a folder.
+
+`design/references/source-images/` contains the owner's supplied JPEGs locally. `design/exports/` contains the local delivery ZIP. Both are untracked; the public package consists of the generated images and design documents. The private first overall plan remains in its existing ignored context location.
