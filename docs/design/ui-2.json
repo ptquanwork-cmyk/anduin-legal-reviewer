@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0.0",
+  "id": "ui-2-web-layout-reference",
+  "status": "design reference; not implemented",
+  "source": {
+    "filename": "ui (2).jpg",
+    "dimensions_px": {"width": 736, "height": 920},
+    "sha256": "00fa631bab825b8f681b33cb6f6fdbc6622567e96c3689ef3434ee6f96ea0098",
+    "provenance": "Owner-supplied visual reference; original remains local and untracked.",
+    "role": "Primary reference for shell, header, sidebar and panel composition.",
+    "extraction_method": "Manual visual interpretation; not a lossless JPEG conversion or an executable UI."
+  },
+  "observed": {
+    "page_type": "Real-estate promotional interface shown on a portrait presentation board.",
+    "hierarchy": ["Outer identity", "Single immersive rounded app shell", "Integrated top controls", "Large headline", "Image-led scene", "Asymmetric information panels"],
+    "shell": {
+      "shape": "Large rounded rectangle with a fine white perimeter and curved concave top-center notch.",
+      "approximate_normalized_bounds": {"x": 0.046, "y": 0.243, "width": 0.91, "height": 0.517},
+      "measurement_note": "Bounds are approximate visual estimates relative to the source image, not recovered CSS.",
+      "surface": "Immersive imagery inside a restrained light frame."
+    },
+    "header": {
+      "placement": "Controls follow the upper edge; middle controls occupy the recessed notch.",
+      "left": "Rounded Buy capsule.",
+      "center": ["Location", "Property type", "Maximum price"],
+      "right": "Rounded Rent capsule."
+    },
+    "sidebar": {
+      "placement": "Inside the shell, against its left edge.",
+      "shape": "Two vertically stacked white capsules with rounded ends.",
+      "primary_items": "Icon-led navigation with an active home control and profile image.",
+      "secondary_items": "Utility icons in a separate lower capsule."
+    },
+    "typography": "Large clean sans-serif display text; smaller compact sans-serif controls and descriptive copy.",
+    "panels": ["Opaque white lower-left information panel with sculpted rounded corners", "Soft translucent right information panel", "Rounded circular action controls"],
+    "palette_description": ["Cool pale blue image area", "White shell and controls", "Warm gray outer board", "Small deep purple accent"],
+    "depth": "Photographic background and overlapping panels; it is not a supplied 3D scene."
+  },
+  "project_adaptation": {
+    "status": "Proposed design parameters; subject to owner approval.",
+    "page_type": "Interactive 3D workflow homepage; clicks open dedicated functional section screens.",
+    "retain": ["Rounded outer shell", "Concave header notch", "Two-part narrow icon rail", "Large readable heading", "Asymmetric integrated panels"],
+    "exclude": ["Real-estate house and copy", "Mountain photograph", "Social presentation footer", "Purple logo", "Fake business statistics"],
+    "palette": {
+      "primary": "#48AFF0",
+      "ink": "#182A38",
+      "mint": "#96DBD4",
+      "dark_mint": "#33BDB0",
+      "navy": "#2251A4",
+      "dark_blue": "#162950",
+      "background_proposed": "#EEF5FA",
+      "surface_proposed": "#FFFFFF",
+      "brand_source": "https://anduintransact.com/hubfs/Anduin%20Brand%20Standards%20-%20February%202024.pdf?hsLang=en",
+      "brand_source_pages": [16, 17],
+      "note": "The owner clarified Anduin brand colors, superseding the initial Android wording. Pale surface colors are project choices."
+    },
+    "header": {"left": "New document", "center": "Find a document or section", "right": "My documents"},
+    "sidebar": {
+      "primary": ["Home", "Intake", "Document map", "Legal review", "Form preview", "PDF QA / export"],
+      "secondary": ["Templates", "Feedback"],
+      "navigation_note": "The homepage exposes all nine stages; the compact rail provides shortcuts, not a replacement for the full stage sequence.",
+      "accessibility_proposed": "Every icon gets a visible tooltip, accessible name and keyboard focus state."
+    },
+    "homepage_layout": {
+      "target_canvas_px": {"width": 1920, "height": 1280},
+      "layout_status": "Target proportions, not measured output dimensions.",
+      "bands": ["Compact header and two-line introduction", "Primary source/review lane: stages 01-05, with Legal review emphasized", "Secondary digitization lane: stages 06-09", "Thin instruction/status footer"],
+      "spacing": {"base_unit_px": 8, "shell_margin_px": 40, "rail_width_px": 64, "module_gap_px": 32, "content_padding_px": 32},
+      "cleanliness": ["Align plaques and module bases", "Use two coherent stage groups", "Limit each section to one principal 3D object and one optional functional prop", "Use one consistent camera and light direction", "Keep connective tracks subtle or omit them", "Only one hover treatment visible at a time", "Remove decorative clutter and unnecessary floating panels"]
+    },
+    "workflow": [
+      {"id": "01", "label": "Intake", "destination": "Intake screen", "purpose": "Upload PDF/Word, inspect versions and duplicate candidates."},
+      {"id": "02", "label": "Source quality", "destination": "Source quality screen", "purpose": "Inspect conversion, extraction coverage and unresolved source issues."},
+      {"id": "03", "label": "Document map", "destination": "Document map screen", "purpose": "Open outline, relation graph and page map linked to source anchors."},
+      {"id": "04", "label": "Legal review", "destination": "Legal review workspace", "purpose": "Inspect source-linked findings and record human decisions.", "emphasis": "Primary"},
+      {"id": "05", "label": "Decision / report", "destination": "Decision and report screen", "purpose": "Inspect decisions, clarification questions, unresolved items and review report."},
+      {"id": "06", "label": "Annotation", "destination": "Annotation workspace", "purpose": "Review paragraph, text box, radio box and checkbox anchors."},
+      {"id": "07", "label": "Form preview", "destination": "Form preview screen", "purpose": "Preview full contract content with approved fields."},
+      {"id": "08", "label": "Responses", "destination": "Responses screen", "purpose": "Enter, retain and inspect version-linked answers."},
+      {"id": "09", "label": "PDF QA / export", "destination": "PDF quality and export screen", "purpose": "Compare source, annotations, answers and rendered PDF before export."}
+    ],
+    "interaction_contract": {
+      "implemented": false,
+      "idle": "Static readable module; no perpetual motion across the page.",
+      "hover": "Lift principal object slightly, add restrained blue rim and reveal Open section action; keep text fixed.",
+      "focus": "Keyboard focus supplies the same information and a visible outline.",
+      "click": "Select the module and open its dedicated functional UI; retain document/version context and a Home return control.",
+      "touch": "Show labels and actions without requiring hover; one tap opens the section.",
+      "reduced_motion": "Use a static focus/rim treatment instead of lift or rotation.",
+      "status": "Only show actual application/job state in future runtime; never infer completion from decorative checkmarks."
+    },
+    "review_destination_layout": {
+      "header": "Document/version, source quality and review/job status.",
+      "left": "Outline, filters and source-linked map.",
+      "center": "PDF source and exact highlighted excerpts; both excerpts for contradictions.",
+      "right": "Finding rationale, confirmation question and confirm/dismiss/clarification actions.",
+      "footer": "Open items, coverage, decision history and review gates.",
+      "note": "This functional UI is a click destination, not the homepage image."
+    }
+  }
+}

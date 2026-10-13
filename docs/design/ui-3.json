@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0.0",
+  "id": "ui-3-retro-3d-reference",
+  "status": "design reference; no Blender scene created",
+  "source": {
+    "filename": "ui (3).jpg",
+    "dimensions_px": {"width": 736, "height": 883},
+    "sha256": "1323d7f273b6e1b38ff650b0492d20f62c99ae6e2f278e2a484b462c9f722fa2",
+    "provenance": "Owner-supplied visual reference; original remains local and untracked.",
+    "role": "Primary reference for 3D geometry, material, lighting and object vocabulary.",
+    "extraction_method": "Manual visual interpretation. Geometry, shaders, lighting and camera cannot be recovered exactly from one raster image."
+  },
+  "observed": {
+    "style": "Playful retro workstation sculpture with glossy/translucent industrial parts, chunky beveled forms and a floating assembly.",
+    "objects": [
+      {"id": "crt", "description": "Thick orange/yellow beveled monitor housing with inset black curved screen and cyan terminal-like lettering."},
+      {"id": "keyboard", "description": "Curved cream tray, tall gray/white keycaps and one orange accent key."},
+      {"id": "cursor", "description": "Large sculpted white arrow beside the monitor."},
+      {"id": "accessory", "description": "Glossy red/orange block-like handheld accessory with white lower detail and lettering."},
+      {"id": "cable", "description": "Thick coiled cream cable with rounded cross section."},
+      {"id": "tiles", "description": "Stacked orange rounded square tiles with an embossed smiling graphic."},
+      {"id": "rear_disk", "description": "Pale rounded disk behind the monitor."}
+    ],
+    "geometry": ["Generous bevels", "Physical thickness", "Slightly distorted/curved retro proportions", "Separate overlapping components", "Rounded cable coils"],
+    "materials_visual_inference": ["Colored translucent resin or polished plastic appearance", "Black glossy screen", "Matte cream/gray keycaps", "Glossy saturated accessory", "Cream rubber-like cable"],
+    "lighting_visual_inference": "Broad soft studio light, bright upper-left highlights, gentle reflections and local contact shadows.",
+    "camera_visual_inference": "Elevated three-quarter product view with limited perspective distortion.",
+    "background": "Plain light gray.",
+    "inference_note": "Material classes, camera and light placement are interpretations, not verified scene properties."
+  },
+  "project_adaptation": {
+    "status": "Proposed Blender-friendly art direction; not a .blend file or a scene import format.",
+    "primary_color": "#48AFF0",
+    "support_colors": ["#96DBD4", "#33BDB0", "#2251A4", "#162950", "#182A38", "#FFFFFF"],
+    "retain": ["Retro CRT silhouette", "Chunky keycaps", "Thick bevels", "Resin depth", "Cream coiled cable", "Polished functional props"],
+    "change": ["Replace dominant orange/red with Anduin blue and supporting mint", "Use source/review symbols rather than arbitrary terminal text", "Simplify accessory count for a clean hub", "Use a shared base and camera for all modules"],
+    "avoid": ["Android mascot or dominant Android green", "Smiling robot monitor face", "Photoreal office clutter", "Tiny decorative gadgets", "Strong glow on every object", "Real contract text baked into textures", "Regenerated official Anduin logo", "Fake completion or accuracy indicators"],
+    "blender_scene_plan": {
+      "implementation_state": "Specification only; no Blender commands executed.",
+      "organization": ["CAMERA", "LIGHTS", "STAGE", "MODULE_01_INTAKE", "MODULE_02_SOURCE_QUALITY", "MODULE_03_DOCUMENT_MAP", "MODULE_04_LEGAL_REVIEW", "MODULE_05_DECISION_REPORT", "MODULE_06_ANNOTATION", "MODULE_07_FORM_PREVIEW", "MODULE_08_RESPONSES", "MODULE_09_PDF_QA_EXPORT"],
+      "component_structure": ["One collection per module", "One named root transform per module", "Separate principal object, optional prop and base", "Same object scale family and local origin", "No inter-module dependencies"],
+      "shared_materials": [
+        {"id": "MAT_RESIN_BLUE", "color": "#48AFF0", "appearance": "Polished blue resin with restrained transmission", "roughness_starting_range": [0.18, 0.28]},
+        {"id": "MAT_RESIN_MINT", "color": "#96DBD4", "appearance": "Supporting mint resin; less area than blue", "roughness_starting_range": [0.2, 0.32]},
+        {"id": "MAT_MATTE_WHITE", "color": "#FFFFFF", "appearance": "Soft matte white polymer for documents, bases and keycaps", "roughness_starting_range": [0.45, 0.6]},
+        {"id": "MAT_DARK_SCREEN", "color": "#162950", "appearance": "Dark inset glossy screen", "roughness_starting_range": [0.12, 0.22]},
+        {"id": "MAT_CABLE", "color_proposed": "#E6EAF0", "appearance": "Soft neutral rubber", "roughness_starting_range": [0.5, 0.65]},
+        {"id": "MAT_METAL", "appearance": "Small polished metal details only", "roughness_starting_range": [0.22, 0.35]}
+      ],
+      "shader_note": "All numeric ranges are optional proposed starting points, not extracted reference values or tested settings. Tune after a real scene exists.",
+      "camera": "Shared mildly elevated three-quarter orthographic or long-lens view, with front-on 2D labels composited separately.",
+      "lights": ["One broad soft key from upper left", "Low-power fill", "Restrained rim/reflection source only where needed"],
+      "stage": "Simple cool light-blue studio ground with two ordered module lanes; matching white bases and soft contact shadows.",
+      "cleanliness": ["One principal silhouette per section", "At most one secondary functional prop, except the integrated CRT assembly", "No cables connecting separate modules", "No random floating decoration", "No baked UI typography or invented logo meshes", "Keep source pages and exact UI copy in the future 2D layer"],
+      "future_delivery_candidates": ["One .blend master scene", "One transparent still per module", "One combined hub render", "Optional lightweight web asset exports after runtime decisions"],
+      "delivery_note": "Future candidates are not deliverables of this design-only task."
+    },
+    "modules": [
+      {"id": "01", "section": "Intake", "principal": "Document stack in a blue upload tray", "optional_prop": "Up-arrow tile", "hover_proposed": "Top sheet lifts slightly"},
+      {"id": "02", "section": "Source quality", "principal": "Aligned paired Word/PDF sheets", "optional_prop": "Inspection lens", "hover_proposed": "Lens shifts a short distance over the pair"},
+      {"id": "03", "section": "Document map", "principal": "Small blue/mint node-and-link sculpture", "optional_prop": "Outline slab", "hover_proposed": "Selected node brightens gently"},
+      {"id": "04", "section": "Legal review", "principal": "Blue CRT/keyboard assembly", "optional_prop": "Source sheet and integrated inspection lens", "hover_proposed": "Workstation lifts slightly; quote symbol appears on screen", "priority": "Primary", "exception": "One integrated hero assembly; keep its accessories subordinate"},
+      {"id": "05", "section": "Decision / report", "principal": "Report slab with stamp", "optional_prop": "Small speech tile", "hover_proposed": "Stamp tilts without marking approval"},
+      {"id": "06", "section": "Annotation", "principal": "Source slab with paragraph/text/radio/checkbox regions", "optional_prop": "Stylus", "hover_proposed": "Stylus moves along one region"},
+      {"id": "07", "section": "Form preview", "principal": "Dimensional form panel", "optional_prop": null, "hover_proposed": "One field inset lifts slightly"},
+      {"id": "08", "section": "Responses", "principal": "Filled field tiles with small keypad", "optional_prop": null, "hover_proposed": "One key depresses; do not insert invented answers"},
+      {"id": "09", "section": "PDF QA / export", "principal": "PDF slab with download arrow", "optional_prop": "Small lens", "hover_proposed": "Arrow lifts; do not display a passed QA state"}
+    ],
+    "motion_specification": {
+      "state": "Proposed behavior only; no animations rendered or implemented.",
+      "idle": "Still.",
+      "hover_duration_ms_proposed": [180, 260],
+      "hover_lift_percent_of_object_height_proposed": [1, 2],
+      "hover_rotation_degrees_max_proposed": 3,
+      "exit": "Return to neutral pose without bouncing.",
+      "click": "Open the corresponding functional section, retaining document/version context.",
+      "focus": "Same selection information as hover, with visible focus ring.",
+      "reduced_motion": "Static selection treatment; no spatial movement.",
+      "separation": "Move only the 3D root or functional prop; keep label and click target stationary."
+    }
+  }
+}

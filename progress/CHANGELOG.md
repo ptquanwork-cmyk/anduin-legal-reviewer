@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-14 — 3D homepage design concept
+
+- Created a root design specification and structured descriptions of the supplied UI 2/web-layout and UI 3/retro-3D references.
+- Applied the owner's clarified Anduin palette and a homepage of nine 3D section stations with proposed hover/click behavior.
+- Generated and refined one selected concept image with simplified background, two ordered lanes and modular objects for future Blender work.
+- Recorded the exact generation/refinement prompts. No website, animation, Blender scene or backend was built.
+
 ## 2026-10-14 — Public page wording
 
 - Replaced vendor-specific navigation with Review design, linked to the architecture documentation.

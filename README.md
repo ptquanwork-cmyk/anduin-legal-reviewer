@@ -16,12 +16,13 @@ Contract digitization teams need to identify flawed inputs before downstream wor
 
 Upload a contract, inspect findings tied to source passages, and record which issues need clarification. Each finding should explain the suspected problem and ask a specific confirmation question. The reviewer stays in control.
 
-## Current status — 13 October 2026
+## Current status — 14 October 2026
 
 | Deliverable | Status |
 | --- | --- |
 | Public repository and project structure | Published; public visibility verified |
 | Challenge interpretation and proposed workflow | Documented |
+| 3D workflow homepage design | [Design specification](design.md), two reference JSONs and a concept image; no Blender scene or interactive implementation |
 | Context packs and versioned prompt drafts | Seeded; not evaluated |
 | Synthetic evaluation cases and finding schema | Seeded; no model runs |
 | Hackathon application in `src/` | Planned; no runtime yet |
@@ -42,6 +43,7 @@ Two independent upstream checkouts already exist in the local workspace. They ar
 6. [Evaluation plan](evals/README.md) — cases, expected findings, and scoring.
 7. [Build log](progress/build-log/2026-10-13.md) and [roadmap](progress/roadmap.md) — actual progress and next steps.
 8. [Complete folder map](docs/repository-map.md) — every public folder and its purpose.
+9. [Overall design](design.md) — Anduin palette, reference roles, modular 3D homepage, proposed hover/click behavior and section screens. [Preview image](demo/design/anduin-3d-workflow-hub-v1.png).
 
 ## Repository layout
 

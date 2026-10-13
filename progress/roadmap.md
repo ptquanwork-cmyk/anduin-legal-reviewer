@@ -1,6 +1,6 @@
 # Roadmap
 
-Status date: 2026-10-13. Dates are planning targets, not a completion guarantee.
+Status date: 2026-10-14. Dates are planning targets, not a completion guarantee.
 
 | Target | Milestone | Status |
 | --- | --- | --- |
@@ -14,5 +14,7 @@ Status date: 2026-10-13. Dates are planning targets, not a completion guarantee.
 The owner-supplied portal screenshot displays a deadline of 18 October at 23:59 Ho Chi Minh City time. Verify it in the live portal before submission.
 
 ## Next implementation task
+
+The owner requested a design-only 3D workflow hub package on 14 October. [The concept](../design.md) is ready for review; it is not a completed runtime or Blender scene. Source/review sections take priority, with later annotation/form/PDF stages represented as proposed destinations. Building these stages remains future work.
 
 Choose a minimal runtime and implement extraction with stable page/section evidence before adding model analysis. Review upstream reuse and record actual run steps. Update this roadmap when scope or progress changes.
