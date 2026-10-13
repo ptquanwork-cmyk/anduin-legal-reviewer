@@ -4,4 +4,4 @@
 - `screenshots/`: future screenshots of the actual application using synthetic data.
 - `submission/`: repository/live-link record and submission checklist.
 
-No working application, public deployment, or portal submission exists for this scaffold. Do not present proposed demo steps as completed behavior.
+The [static project hub](https://anduin-legal-reviewer.vercel.app) is deployed. The working contract-review application and portal submission remain pending. Do not present proposed demo steps as completed behavior.

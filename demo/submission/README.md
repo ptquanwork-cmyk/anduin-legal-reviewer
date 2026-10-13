@@ -4,7 +4,8 @@
 | --- | --- |
 | Public repository | https://github.com/ptquanwork-cmyk/anduin-legal-reviewer |
 | Selected challenge | The Legal Reviewer |
-| Live application | Pending implementation and deployment |
+| Live project hub | https://anduin-legal-reviewer.vercel.app |
+| Working contract-review application | Pending implementation; the static hub is not the working review demo |
 | Repository linked in portal | Not performed or verified in this task |
 | Final submission | Not performed |
 | Displayed deadline | 18 October 2026, 23:59, Ho Chi Minh City time; verify in portal |

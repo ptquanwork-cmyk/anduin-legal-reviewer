@@ -1,0 +1,43 @@
+{
+  "verification_date": "2026-10-13",
+  "scope": "Static project hub and provisioned backend, not contract-review application",
+  "github": {
+    "repository": "https://github.com/ptquanwork-cmyk/anduin-legal-reviewer",
+    "visibility": "PUBLIC",
+    "foundation_commit": "1e4c85e428ff2ccd2233e8579f47f12de679b4b5"
+  },
+  "vercel": {
+    "project": "anduin-legal-reviewer",
+    "scope": "jayson3",
+    "url": "https://anduin-legal-reviewer.vercel.app",
+    "deployment_at_verification": "dpl_FmqTmc6DxVgPSapUNVa8c7vKtNVx",
+    "github_connected": true,
+    "public_http_status": 200,
+    "expected_title_verified": true,
+    "expected_project_content_verified": true,
+    "supabase_environment_targets": ["production", "preview"]
+  },
+  "supabase": {
+    "name": "anduin-legal-reviewer",
+    "reference": "hxucmhlssgasjthxaklr",
+    "region": "ap-southeast-1",
+    "status": "ACTIVE_HEALTHY",
+    "database_connection_query_result": 1,
+    "auth_settings_http_status": 200,
+    "application_tables_or_buckets_created": false
+  },
+  "browser": {
+    "surface": "Codex in-app Browser",
+    "viewports_checked": [1440, 768, 390, 320],
+    "horizontal_document_overflow": false,
+    "desktop_mobile_visual_inspection": "passed",
+    "build_journey_navigation": "checked",
+    "observed_console_errors": 0
+  },
+  "limitations": [
+    "Static hub only; no contract upload or AI review workflow",
+    "Supabase provisioned but not used by the static hub",
+    "No model evaluation run or application persistence test",
+    "Portal repository linking and final submission not performed"
+  ]
+}

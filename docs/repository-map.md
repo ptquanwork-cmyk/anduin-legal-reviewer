@@ -10,7 +10,8 @@ anduin-legal-reviewer/
 │   ├── challenge/
 │   ├── product/
 │   ├── architecture/
-│   └── decisions/
+│   ├── decisions/
+│   └── deployment/
 ├── context/
 │   ├── briefs/
 │   └── research/
@@ -21,9 +22,11 @@ anduin-legal-reviewer/
 ├── openai/
 ├── src/
 │   ├── app/
+│   │   └── public/
 │   ├── review/
 │   └── integrations/
 ├── tests/
+├── supabase/
 ├── data/
 │   ├── synthetic/
 │   └── schemas/
@@ -48,6 +51,7 @@ anduin-legal-reviewer/
 | `docs/product/` | User problem, proposed workflow, scope, acceptance criteria |
 | `docs/architecture/` | Proposed system flow and component responsibilities |
 | `docs/decisions/` | Dated decisions, alternatives when relevant, consequences |
+| `docs/deployment/` | Actual Vercel/Supabase setup, links, and reproduction steps |
 | `context/` | Development context conventions |
 | `context/briefs/` | Public-safe user request summaries and reusable context packs |
 | `context/research/` | Sources, observations, and implications |
@@ -58,9 +62,11 @@ anduin-legal-reviewer/
 | `openai/` | Official-source notes, concepts, and integration plan |
 | `src/` | Future application source and run instructions |
 | `src/app/` | Future UI, application state, review actions, export |
+| `src/app/public/` | Deployed static project hub; entry point `index.html` |
 | `src/review/` | Future extraction, checks, and evidence validation |
 | `src/integrations/` | Future OpenAI and external service adapters |
 | `tests/` | Meaningful tests of implemented application code |
+| `supabase/` | Backend project record and future migration conventions |
 | `data/` | Public data conventions |
 | `data/synthetic/` | Fictional, publishable demonstration documents |
 | `data/schemas/` | Versioned model/application output contracts |
@@ -81,6 +87,8 @@ anduin-legal-reviewer/
 - `AGENTS.md`: persistent project instructions, including GitHub synchronization after each project task.
 - `.gitignore`: exclusions for existing independent checkouts, secrets, private inputs, environments, and local runtime data.
 - `.gitattributes`: text/line-ending conventions.
+- `vercel.json` and `.vercelignore`: static hosting configuration and upload exclusions.
+- `.env.example`: configuration variable names and placeholders; actual values remain ignored.
 
 ## Local-only existing folders
 

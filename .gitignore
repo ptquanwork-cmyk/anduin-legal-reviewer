@@ -42,6 +42,8 @@ coverage/
 # Local tool/OS state
 .idea/
 .vscode/
+.vercel/
+.local-qa/
 .DS_Store
 Thumbs.db
 desktop.ini

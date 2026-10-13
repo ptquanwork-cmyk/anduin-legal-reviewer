@@ -1,9 +1,9 @@
 {
-  "checked_at": "2026-10-13T23:44:05.131710+07:00",
+  "checked_at": "2026-10-13T23:57:07.951601+07:00",
   "scope": "Repository foundation only; not application or model evaluation",
   "local_checks": "passed",
-  "publishable_file_count": 52,
-  "public_directory_count": 33,
+  "publishable_file_count": 59,
+  "public_directory_count": 36,
   "synthetic_case_count": 8,
   "checks": [
     "Nonempty publishable files and complete folder map",
@@ -14,11 +14,12 @@
     "Nested checkout and private-path ignore rules",
     "Credential-pattern scan of publishable text"
   ],
-  "publication": "pending",
+  "publication": "verified public; initial commit matches remote main",
   "limitations": [
     "No hackathon application runtime exists",
     "No OpenAI API or model evaluation run performed",
     "Credential-pattern scanning is not a complete secret audit",
     "Portal repo linking and final submission not performed"
-  ]
+  ],
+  "published_foundation_commit": "1e4c85e428ff2ccd2233e8579f47f12de679b4b5"
 }

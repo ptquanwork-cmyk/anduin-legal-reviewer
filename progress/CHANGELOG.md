@@ -7,5 +7,8 @@
 - Added context pack, three versioned prompt drafts, and official OpenAI source notes.
 - Added synthetic example documents, an output-schema draft, and eight evaluation cases.
 - Added experiment/demo templates, roadmap, source attribution, and GitHub update instructions.
+- Published the repository and a responsive static project hub on Vercel; connected GitHub deployment.
+- Created a separate Supabase project in Singapore and verified database/Auth API connectivity.
+- Prepared ignored local configuration and Vercel Production/Preview Supabase variables for future implementation.
 
-No hackathon runtime, API integration, model benchmark, or live deployment is included in this foundation.
+No contract-review runtime, OpenAI integration, model benchmark, or review-data persistence is included in this foundation. The static project hub is deployed.

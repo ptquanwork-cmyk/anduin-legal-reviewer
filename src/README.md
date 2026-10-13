@@ -1,6 +1,6 @@
 # Application source — planned
 
-The hackathon application will live here. No runnable application has been committed yet.
+The static project hub is implemented in `app/public/index.html` and deployed on Vercel. The contract-review application will live here; its runtime is not implemented yet.
 
 - `app/`: upload/review/export interface and application state.
 - `review/`: extraction, deterministic checks, finding assembly, evidence validation.

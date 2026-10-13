@@ -4,7 +4,7 @@ Status date: 2026-10-13. Dates are planning targets, not a completion guarantee.
 
 | Target | Milestone | Status |
 | --- | --- | --- |
-| 13 Oct | Public foundation, context, prompts, synthetic cases | Initial setup |
+| 13 Oct | Public foundation, context, prompts, synthetic cases, hosting/backend projects | Published and infrastructure verified |
 | 14 Oct | Text extraction, source locations, deterministic checks | Proposed |
 | 15 Oct | OpenAI semantic review and evidence validation | Proposed |
 | 16 Oct | Reviewer actions, export, end-to-end workflow | Proposed |

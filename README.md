@@ -4,6 +4,10 @@
 
 Built by [Quan / Jayson](https://github.com/ptquanwork-cmyk) for **The Legal Reviewer** challenge. This repository records the journey from business problem and context design to prompts, implementation, experiments, and a reviewable demo.
 
+**[Live project hub](https://anduin-legal-reviewer.vercel.app)** · **[Vercel project](https://vercel.com/jayson3/anduin-legal-reviewer)** · **[Supabase dashboard](https://supabase.com/dashboard/project/hxucmhlssgasjthxaklr)**
+
+The live page presents the project and build journey. Contract upload/review is still being implemented. Infrastructure dashboards require the owner's account access.
+
 ## The problem
 
 Contract digitization teams need to identify flawed inputs before downstream work begins. The challenge highlights typos, missing references, contradictions, and ambiguous terms that require confirmation with external legal counsel.
@@ -16,13 +20,15 @@ Upload a contract, inspect findings tied to source passages, and record which is
 
 | Deliverable | Status |
 | --- | --- |
-| Public repository and project structure | Initial setup |
+| Public repository and project structure | Published; public visibility verified |
 | Challenge interpretation and proposed workflow | Documented |
 | Context packs and versioned prompt drafts | Seeded; not evaluated |
 | Synthetic evaluation cases and finding schema | Seeded; no model runs |
 | Hackathon application in `src/` | Planned; no runtime yet |
 | OpenAI API integration and performance metrics | Not implemented or measured |
-| Live demo and portal submission | Pending |
+| Static project hub on Vercel | Live; public HTTP 200 verified |
+| Supabase project | Created; database and Auth API connectivity verified |
+| Working contract-review demo and portal submission | Pending |
 
 Two independent upstream checkouts already exist in the local workspace. They are documented in [references](references/README.md); their source, environments, and local data are excluded from this repository. They are not the submitted hackathon application.
 
@@ -47,6 +53,7 @@ anduin-legal-reviewer/
 ├── prompts/                     # Versioned development/review/evaluation prompts
 ├── openai/                      # Concepts, integration plan, official sources
 ├── src/                         # Future app, review pipeline, integrations
+├── supabase/                    # Backend project record and migration conventions
 ├── tests/                       # Future deterministic/application tests
 ├── data/                        # Synthetic documents and output schema
 ├── evals/                       # Evaluation inputs, rubric, actual results
@@ -64,7 +71,15 @@ These notes describe the proposed approach. They are not a claim of completed in
 
 ## Working locally
 
-This initial commit contains documentation, prompts, a schema, and synthetic evaluation fixtures. There is no application install or launch command yet. Implementation and verified setup instructions will be added to `src/` and this README when the application exists.
+The repository contains documentation, prompts, a schema, synthetic evaluation fixtures, and a dependency-free static project hub in `src/app/public/`.
+
+Preview the hub locally from the repository root:
+
+```powershell
+python -m http.server 4173 --bind 127.0.0.1 --directory src/app/public
+```
+
+Open `http://127.0.0.1:4173`. Production hosting uses `vercel.json` and the connected GitHub repository. See [deployment setup](docs/deployment/setup.md). Contract-review application setup will be added when that implementation exists.
 
 ## Keeping GitHub up to date
 

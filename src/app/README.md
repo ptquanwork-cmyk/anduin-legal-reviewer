@@ -1,3 +1,5 @@
-# Application interface — planned
+# Application interface
 
-Implement the upload, finding inspection, reviewer decisions, and export flow described in [MVP scope](../../docs/product/mvp.md). No UI code exists in this folder yet.
+`public/index.html` is the dependency-free static project hub, deployed at [anduin-legal-reviewer.vercel.app](https://anduin-legal-reviewer.vercel.app). It describes the project and links to the build journey; its review specimen is explicitly illustrative.
+
+The upload, finding inspection, reviewer decisions, and export flow described in [MVP scope](../../docs/product/mvp.md) remains to be implemented.
