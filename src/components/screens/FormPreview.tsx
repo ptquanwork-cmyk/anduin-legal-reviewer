@@ -85,8 +85,8 @@ export function FormPreview() {
           <p className="absolute left-[174px] top-[78px] text-[19px]" style={{ color: 'var(--muted)' }}>
             {ws.document?.title ?? 'No document'} · v{ws.version?.version_no ?? '–'}
           </p>
-          <div className="absolute left-[174px] top-[104px] flex h-[40px] w-[445px] items-center gap-2 rounded-xl px-3 text-[13px]" style={{ background: 'var(--warn-bg)', color: 'var(--warn-ink)' }}>
-            <CircleAlert size={18} /> <b>Preview only</b> <span style={{ color: 'var(--ink)' }}>Controls are read-only here; answers are entered in Responses.</span>
+          <div className="absolute left-[174px] top-[104px] flex h-[36px] w-[445px] items-center gap-2 whitespace-nowrap rounded-xl px-3 text-[12px]" style={{ background: 'var(--warn-bg)', color: 'var(--warn-ink)' }}>
+            <CircleAlert size={16} className="shrink-0" /> <b>Preview only</b> <span className="truncate" style={{ color: 'var(--ink)' }}>Controls are read-only here; answers are entered in Responses.</span>
           </div>
         </div>
         <div className="scroll-thin flex-1 overflow-auto px-7 pb-6">
@@ -104,7 +104,7 @@ export function FormPreview() {
                     <span className="block text-[13px] font-medium" style={{ color: 'var(--primary)' }}>
                       Plain-language help
                     </span>
-                    <span className="text-[11px]" style={{ color: 'var(--muted)' }}>
+                    <span className="whitespace-nowrap text-[11px]" style={{ color: 'var(--muted)' }}>
                       Separate from contract text
                     </span>
                   </span>
@@ -161,7 +161,7 @@ export function FormPreview() {
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full" style={{ background: coverageOk ? 'var(--info-bg)' : 'var(--warn-bg)' }}>
             <CircleAlert size={26} style={{ color: coverageOk ? 'var(--mint-dark)' : 'var(--warn-dot)' }} />
           </span>
-          <div className="w-[340px]">
+          <div className="w-[300px] shrink-0">
             <div className="text-[16px] font-semibold" style={{ color: coverageOk ? 'var(--info-ink)' : '#d4380d' }}>
               {coverageOk ? 'Every source block is represented' : `${form.unmapped.length} source block${form.unmapped.length > 1 ? 's' : ''} unmapped`}
             </div>
@@ -169,7 +169,7 @@ export function FormPreview() {
               {coverageOk ? (approved ? 'Annotations approved for this version.' : 'Approve annotations to enable responses.') : 'Review and map all source text before enabling responses.'}
             </div>
           </div>
-          <button className="btn-outline flex h-[48px] w-[178px] items-center justify-center gap-2 text-[16px]" onClick={() => setModal('coverage')}>
+          <button className="btn-outline flex h-[48px] w-[168px] shrink-0 items-center justify-center gap-2 text-[15px]" onClick={() => setModal('coverage')}>
             <Search size={19} /> Inspect coverage
           </button>
           <button className="btn-primary flex h-[56px] w-[232px] flex-col items-center justify-center text-[15px] leading-tight" disabled={!canEnable} onClick={() => nav.go('responses')}>
@@ -177,10 +177,10 @@ export function FormPreview() {
             {!canEnable && <span className="text-[12px]">{coverageOk ? 'Approve annotations first' : 'Complete mapping to continue'}</span>}
           </button>
           <span className="mx-1 h-10 w-px" style={{ background: 'var(--panel-border)' }} />
-          <button className="pill flex h-[44px] items-center gap-2 px-5 text-[14.5px] font-medium" style={{ color: 'var(--primary)' }} onClick={() => setModal('full')}>
+          <button className="pill flex h-[44px] items-center gap-2 whitespace-nowrap px-4 text-[14px] font-medium" style={{ color: 'var(--primary)' }} onClick={() => setModal('full')}>
             <Eye size={18} /> Show full original text
           </button>
-          <button className="pill flex h-[44px] items-center gap-2 px-5 text-[14.5px] font-medium" style={{ color: 'var(--primary)' }} onClick={() => setModal('conditional')}>
+          <button className="pill flex h-[44px] items-center gap-2 whitespace-nowrap px-4 text-[14px] font-medium" style={{ color: 'var(--primary)' }} onClick={() => setModal('conditional')}>
             <SlidersHorizontal size={18} /> Preview conditional sections
           </button>
         </div>

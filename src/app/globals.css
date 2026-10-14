@@ -129,102 +129,82 @@ button:disabled {
   font-family: var(--font-display);
 }
 
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 22px;
-  box-shadow: var(--shadow);
+/* Component classes sit in a layer so Tailwind utilities on the same element (size, padding, weight) win. */
+@layer components {
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+  }
+
+  .pill {
+    border-radius: 999px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    box-shadow: 0 4px 14px rgba(32, 72, 140, 0.08);
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: var(--primary-ink);
+    border-radius: 999px;
+    font-weight: 500;
+    transition: filter 160ms, transform 160ms;
+  }
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+  .btn-primary:disabled,
+  .btn-disabled {
+    background: var(--disabled-bg) !important;
+    color: var(--disabled-ink) !important;
+    border-color: transparent !important;
+  }
+  .btn-outline {
+    border: 1.5px solid var(--primary);
+    color: var(--primary);
+    background: var(--panel);
+    border-radius: 999px;
+    font-weight: 500;
+    transition: background 160ms;
+  }
+  .btn-outline:hover:not(:disabled) {
+    background: var(--selected);
+  }
+  .btn-outline:disabled {
+    border-color: var(--disabled-ink);
+    color: var(--disabled-ink);
+  }
+
+  .paper {
+    background: var(--paper);
+    color: var(--paper-ink);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 3px 12px;
+    font-size: 13px;
+    font-weight: 500;
+  }
 }
 
-.pill {
-  border-radius: 999px;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  box-shadow: 0 4px 14px rgba(32, 72, 140, 0.08);
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: var(--primary-ink);
-  border-radius: 999px;
-  font-weight: 500;
-  transition: filter 160ms, transform 160ms;
-}
-.btn-primary:hover:not(:disabled) {
-  filter: brightness(1.08);
-}
-.btn-primary:disabled,
-.btn-disabled {
-  background: var(--disabled-bg) !important;
-  color: var(--disabled-ink) !important;
-  border-color: transparent !important;
-}
-.btn-outline {
-  border: 1.5px solid var(--primary);
-  color: var(--primary);
-  background: var(--panel);
-  border-radius: 999px;
-  font-weight: 500;
-  transition: background 160ms;
-}
-.btn-outline:hover:not(:disabled) {
-  background: var(--selected);
-}
-.btn-outline:disabled {
-  border-color: var(--disabled-ink);
-  color: var(--disabled-ink);
-}
-
-.paper {
-  background: var(--paper);
-  color: var(--paper-ink);
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 999px;
-  padding: 3px 12px;
-  font-size: 13px;
-  font-weight: 500;
-}
-
+/* Positions come from box() in src/lib/nav.tsx (design units, content area stretched horizontally by --k). */
 .abs {
   position: absolute;
-  left: var(--x);
+  left: var(--l);
   top: var(--y);
-  width: var(--w);
+  width: var(--wd);
   height: var(--h);
 }
 
 .stage {
   position: relative;
-  width: 1536px;
   height: 1024px;
-}
-
-@media (max-width: 899px) {
-  body {
-    overflow: auto;
-  }
-  .stage {
-    width: 100%;
-    height: auto;
-    min-height: 100vh;
-    padding-bottom: 40px;
-  }
-  .abs {
-    position: relative;
-    left: auto;
-    top: auto;
-    width: auto;
-    height: auto;
-    margin: 12px 16px;
-  }
-  .desktop-only {
-    display: none !important;
-  }
 }
 
 .shelf {
@@ -245,6 +225,12 @@ button:disabled {
 }
 .docx-html p {
   margin: 0 0 10px;
+}
+/* Paragraph matching a source issue (the paper stays light in both themes). */
+.docx-html .source-focus {
+  background: #e6f0fd;
+  border-radius: 8px;
+  box-shadow: 0 0 0 8px #e6f0fd;
 }
 .docx-html strong {
   font-weight: 700;

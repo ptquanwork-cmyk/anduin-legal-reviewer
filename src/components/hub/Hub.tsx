@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowUpRight, CloudUpload, Loader2 } from 'lucide-react';
 import { box, useNav } from '../../lib/nav';
@@ -54,15 +54,24 @@ export function Hub() {
     }
   };
 
+  // Development-only aid for headless screenshots: ?autodemo loads the demo into this browser's workspace.
+  const auto = useRef(false);
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development' || auto.current || !ws.ready) return;
+    if (!new URLSearchParams(window.location.search).has('autodemo')) return;
+    auto.current = true;
+    run('demo');
+  }, [ws.ready]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" exit={{ opacity: 0, transition: { duration: 0.18 } }}>
-      <motion.h1 variants={rise} className="abs font-display text-[68px] font-extrabold leading-[62px] tracking-[-0.035em]" style={{ ...box(174, 168, 560), color: 'var(--ink)' }}>
+      <motion.h1 variants={rise} className="abs font-display text-[68px] font-extrabold leading-[62px] tracking-[-0.035em]" style={{ ...box(174, 168, 560, undefined, 'left'), color: 'var(--ink)' }}>
         Review before you digitize.
       </motion.h1>
-      <motion.p variants={rise} className="abs text-[26px]" style={{ ...box(175, 298, 600), color: 'var(--sub)' }}>
+      <motion.p variants={rise} className="abs text-[26px]" style={{ ...box(175, 298, 600, undefined, 'left'), color: 'var(--sub)' }}>
         One source. Every step. Your decision.
       </motion.p>
-      <motion.div variants={rise} className="abs flex gap-3" style={box(174, 343, 400, 46)}>
+      <motion.div variants={rise} className="abs flex gap-3" style={box(174, 343, 400, 46, 'left')}>
         <button className="flex h-[46px] w-[199px] items-center justify-center gap-3 rounded-full text-[17px] font-semibold shadow-[0_10px_22px_rgba(14,67,160,.28)]" style={{ background: 'var(--navy)', color: 'var(--primary-ink)' }} onClick={() => input.current?.click()} disabled={!!busy}>
           {busy === 'upload' ? <Loader2 className="animate-spin" size={22} /> : <CloudUpload size={22} />} Upload contract
         </button>
@@ -71,13 +80,13 @@ export function Hub() {
         </button>
         <input ref={input} type="file" accept={ACCEPT} hidden onChange={(e) => e.target.files?.[0] && run('upload', e.target.files[0])} />
       </motion.div>
-      <motion.p variants={rise} className="abs text-[15px]" style={{ ...box(180, 397, 400), color: 'var(--muted)' }}>
+      <motion.p variants={rise} className="abs text-[15px]" style={{ ...box(180, 397, 400, undefined, 'left'), color: 'var(--muted)' }}>
         Duplicate checks stay with intake.
       </motion.p>
 
       {/* Shelves */}
-      <motion.div variants={rise} className="abs desktop-only shelf" style={{ ...box(124, 506, 1384, 156), borderRadius: 44 }} />
-      <motion.div variants={rise} className="abs desktop-only shelf" style={{ ...box(170, 690, 1312, 252), borderRadius: '140px 60px 60px 140px' }} />
+      <motion.div variants={rise} className="abs shelf" style={{ ...box(124, 506, 1384, 156), borderRadius: 44 }} />
+      <motion.div variants={rise} className="abs shelf" style={{ ...box(170, 690, 1312, 252), borderRadius: '140px 60px 60px 140px' }} />
 
       {STAGES.map((s) => (
         <Station key={s.id} stage={s} slot={HUB_SLOTS[s.id]} active={selected === s.id} hovered={hover === s.id} onHover={setHover} />
@@ -94,11 +103,11 @@ function Station({ stage, slot, active, hovered, onHover }: { stage: Stage; slot
   const [ax, ay, aw, ah] = slot.art;
   return (
     <motion.div variants={rise}>
-      <div className="abs desktop-only pedestal" style={{ ...box(bx, by, bw, bh), borderRadius: stage.id === 'review' ? 46 : 30 }} />
-      <StationArt stage={stage} role="hub" lifted={hovered} className="abs desktop-only" style={box(ax, ay, aw, ah)} />
+      <div className="abs pedestal" style={{ ...box(bx, by, bw, bh, 'center'), borderRadius: stage.id === 'review' ? 46 : 30 }} />
+      <StationArt stage={stage} role="hub" lifted={hovered} className="abs" style={box(ax, ay, aw, ah, 'center')} />
       <button
         className="abs group text-left"
-        style={{ ...box(Math.min(ax, bx), ay, Math.max(ax + aw, bx + bw) - Math.min(ax, bx), by + bh - ay), zIndex: 10 }}
+        style={{ ...box(Math.min(ax, bx), ay, Math.max(ax + aw, bx + bw) - Math.min(ax, bx), by + bh - ay, 'center'), zIndex: 10 }}
         onMouseEnter={() => onHover(stage.id)}
         onMouseLeave={() => onHover(null)}
         onFocus={() => onHover(stage.id)}
@@ -139,7 +148,7 @@ function Station({ stage, slot, active, hovered, onHover }: { stage: Stage; slot
 function HoverCard({ stage }: { stage: Stage }) {
   const [x, y] = HUB_SLOTS[stage.id].card;
   return (
-    <motion.div key={stage.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="abs panel desktop-only pointer-events-none p-4" style={{ ...box(x, y, 184), borderRadius: 18, zIndex: 10 }}>
+    <motion.div key={stage.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="abs panel pointer-events-none p-4" style={{ ...box(x, y, 184), borderRadius: 18, zIndex: 10 }}>
       <div className="text-[19px] font-semibold" style={{ color: 'var(--ink)' }}>
         {stage.label}
       </div>

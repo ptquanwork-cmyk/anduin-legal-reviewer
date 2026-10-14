@@ -66,7 +66,7 @@ export function Fade({ i = 0, x, y, w, h, className = '', style, children }: { i
 }
 
 export function HeaderArt({ id, x, y, w, h }: { id: Stage['id']; x: number; y: number; w: number; h: number }) {
-  return <StationArt stage={stageOf(id)!} role="header" className="abs desktop-only" style={box(x, y, w, h)} />;
+  return <StationArt stage={stageOf(id)!} role="header" className="abs" style={box(x, y, w, h)} />;
 }
 
 export function Title({ x, y, size = 64, children }: { x: number; y: number; size?: number; children: React.ReactNode }) {

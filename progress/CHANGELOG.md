@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-15 — Full-bleed desktop layout, screen polish, CLI semantic reviewer
+
+- The interface fills the browser window: height sets the scale and wider windows widen the content area while the rail and right-hand controls stay at the edges. Mobile layout removed at the owner's request.
+- Semantic reviewer can run through the owner's Codex CLI in the worker (`/semantic`, locked down, same prompt file and schema); the API path falls back to it when the key is rejected or unfunded. Prompt rule 8 ("do not use any tools") added for the CLI engine.
+- Screen polish against the approved images: stage-strip labels wrap on narrow strips; Source quality scrolls both panes to the flagged region; Document map shows at most four key sections with the conflicting section selected; Legal review keeps action buttons at full size and scrolls the viewer to the passages; Decision/report uses one-line status chips; Form preview banner and buttons stay on one line.
+- Component CSS classes moved into a cascade layer so size and padding utilities apply (chips had been rendering at a fixed 13 px).
+- 3D stations: per-module framing measured against the stills and glossier resin materials.
+- Contradiction questions name the two values and sections instead of quoting both sentences.
+
 ## 2026-10-15 — Working application
 
 - Replaced the static hub with the single-page application: 3D hub (Blender stations rendered live), nine workspaces, Templates, Feedback, light/dark themes.

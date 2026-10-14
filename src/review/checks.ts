@@ -168,7 +168,7 @@ export function checkNumericConflicts(blocks: Block[]): Candidate[] {
         category: 'contradiction',
         title: `Conflicting ${topic(a.s)}`,
         rationale: `${sa} and ${sc} state the same obligation with different values (${a.nums.join(', ')} vs ${c.nums.join(', ')}).`,
-        question: `Which value should apply: "${a.s}" or "${c.s}"?`,
+        question: `Which value should apply: ${a.nums.join(', ')} (${sa}) or ${c.nums.join(', ')} (${sc})?`,
         suggestion: null,
         severity: 'high',
         evidence: [

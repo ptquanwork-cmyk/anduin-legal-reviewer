@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, animate, motion } from 'motion/react';
-import { NavCtx, type Nav } from '../lib/nav';
+import { NavCtx, stretchFactor, type Nav } from '../lib/nav';
 import { stageOf, type ScreenId } from '../lib/stages';
 import { WorkspaceProvider } from '../lib/workspace';
 import { ShellFrame } from './shell/Frame';
@@ -30,6 +30,16 @@ function readUrl() {
   return { screen: s && SCREENS.includes(s) ? s : 'home', versionId: p.get('v'), overlay: p.get('overlay') };
 }
 
+/** Fill the window: height sets the zoom, extra width widens the content area. The dev overlay renders the exact design frame. */
+function fitFrame(overlay: boolean) {
+  if (overlay) return { zoom: 1, frameWidth: 1536 };
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const wide = vw / (vh / 1024);
+  if (wide < 1536) return { zoom: Math.min(vw / 1536, vh / 1024), frameWidth: 1536 };
+  return { zoom: vh / 1024, frameWidth: wide };
+}
+
 interface Fly {
   id: string;
   img: string;
@@ -41,18 +51,17 @@ export default function App() {
   const [prev, setPrev] = useState<ScreenId>('home');
   const [versionId, setVersionIdState] = useState<string | null>(() => readUrl().versionId);
   const [overlay, setOverlay] = useState<string | null>(() => readUrl().overlay);
-  const [zoom, setZoom] = useState(() => Math.min(window.innerWidth / 1536, window.innerHeight / 1024));
-  const [mobile, setMobile] = useState(() => window.innerWidth < 900);
+  const [frame, setFrame] = useState(() => fitFrame(!!readUrl().overlay));
   const [search, setSearch] = useState(false);
   const [toast, setToast] = useState<{ message: string; tone: 'info' | 'error' } | null>(null);
   const [fly, setFly] = useState<Fly | null>(null);
   const flyEl = useRef<HTMLDivElement>(null);
-  // Real-time 3D on capable desktops; the approved PNG stills stay for phones, reduced motion and ?static.
+  // Real-time 3D when WebGL is available; the approved PNG stills stay for reduced motion and ?static.
   const [three] = useState(() => {
     const q = new URLSearchParams(window.location.search);
     if (q.has('static')) return false;
     if (q.has('three')) return webgl();
-    return window.innerWidth >= 900 && webgl() && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return webgl() && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
 
   useEffect(() => {
@@ -67,15 +76,11 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const fit = () => {
-      const m = window.innerWidth < 900;
-      setMobile(m);
-      setZoom(m ? 1 : Math.min(window.innerWidth / 1536, window.innerHeight / 1024));
-    };
+    const fit = () => setFrame(fitFrame(!!overlay));
     fit();
     window.addEventListener('resize', fit);
     return () => window.removeEventListener('resize', fit);
-  }, []);
+  }, [overlay]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -119,7 +124,7 @@ export default function App() {
       const flyId = screen === 'home' ? next : next === 'home' ? screen : null;
       const stage = flyId ? stageOf(flyId) : undefined;
       const from = stage ? document.querySelector(`[data-art="${stage.id}"]`)?.getBoundingClientRect() : undefined;
-      if (stage && from && !mobile && !matchMedia('(prefers-reduced-motion: reduce)').matches) setFly({ id: stage.id, img: stage.img, from });
+      if (stage && from && !matchMedia('(prefers-reduced-motion: reduce)').matches) setFly({ id: stage.id, img: stage.img, from });
       const nextVersion = v === undefined ? versionId : v;
       setPrev(screen);
       setScreen(next);
@@ -127,7 +132,7 @@ export default function App() {
       writeUrl(next, nextVersion, true);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [screen, versionId, mobile, overlay],
+    [screen, versionId, overlay],
   );
 
   // Animate the flying copy to wherever the destination art renders.
@@ -156,7 +161,9 @@ export default function App() {
     return () => cancelAnimationFrame(raf);
   }, [fly, screen]);
 
-  const nav = useMemo<Nav>(() => ({ screen, prev, go, zoom, mobile, notify }), [screen, prev, go, zoom, mobile, notify]);
+  const { zoom, frameWidth } = frame;
+  const nav = useMemo<Nav>(() => ({ screen, prev, go, zoom, frameWidth, notify }), [screen, prev, go, zoom, frameWidth, notify]);
+  const stageStyle = { zoom, width: frameWidth, ['--k' as string]: stretchFactor(frameWidth), ['--dw' as string]: `${frameWidth - 1536}px` } as React.CSSProperties;
 
   return (
     <NavCtx.Provider value={nav}>
@@ -164,8 +171,8 @@ export default function App() {
         <ThreeCtx.Provider value={three}>
         <FlyingCtx.Provider value={fly?.id ?? null}>
           {three && <StationsCanvas />}
-          <div className="flex min-h-screen w-full items-start justify-center">
-            <div className="stage" style={mobile ? undefined : { zoom }}>
+          <div className="flex h-screen w-full items-center justify-center">
+            <div className="stage" style={stageStyle}>
               <ShellFrame />
               <Brand />
               <TopBar onSearch={() => setSearch(true)} />
@@ -176,7 +183,7 @@ export default function App() {
                 </motion.div>
               </AnimatePresence>
               <Footer hint={screen === 'home' ? 'Hover to explore · Click to open a section' : undefined} />
-              {overlay && (
+              {overlay && overlay !== '0' && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={overlayUrl(overlay)} alt="" className="pointer-events-none absolute left-0 top-0 z-[90] h-[1024px] w-[1536px] opacity-50" />
               )}
@@ -202,7 +209,7 @@ export default function App() {
   );
 }
 
-// Dev alignment aid: ?overlay=04 (light) or ?overlay=d04 (dark) lays the approved design over the app.
+// Dev alignment aid: ?overlay=04 (light) or ?overlay=d04 (dark) lays the approved design over the app; ?overlay=0 only fixes the design frame.
 function overlayUrl(o: string) {
   const dark = o.startsWith('d');
   const n = o.replace(/^d/, '');

@@ -33,7 +33,7 @@ Templates (approved field structure, no answers) and Feedback (decision history;
 ## How findings are produced
 
 1. **Deterministic rules** (`src/review/checks.ts`): numeric contradictions between near-identical obligations, references to sections/exhibits/annexes that do not exist (incl. *Điều/Khoản/Phụ lục*), vague obligation terms, capitalised terms without definitions, spelling (Hunspell dictionaries plus a high-precision list).
-2. **Semantic reviewer** (OpenAI Responses API with a strict JSON schema, `src/review/semantic.ts`, prompt [`contract-review-v2`](prompts/review/contract-review-v2.md)): contradictions, ambiguities and undefined terms. Contract text is sent as data; the reviewer may return nothing. Runs only when `OPENAI_API_KEY` is configured.
+2. **Semantic reviewer** (`src/review/semantic.ts`, prompt [`contract-review-v2`](prompts/review/contract-review-v2.md), strict JSON schema): contradictions, ambiguities and undefined terms. Contract text is sent as data; the reviewer may return nothing. Engine: the OpenAI Responses API when `OPENAI_API_KEY` is configured and funded; otherwise (and as automatic fallback) the owner's Codex CLI running locked-down in the worker.
 3. **Evidence validator** (`src/review/validate.ts`): every quote must match the extracted source text; contradictions need two matched passages; duplicates are merged. Unsupported candidates are rejected and listed as limitations.
 4. **Decision agent** ([Laya](https://github.com/NandhaKishorM/laya), Apache-2.0) in the worker: routes steps (document type, fillable fields, need for semantic review), orders findings (needs counsel, impact) and double-checks annotation types. Its `answer_confidence` is shown as **not calibrated**.
 
@@ -58,7 +58,7 @@ When the worker is offline the application still reviews Word text (without page
 
 ## Running locally
 
-Requirements: Node 24, the project's `.env.supabase.local` (public URL and publishable key; machine-wide Supabase variables may belong to other projects) and optionally `OPENAI_API_KEY` in `.env.local`.
+Requirements: Node 24, the project's `.env.supabase.local` (public URL and publishable key; machine-wide Supabase variables may belong to other projects) and optionally `OPENAI_API_KEY` in `.env.local`. The interface targets desktop browsers: it fills the window edge to edge, widening the content area on wide screens.
 
 ```bash
 npm install
@@ -96,7 +96,7 @@ Developer aids: `?overlay=04` lays an approved design over the page (development
 | Supabase schema, RLS, private storage, Realtime | Applied (`supabase/migrations/`); security advisor warnings only for intentional anonymous access and the secret-gated worker RPCs |
 | End-to-end flow on the synthetic demo | Verified locally on 15 Oct 2026: upload → Word conversion → 4 findings → decisions → report PDF → v2 revision → annotation QA → responses → clipping caught → QA passed → confirmed final PDF |
 | Blender stations | 9 modules built by `design/blender/build_modules.py`, exported as Draco GLB; approximations of the approved stills, which remain the fallback |
-| Semantic reviewer (OpenAI) | Implemented; runs where `OPENAI_API_KEY` is configured |
+| Semantic reviewer | Implemented; verified end to end on 15 Oct 2026 through the Codex CLI engine on the worker (OpenAI API path implemented, not yet exercised: key unfunded) |
 | Decision agent (Laya) | Running in the worker; CPU latency measured at about 2–18 s per batched call on the owner's machine |
 | Model-quality evaluation on real contracts | Not done; no calibration claim |
 | Worker availability | Depends on the owner's machine being on; otherwise the app reports it offline |

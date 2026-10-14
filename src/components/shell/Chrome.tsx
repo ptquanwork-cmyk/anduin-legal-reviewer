@@ -35,7 +35,7 @@ export function Brand() {
           Legal Reviewer
         </span>
       </div>
-      <div className="abs desktop-only text-right text-[19px] uppercase tracking-wide" style={{ ...box(1000, 29, 502), color: 'var(--ink)' }}>
+      <div className="abs text-right text-[19px] uppercase tracking-wide" style={{ ...box(1000, 29, 502), color: 'var(--ink)' }}>
         {demo ? 'Private workspace · Synthetic data' : 'Private workspace'}
       </div>
     </>
@@ -49,18 +49,18 @@ export function TopBar({ onSearch }: { onSearch: () => void }) {
   return (
     <>
       {home ? (
-        <button className="abs pill flex items-center gap-3 pl-12 text-[15px] font-medium" style={{ ...box(144, 84, 244, 48), color: 'var(--ink)' }} onClick={() => nav.go('intake', null)}>
+        <button className="abs pill flex items-center gap-3 pl-12 text-[15px] font-medium" style={{ ...box(144, 84, 244, 48, 'left'), color: 'var(--ink)' }} onClick={() => nav.go('intake', null)}>
           <span className="absolute left-12 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full" style={{ background: 'var(--primary)', color: 'var(--primary-ink)' }}>
             <Plus size={17} strokeWidth={2.5} />
           </span>
           <span className="ml-10">New document</span>
         </button>
       ) : (
-        <button className="abs pill flex items-center justify-center gap-3 text-[16px] font-semibold" style={{ ...box(143, 83, 147, 48), color: 'var(--ink)' }} onClick={() => nav.go('home')}>
+        <button className="abs pill flex items-center justify-center gap-3 text-[16px] font-semibold" style={{ ...box(143, 83, 147, 48, 'left'), color: 'var(--ink)' }} onClick={() => nav.go('home')}>
           <ArrowLeft size={20} /> Home
         </button>
       )}
-      <button className="abs pill desktop-only flex items-center gap-4 px-5 text-left text-[14px]" style={{ ...box(578, 77, 380, 48), color: 'var(--muted)' }} onClick={onSearch} aria-label="Search documents and sections">
+      <button className="abs pill flex items-center gap-4 px-5 text-left text-[14px]" style={{ ...box(578, 77, 380, 48), color: 'var(--muted)' }} onClick={onSearch} aria-label="Search documents and sections">
         <Search size={22} style={{ color: 'var(--ink)' }} />
         <span className="flex-1 truncate">{!home && ws.document ? ws.document.title : 'Find a document or section'}</span>
         <kbd className="rounded-md px-2 py-0.5 text-[12px]" style={{ background: 'var(--raised)', color: 'var(--muted)' }}>
@@ -79,13 +79,13 @@ function VersionControl() {
   const [open, setOpen] = useState(false);
   if (nav.screen === 'home' || !ws.version) {
     return (
-      <button className="abs pill flex items-center justify-center gap-3 text-[15px] font-medium" style={{ ...box(1126, 85, 202, 48), color: 'var(--ink)' }} onClick={() => nav.go('intake')}>
+      <button className="abs pill flex items-center justify-center gap-3 text-[15px] font-medium" style={{ ...box(1126, 85, 202, 48, 'right'), color: 'var(--ink)' }} onClick={() => nav.go('intake')}>
         <FileText size={20} /> My documents
       </button>
     );
   }
   return (
-    <div className="abs" style={box(1100, 85, 228, 48)}>
+    <div className="abs" style={box(1100, 85, 228, 48, 'right')}>
       <button className="pill flex h-full w-full items-center gap-3 px-5 text-[15px] font-semibold" style={{ color: 'var(--ink)' }} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         <FileText size={20} />
         <span className="flex-1 truncate text-left">
@@ -123,7 +123,7 @@ function AvatarMenu() {
     setTheme(next);
   };
   return (
-    <div className="abs" style={box(1343, 85, 78, 48)}>
+    <div className="abs" style={box(1343, 85, 78, 48, 'right')}>
       <button className="pill flex h-full w-full items-center justify-center gap-2" onClick={() => setOpen((o) => !o)} aria-label="Account and theme menu" aria-expanded={open}>
         <span className="grid h-9 w-9 place-items-center rounded-full text-[17px] font-semibold" style={{ background: 'var(--raised)', color: 'var(--navy)' }}>
           J
@@ -178,7 +178,7 @@ export function IconRail() {
     );
   };
   return (
-    <nav aria-label="Sections" className="desktop-only">
+    <nav aria-label="Sections">
       <div className="abs panel flex flex-col justify-start gap-3 py-5" style={{ ...box(36, 152, 86, 520), borderRadius: 42 }}>
         {RAIL.map(item)}
       </div>
@@ -192,6 +192,8 @@ export function IconRail() {
 /** Unified pill-style nine-stage strip. Selecting a stage never implies earlier stages passed. */
 export function StageStrip({ y = 152, x = 132, w = 1360 }: { y?: number; x?: number; w?: number }) {
   const nav = useNav();
+  // Narrow strips wrap labels onto two lines, like the stepper labels in the approved design.
+  const size = w < 1150 ? 'pr-2 text-[11.5px] leading-[13px]' : w < 1250 ? 'pr-2.5 text-[12.5px]' : 'pr-3.5 text-[13.5px]';
   return (
     <div className="abs pill flex items-center justify-between overflow-x-auto px-3" style={box(x, y, w, 48)} role="tablist" aria-label="Workflow stages">
       {STAGES.map((s) => {
@@ -202,13 +204,13 @@ export function StageStrip({ y = 152, x = 132, w = 1360 }: { y?: number; x?: num
             role="tab"
             aria-selected={on}
             onClick={() => nav.go(s.id)}
-            className={`flex shrink-0 items-center gap-2 rounded-full py-1 pl-1 transition-colors ${w < 1250 ? 'pr-2.5 text-[12.5px]' : 'pr-3.5 text-[13.5px]'}`}
+            className={`flex shrink-0 items-center gap-2 rounded-full py-1 pl-1 text-left transition-colors ${size}`}
             style={on ? { background: 'var(--primary)', color: 'var(--primary-ink)' } : { color: 'var(--ink)' }}
           >
             <span className="grid h-8 w-8 place-items-center rounded-full text-[13px] font-semibold" style={on ? { background: 'rgba(255,255,255,.18)' } : { background: 'var(--raised)' }}>
               {s.n}
             </span>
-            {s.label}
+            <span className={w < 1150 ? 'max-w-[78px]' : undefined}>{s.label}</span>
           </button>
         );
       })}
@@ -250,11 +252,11 @@ export function Footer({ hint }: { hint?: string }) {
   return (
     <>
       {hint && (
-        <div className="abs desktop-only flex items-center justify-center gap-2 text-[14px]" style={{ ...box(468, 979, 600, 24), color: 'var(--ink)' }}>
+        <div className="abs flex items-center justify-center gap-2 text-[14px]" style={{ ...box(468, 979, 600, 24), color: 'var(--ink)' }}>
           <Info size={18} fill="var(--ink)" color="var(--canvas)" /> {hint}
         </div>
       )}
-      <div className="abs pill desktop-only flex items-center justify-center gap-2 text-[11.5px]" style={{ ...box(1272, 976, 240, 30), color: 'var(--ink)' }}>
+      <div className="abs pill flex items-center justify-center gap-2 text-[11.5px]" style={{ ...box(1272, 976, 240, 30, 'right'), color: 'var(--ink)' }}>
         <span className="h-2 w-2 rounded-full" style={{ background: agent === 'offline' ? 'var(--warn-dot)' : 'var(--mint-dark)' }} />
         {status}
       </div>

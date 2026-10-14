@@ -1,11 +1,11 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowLeftRight, ArrowRight, ChevronDown, ChevronUp, CircleAlert, CircleCheck, Eye, Info, Loader2, Maximize, Minus, Plus, RotateCw } from 'lucide-react';
 import { useNav } from '../../lib/nav';
 import { api, signedUrl, supabase } from '../../lib/supabase';
 import type { SourceIssue } from '../../lib/types';
 import { useWorkspace } from '../../lib/workspace';
-import { PdfPage, TextPaper, usePdf } from '../pdf/PdfViewer';
+import { PdfPage, scrollWithin, TextPaper, usePdf } from '../pdf/PdfViewer';
 import { StageStrip } from '../shell/Chrome';
 import { FileBadge, Modal } from '../ui';
 import { Empty, Fade, HeaderArt, Panel, Title } from './Screen';
@@ -65,7 +65,8 @@ export function SourceQuality() {
     .filter((i) => i.block_idx != null)
     .map((i) => ws.blocks.find((b) => b.idx === i.block_idx))
     .filter((b): b is NonNullable<typeof b> => !!b?.bbox && b.page != null)
-    .map((b) => ({ id: `b${b.idx}`, page: b.page!, bbox: b.bbox!, tone: 'warn' as const }));
+    .map((b) => ({ id: `b${b.idx}`, page: b.page!, bbox: b.bbox!, tone: 'warn' as const, label: issues.find((i) => i.block_idx === b.idx)?.title }));
+  const focusText = (focusIssue ?? issues.find((i) => i.quote))?.quote;
 
   return (
     <>
@@ -74,7 +75,7 @@ export function SourceQuality() {
         Source quality
       </Title>
       {status && (
-        <Fade x={735} y={165}>
+        <Fade x={760} y={165}>
           <span className="chip h-[42px] px-4 text-[15px]" style={ok ? { background: 'var(--info-bg)', color: 'var(--info-ink)' } : v?.source_status === 'blocked' ? { background: 'var(--error-bg)', color: 'var(--error-ink)' } : { background: 'var(--warn-bg)', color: 'var(--warn-ink)' }}>
             {ok ? <CircleCheck size={20} /> : <CircleAlert size={20} fill="var(--warn-dot)" color="var(--panel)" />} {status}
           </span>
@@ -114,6 +115,7 @@ export function SourceQuality() {
                   zoom={zoomL}
                   setZoom={setZoomL}
                   onFull={() => setFull('word')}
+                  focus={{ text: focusText, key: `${v.id}:${!!word}:${!!doc}:${zoomL}` }}
                 >
                   {v.mime.includes('word') ? (
                     word ? <div className="paper docx-html px-8 py-6" style={{ zoom: zoomL / 100 }} dangerouslySetInnerHTML={{ __html: word }} /> : <Loader2 className="m-8 animate-spin" />
@@ -121,7 +123,7 @@ export function SourceQuality() {
                     <PdfPage doc={doc} page={focusPage} width={(450 * zoomL) / 100} highlights={hl} />
                   ) : null}
                 </Pane>
-                <Pane icon={<FileBadge mime="application/pdf" size={34} />} title={v.mime.includes('word') ? 'Converted (PDF)' : 'Extracted text'} sub={v.mime.includes('word') ? `${report.converted_by ?? 'not converted'}` : `${ws.blocks.length} blocks`} zoom={zoomR} setZoom={setZoomR} onFull={() => setFull('pdf')}>
+                <Pane icon={<FileBadge mime="application/pdf" size={34} />} title={v.mime.includes('word') ? 'Converted (PDF)' : 'Extracted text'} sub={v.mime.includes('word') ? `${doc ? `Page ${focusPage} of ${doc.numPages} · ` : ''}${report.converted_by ?? 'not converted'}` : `${ws.blocks.length} blocks`} zoom={zoomR} setZoom={setZoomR} onFull={() => setFull('pdf')} focus={{ text: focusText, key: `${v.id}:${!!doc}:${focusPage}:${zoomR}` }}>
                   {v.mime.includes('word') ? (
                     doc ? (
                       <PdfPage doc={doc} page={focusPage} width={(450 * zoomR) / 100} highlights={hl} />
@@ -161,11 +163,11 @@ export function SourceQuality() {
               <button className="flex w-full items-start gap-2 text-left" onClick={() => setOpen(isOpen ? null : i.id)} aria-expanded={isOpen}>
                 {done ? <CircleCheck size={26} className="shrink-0" style={{ color: 'var(--mint-dark)' }} /> : <CircleAlert size={26} className="shrink-0" fill="#e5383b" color="#fff" />}
                 <span className="flex-1">
-                  <span className="block text-[16px] font-semibold" style={{ color: 'var(--ink)' }}>
+                  <span className="block text-[15px] font-semibold leading-[20px]" style={{ color: 'var(--ink)' }}>
                     {i.page ? `Page ${i.page} · ` : ''}
                     {i.title}
                   </span>
-                  <span className="block text-[14px] font-semibold" style={{ color: 'var(--ink)' }}>
+                  <span className="block text-[13.5px] font-medium" style={{ color: 'var(--ink)' }}>
                     {done ? 'Manual comparison recorded' : i.kind === 'conversion_failed' ? 'Retry required' : 'Manual comparison required'}
                   </span>
                 </span>
@@ -173,25 +175,25 @@ export function SourceQuality() {
               </button>
               {isOpen && (
                 <div className="mt-2">
-                  <p className="text-[12.5px] leading-[17px]" style={{ color: 'var(--muted)' }}>
+                  <p className="text-[12px] leading-[16px]" style={{ color: 'var(--muted)' }}>
                     {i.detail}
                   </p>
                   {i.quote && (
-                    <div className="paper mt-3 rounded-lg px-3 py-2 font-[family-name:var(--font-paper)] text-[13px]" style={{ background: 'var(--highlight)' }}>
+                    <div className="paper mt-2 rounded-lg px-3 py-1.5 font-[family-name:var(--font-paper)] text-[12.5px] leading-[17px]" style={{ background: 'var(--highlight)' }}>
                       {i.quote}
                     </div>
                   )}
                   {i.kind !== 'conversion_failed' && (
-                    <button className="btn-outline mt-3 flex h-10 w-full items-center justify-center gap-2 text-[14px]" onClick={() => setFocusIssue(i)}>
+                    <button className="btn-outline mt-2 flex h-9 w-full items-center justify-center gap-2 text-[13.5px]" onClick={() => setFocusIssue(i)}>
                       <Eye size={18} /> View source region
                     </button>
                   )}
                   {!done && i.kind !== 'conversion_failed' && i.kind !== 'unreadable' && i.kind !== 'password' && (
-                    <button className="btn-outline mt-2 h-10 w-full text-[14px]" onClick={() => confirm(i.id)}>
+                    <button className="btn-outline mt-2 h-9 w-full text-[13.5px]" onClick={() => confirm(i.id)}>
                       Confirm manual comparison
                     </button>
                   )}
-                  <button className="btn-primary mt-2 flex h-10 w-full items-center justify-center gap-2 text-[14px]" onClick={retry} disabled={retrying || ws.job?.status === 'running'}>
+                  <button className="btn-primary mt-2 flex h-9 w-full items-center justify-center gap-2 text-[13.5px]" onClick={retry} disabled={retrying || ws.job?.status === 'running'}>
                     {retrying ? <Loader2 size={18} className="animate-spin" /> : <RotateCw size={18} />} Retry conversion
                   </button>
                 </div>
@@ -255,7 +257,27 @@ export function SourceQuality() {
   );
 }
 
-function Pane({ icon, title, sub, zoom, setZoom, onFull, children }: { icon: React.ReactNode; title: string; sub: string; zoom: number; setZoom: (z: number) => void; onFull: () => void; children: React.ReactNode }) {
+const norm = (t: string) => t.replace(/[s ]+/g, ' ').trim();
+
+function Pane({ icon, title, sub, zoom, setZoom, onFull, focus, children }: { icon: React.ReactNode; title: string; sub: string; zoom: number; setZoom: (z: number) => void; onFull: () => void; focus?: { text?: string; key: string }; children: React.ReactNode }) {
+  const body = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let tries = 0;
+    const t = setInterval(() => {
+      const box = body.current;
+      if (!box || tries++ > 40) return clearInterval(t);
+      let el = box.querySelector<HTMLElement>('[data-highlight]');
+      if (!el && focus?.text) {
+        const needle = norm(focus.text).slice(0, 48);
+        el = [...box.querySelectorAll<HTMLElement>('p')].find((p) => norm(p.textContent ?? '').includes(needle)) ?? null;
+        el?.classList.add('source-focus');
+      }
+      if (!el) return;
+      clearInterval(t);
+      scrollWithin(box, el);
+    }, 150);
+    return () => clearInterval(t);
+  }, [focus?.key, focus?.text]);
   return (
     <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border" style={{ borderColor: 'var(--panel-border)' }}>
       <div className="flex items-center gap-3 px-4 py-3">
@@ -279,7 +301,7 @@ function Pane({ icon, title, sub, zoom, setZoom, onFull, children }: { icon: Rea
           <Maximize size={15} />
         </button>
       </div>
-      <div className="scroll-thin min-h-0 flex-1 overflow-auto px-3 pb-3" style={{ background: 'var(--panel-2)' }}>
+      <div ref={body} className="scroll-thin relative min-h-0 flex-1 overflow-auto px-3 pb-3" style={{ background: 'var(--panel-2)' }}>
         {children}
       </div>
     </div>

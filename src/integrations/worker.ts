@@ -64,6 +64,12 @@ export async function convertDocx(data: Uint8Array, name: string) {
   return { pdf: new Uint8Array(await res.arrayBuffer()), converter: res.headers.get('x-converter') ?? 'libreoffice', elapsedMs: Number(res.headers.get('x-elapsed-ms') ?? 0) };
 }
 
+/** Semantic review by the owner's Codex CLI in the worker. Only data is sent; instructions and schema are fixed there. */
+export async function semanticViaWorker(body: { document: { id: number; section: string | null; text: string }[]; index: unknown; guidance: string }) {
+  const res = await call('/semantic', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }, 240000);
+  return (await res.json()) as { result: unknown; engine: string; elapsed_ms: number };
+}
+
 type Question =
   | { type: 'choice'; instructions: string; criteria: Record<string, string> }
   | { type: 'noul'; instructions: string }

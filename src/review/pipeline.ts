@@ -6,7 +6,7 @@ import { download } from '../integrations/supabase-server';
 import { runRules, type Speller } from './checks';
 import { blocksFromDocx, extractPdf, inspectDocx } from './extract';
 import type { Block, Edge, Finding } from './model';
-import { semanticConfigured, semanticReview, type Example } from './semantic';
+import { semanticEngine, semanticReview, type Example } from './semantic';
 import { compareConversion, coverage, sourceStatus } from './source';
 import { detectLanguage, jaccard, shingles } from './text';
 import { validate } from './validate';
@@ -151,8 +151,11 @@ export async function runPipeline(sb: SupabaseClient, userId: string, versionId:
     const rules = runRules(blocks, lang, await speller(lang));
     const candidates = [...rules.findings];
     const wantSemantic = routing.agent !== 'online' || Number(routing.needs_semantic?.value ?? 1) >= 0.25 || head.length >= 3000;
-    if (!semanticConfigured()) routing.semantic_review = 'unconfigured';
-    else if (!wantSemantic) {
+    if (semanticEngine() === 'codex' && routing.agent === 'offline') {
+      // The CLI engine runs in the same worker; when it is offline the rules still run.
+      routing.semantic_review = 'unconfigured';
+      (routing.notes ??= []).push('Semantic reviewer offline (runs on the owner’s worker); deterministic checks still ran.');
+    } else if (!wantSemantic) {
       routing.semantic_review = 'skipped';
       (routing.notes ??= []).push('Decision agent judged deep semantic review unnecessary for this document.');
     } else if (await overHourlyLimit(sb)) {
@@ -168,7 +171,7 @@ export async function runPipeline(sb: SupabaseClient, userId: string, versionId:
       } catch (e) {
         console.error('semantic review failed', e);
         routing.semantic_review = 'failed';
-        report.limitations!.push(`Semantic review failed: ${e instanceof Error ? e.message.slice(0, 160) : 'error'}`);
+        report.limitations!.push(`Semantic review did not complete: ${e instanceof Error ? e.message.slice(0, 160) : 'error'}`);
       }
     }
     const { findings, rejected } = validate(candidates, blocks);

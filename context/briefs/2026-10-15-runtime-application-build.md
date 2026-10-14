@@ -14,7 +14,7 @@ Build the real Legal Reviewer web application on the existing Vercel project and
 | Visual fidelity | Follow each approved screen closely; one shared pill-style stage strip across screens |
 | 3D | Stations modelled in Blender and rendered in the browser; the approved PNG objects are the fallback |
 | Transitions | The selected station's object flies from the hub to the screen header; panels slide in |
-| Semantic review | Server-side model API for contradictions and ambiguities, behind the evidence validator |
+| Semantic review | Server-side model API for contradictions and ambiguities, behind the evidence validator (temporarily the owner's Codex CLI in the worker; see the 15 Oct follow-up brief) |
 | Decision agent | Laya typed decisions in a separately hosted worker (with Word→PDF conversion), used for routing steps and ordering findings; scores shown as not calibrated |
 | Access | Anonymous private workspace per visitor (row-level security) |
 | Languages | Interface in English; contracts in English and Vietnamese |

@@ -6,7 +6,7 @@ import { useNav } from '../../lib/nav';
 import { supabase } from '../../lib/supabase';
 import type { Category, DecisionAction, FindingRow } from '../../lib/types';
 import { useWorkspace } from '../../lib/workspace';
-import { PdfPage, TextPaper, usePdf, type Highlight } from '../pdf/PdfViewer';
+import { PdfPage, scrollWithin, TextPaper, usePdf, type Highlight } from '../pdf/PdfViewer';
 import { StageStrip } from '../shell/Chrome';
 import { CATEGORY, CategoryChip, fmtTime, Modal, reviewState, STATE } from '../ui';
 import { Empty, Fade, HeaderArt, Panel, Title } from './Screen';
@@ -72,13 +72,13 @@ export function LegalReview() {
             <SlidersHorizontal size={18} />
           </span>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2 px-1">
+        <div className="mt-3 flex flex-wrap gap-1.5 px-1">
           {FILTERS.map((f) => {
             const on = filter === f;
             const count = f === 'all' ? ws.findings.length : ws.findings.filter((x) => x.category === f).length;
             if (f === 'undefined_term' && !count) return null;
             return (
-              <button key={f} onClick={() => setFilter(f)} className="h-[38px] rounded-xl px-4 text-[15px] transition-colors" style={on ? { background: 'var(--primary)', color: 'var(--primary-ink)' } : { background: 'var(--panel-2)', color: 'var(--ink)' }}>
+              <button key={f} onClick={() => setFilter(f)} className="h-[34px] rounded-xl px-3.5 text-[14px] transition-colors" style={on ? { background: 'var(--primary)', color: 'var(--primary-ink)' } : { background: 'var(--panel-2)', color: 'var(--ink)' }}>
                 {f === 'all' ? 'All' : CATEGORY[f].filter}
               </button>
             );
@@ -100,17 +100,17 @@ export function LegalReview() {
                 layout
                 key={f.id}
                 onClick={() => setSelId(f.id)}
-                className="flex w-full items-start gap-3 rounded-2xl border px-3 py-3 text-left transition-colors"
+                className="flex w-full items-start gap-3 rounded-2xl border px-3 py-2.5 text-left transition-colors"
                 style={{ background: on ? 'var(--selected)' : 'var(--panel)', borderColor: on ? 'var(--brand-blue)' : 'var(--panel-border)' }}
               >
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[15px] font-semibold" style={{ background: 'var(--panel-2)', color: 'var(--ink)' }}>
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[14px] font-semibold" style={{ background: 'var(--panel-2)', color: 'var(--ink)' }}>
                   {String(f.seq).padStart(2, '0')}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[16px] font-semibold leading-tight" style={{ color: 'var(--ink)' }}>
+                  <span className="block text-[15px] font-semibold leading-tight" style={{ color: 'var(--ink)' }}>
                     {f.title}
                   </span>
-                  <span className="mt-0.5 line-clamp-2 block text-[13.5px] leading-[18px]" style={{ color: 'var(--muted)' }}>
+                  <span className="mt-0.5 line-clamp-2 block text-[13px] leading-[17px]" style={{ color: 'var(--muted)' }}>
                     {f.rationale}
                   </span>
                   <span className="mt-1.5 flex items-center gap-2">
@@ -149,10 +149,10 @@ export function LegalReview() {
                 </div>
               </div>
               <div className="relative mt-3 flex items-center gap-3">
-                <span className="chip h-[30px] px-4 text-[14px]" style={{ background: CATEGORY[sel.category].bg, color: CATEGORY[sel.category].ink }}>
+                <span className="chip h-[30px] shrink-0 px-4 text-[13.5px]" style={{ background: CATEGORY[sel.category].bg, color: CATEGORY[sel.category].ink }}>
                   {CATEGORY[sel.category].label === 'References' ? 'Missing reference' : CATEGORY[sel.category].label === 'Typos' ? 'Typo' : CATEGORY[sel.category].label === 'Ambiguities' ? 'Ambiguity' : CATEGORY[sel.category].label}
                 </span>
-                <button onClick={() => setMenu((m) => !m)} className="flex h-[30px] items-center gap-2 rounded-full border px-3 text-[13.5px] font-medium" style={{ borderColor: 'var(--panel-border)', color: 'var(--ink)' }} aria-expanded={menu}>
+                <button onClick={() => setMenu((m) => !m)} className="flex h-[30px] items-center gap-2 whitespace-nowrap rounded-full border px-3 text-[13px] font-medium" style={{ borderColor: 'var(--panel-border)', color: 'var(--ink)' }} aria-expanded={menu}>
                   <span className="h-2.5 w-2.5 rounded-full" style={{ background: STATE[state].dot }} /> {STATE[state].label} <ChevronDown size={15} />
                 </button>
                 {menu && (
@@ -163,33 +163,36 @@ export function LegalReview() {
                   </div>
                 )}
               </div>
+              {/* Long rationales scroll here so the actions below always keep their size. */}
+              <div className="scroll-thin -mr-2 min-h-0 flex-1 overflow-auto pr-2">
               <Block title="Rationale">{sel.rationale}</Block>
               <Block title="Question">{sel.question}</Block>
-              <div className="mt-3 text-[15.5px] font-semibold" style={{ color: 'var(--ink)' }}>
+              <div className="mt-3 text-[15px] font-semibold" style={{ color: 'var(--ink)' }}>
                 Document anchors
               </div>
-              <div className="scroll-thin mt-1.5 max-h-[110px] space-y-2 overflow-auto">
+              <div className="mt-1.5 space-y-2">
                 {sel.evidence.map((e, i) => (
-                  <button key={i} onClick={() => document.querySelector(`[data-highlight="${sel.id}-${i}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="flex h-[42px] w-full items-center gap-3 rounded-xl border px-4 text-[15px] hover:bg-[var(--selected)]" style={{ borderColor: 'var(--panel-border)', color: 'var(--ink)' }}>
+                  <button key={i} onClick={() => { const el = document.querySelector<HTMLElement>(`[data-highlight="${sel.id}-${i}"]`) ?? document.querySelector<HTMLElement>(`[data-highlight="t${e.block_idx}"]`); scrollWithin(el?.closest<HTMLElement>('[data-scroller]') ?? null, el); }} className="flex h-[40px] w-full items-center gap-3 rounded-xl border px-4 text-[14.5px] hover:bg-[var(--selected)]" style={{ borderColor: 'var(--panel-border)', color: 'var(--ink)' }}>
                     <FileText size={20} /> Page {e.page ?? '–'} · {anchorLabel(ws.blocks.find((b) => b.idx === e.block_idx)?.section_ref)}
                     {!e.matched && <span className="text-[12px]" style={{ color: 'var(--error-ink)' }}>quote not matched</span>}
                     <ChevronRight size={18} className="ml-auto" />
                   </button>
                 ))}
               </div>
-              <div className="mt-3 text-[15.5px] font-semibold" style={{ color: 'var(--ink)' }}>
+              </div>
+              <div className="mt-3 shrink-0 text-[15px] font-semibold" style={{ color: 'var(--ink)' }}>
                 Actions
               </div>
-              <button className="btn-primary mt-2 h-[38px] text-[16px]" onClick={() => decide('confirm')} disabled={state === 'confirmed'}>
+              <button className="btn-primary mt-2 h-[40px] shrink-0 text-[15.5px]" onClick={() => decide('confirm')} disabled={state === 'confirmed'}>
                 Confirm issue
               </button>
-              <button className="btn-outline mt-2 flex h-[38px] items-center justify-center gap-2 text-[16px]" onClick={() => setModal('dismiss')}>
+              <button className="btn-outline mt-2 flex h-[40px] shrink-0 items-center justify-center gap-2 text-[15.5px]" onClick={() => setModal('dismiss')}>
                 <CircleMinus size={18} /> Dismiss
               </button>
-              <button className="btn-outline mt-2 flex h-[38px] items-center justify-center gap-2 text-[16px]" onClick={() => setModal('clarify')}>
+              <button className="btn-outline mt-2 flex h-[40px] shrink-0 items-center justify-center gap-2 text-[15.5px]" onClick={() => setModal('clarify')}>
                 <MessageSquareMore size={18} /> Needs clarification
               </button>
-              <button className="mt-auto flex items-center gap-2 pt-2 text-left text-[13px]" style={{ color: 'var(--muted)' }} onClick={() => setModal('confidence')}>
+              <button className="flex shrink-0 items-center gap-2 pt-3 text-left text-[13px]" style={{ color: 'var(--muted)' }} onClick={() => setModal('confidence')}>
                 <Info size={18} fill="var(--muted)" color="var(--panel)" /> Confidence: not calibrated · {sel.evidence_status === 'matched' ? 'quotes match source' : 'partial evidence'}
               </button>
             </motion.div>
@@ -202,7 +205,7 @@ export function LegalReview() {
           <Info size={18} fill="var(--ink)" color="var(--canvas)" /> Source coverage: {cov ? `${cov.read_pages} of ${cov.total_pages} pages read` : 'not measured'}
         </p>
       </Fade>
-      <Fade x={905} y={976} w={330} h={38} className="desktop-only flex gap-3">
+      <Fade x={905} y={976} w={330} h={38} className="flex gap-3">
         <button className="pill flex flex-1 items-center justify-center gap-2 text-[14px] font-medium" onClick={() => setModal('history')}>
           <Clock size={18} /> Decision history
         </button>
@@ -232,10 +235,10 @@ function MenuItem({ children, onClick }: { children: React.ReactNode; onClick: (
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <>
-      <div className="mt-3 text-[15.5px] font-semibold" style={{ color: 'var(--ink)' }}>
+      <div className="mt-3 text-[15px] font-semibold" style={{ color: 'var(--ink)' }}>
         {title}
       </div>
-      <div className="mt-1.5 rounded-xl px-4 py-2.5 text-[14.5px] leading-[20px]" style={{ background: 'var(--panel-2)', color: 'var(--ink)' }}>
+      <div className="mt-1.5 rounded-xl px-4 py-2.5 text-[14px] leading-[19px]" style={{ background: 'var(--panel-2)', color: 'var(--ink)' }}>
         {children}
       </div>
     </>
@@ -255,15 +258,21 @@ function Viewer({ finding, doc }: { finding: FindingRow | null; doc: ReturnType<
   // Jump to the first passage of the selected finding; both passages of a contradiction stay visible in the scroll.
   useEffect(() => {
     const first = highlights[0];
-    if (!first) return;
-    setPage(first.page);
-    const t = setTimeout(() => document.querySelector(`[data-highlight="${first.id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350);
+    if (first) setPage(first.page);
+    const firstIdx = finding?.evidence[0]?.block_idx;
+    if (!first && firstIdx == null) return;
+    const t = setTimeout(() => {
+      const box = scroller.current;
+      scrollWithin(box, (first && box?.querySelector<HTMLElement>(`[data-highlight="${first.id}"]`)) || (box?.querySelector<HTMLElement>(`[data-highlight="t${firstIdx}"]`) ?? null));
+    }, 350);
     return () => clearTimeout(t);
-  }, [highlights]);
+  }, [highlights, finding, doc, ws.blocks.length]);
 
   const go = (p: number) => {
     setPage(p);
-    scroller.current?.querySelector(`[data-page="${p}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const box = scroller.current;
+    const el = box?.querySelector<HTMLElement>(`[data-page="${p}"]`);
+    if (box && el) box.scrollTo({ top: el.offsetTop - 16, behavior: 'smooth' });
   };
 
   return (
@@ -288,7 +297,7 @@ function Viewer({ finding, doc }: { finding: FindingRow | null; doc: ReturnType<
           </button>
         </div>
       </div>
-      <div ref={scroller} className="scroll-thin flex-1 overflow-auto px-6 py-4" style={{ background: 'var(--panel-2)' }}>
+      <div ref={scroller} data-scroller className="scroll-thin relative flex-1 overflow-auto px-6 py-4" style={{ background: 'var(--panel-2)' }}>
         {doc ? (
           <div className="flex flex-col items-center gap-4">
             {Array.from({ length: doc.numPages }, (_, i) => (

@@ -1,11 +1,13 @@
 # REVIEW-002 · contract-review-v2
 
-Used by `src/review/semantic.ts` (constant `DEVELOPER_PROMPT`, version `contract-review-v2`). The code copy is authoritative at runtime; keep both identical when changing behaviour, and bump the version.
+Runtime copy: `src/review/contract-review-v2.json` (`version`, `instructions`, `schema`), read by `src/review/semantic.ts` and by the worker's `/semantic` endpoint, so both engines use identical instructions and schema. The JSON copy is authoritative at runtime; keep this page identical when changing behaviour, and bump the version.
+
+## Engines
+
+- **OpenAI Responses API** when `OPENAI_API_KEY` is set (`text.format = json_schema`, `strict: true`; model from `OPENAI_MODEL`, default `gpt-5-mini`). If the key is rejected (401) or has no quota (429 `insufficient_quota`), the review falls back to the CLI engine for the rest of the run.
+- **Codex CLI on the owner's worker** otherwise (or with `SEMANTIC_ENGINE=codex`): `codex exec` with `--output-schema`, no user config, read-only sandbox, shell/apps/browser/web search disabled, an empty temporary working directory, one run at a time. The app sends only data (blocks, index, workspace examples); the worker adds the fixed instructions and schema. At most 2 chunks per document (slower per call). Temporary arrangement while the API key is unfunded.
 
 ## Call shape
-
-- API: OpenAI Responses API, `text.format = json_schema` with `strict: true` (schema in `semantic.ts`).
-- Model: `OPENAI_MODEL` environment variable (default `gpt-5-mini`).
 - `developer` message: the instructions below, plus — when the workspace has reviewer-selected examples — a short list of earlier decisions labelled as workspace-scoped calibration, not rules.
 - `user` message: an index of the whole document (defined terms, section list) and `<document>` containing JSON blocks `{id, section, text}` for one section-aligned chunk (≤ 24 000 characters; at most 6 chunks, otherwise a coverage limitation is recorded).
 - Output: `findings[]` with `category` (contradiction | ambiguity | undefined_term), `title`, `rationale`, `question`, `suggestion`, `severity`, `model_score`, `evidence[] {block_id, quote}`.
@@ -27,7 +29,10 @@ Rules:
 5. Return an empty findings list when you find nothing. Never invent issues to fill the list.
 6. model_score is your own uncalibrated estimate (0-1) that the issue is real; it is shown to reviewers as uncalibrated.
 7. Write in the document's language for title, rationale, question and suggestion.
+8. Do not use any tools. Answer only from the supplied text.
 ```
+
+Rule 8 was added on 15 October 2026 for the CLI engine (which could otherwise offer tools); the API path has no tools, so review behaviour is unchanged and the version stays `contract-review-v2`.
 
 ## Plain-language help (form preview)
 

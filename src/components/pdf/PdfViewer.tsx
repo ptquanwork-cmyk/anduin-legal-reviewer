@@ -123,12 +123,20 @@ export function PdfPage({
   );
 }
 
+/** Scrolls a scroll container (made position: relative) so el sits a third of the way down, without moving the page. */
+export function scrollWithin(box: HTMLElement | null, el: HTMLElement | null) {
+  if (!box || !el) return;
+  let top = 0;
+  for (let n: HTMLElement | null = el; n && n !== box; n = n.offsetParent as HTMLElement | null) top += n.offsetTop;
+  box.scrollTo({ top: Math.max(0, top - box.clientHeight / 3), behavior: 'smooth' });
+}
+
 /** Placeholder paper when no PDF exists yet (e.g. converter offline): shows the extracted text. */
 export function TextPaper({ blocks, width, highlightIdx = [] }: { blocks: { idx: number; kind: string; text: string }[]; width: number; highlightIdx?: number[] }) {
   return (
     <div className="paper px-10 py-8 font-[family-name:var(--font-paper)] text-[15px] leading-relaxed" style={{ width }}>
       {blocks.map((b) => (
-        <p key={b.idx} className={b.kind === 'heading' || b.kind === 'title' ? 'mt-4 font-bold' : 'mt-2'} style={highlightIdx.includes(b.idx) ? { background: 'rgba(251,214,96,.45)' } : undefined}>
+        <p key={b.idx} data-highlight={highlightIdx.includes(b.idx) ? `t${b.idx}` : undefined} className={b.kind === 'heading' || b.kind === 'title' ? 'mt-4 font-bold' : 'mt-2'} style={highlightIdx.includes(b.idx) ? { background: 'rgba(251,214,96,.45)' } : undefined}>
           {b.text}
         </p>
       ))}

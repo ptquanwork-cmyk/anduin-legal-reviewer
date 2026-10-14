@@ -41,11 +41,11 @@ export const STATE: Record<ReviewState, { label: string; bg: string; ink: string
   exception: { label: 'Approved with exception', bg: 'var(--violet-bg)', ink: 'var(--violet-ink)', dot: 'var(--violet-ink)' },
 };
 
-export function StateChip({ s, className = '' }: { s: ReviewState; className?: string }) {
+export function StateChip({ s, className = '', short = false }: { s: ReviewState; className?: string; short?: boolean }) {
   const v = STATE[s];
   return (
     <span className={`chip ${className}`} style={{ background: v.bg, color: v.ink }}>
-      {v.label}
+      {short && s === 'open' ? 'Needs confirmation' : v.label}
     </span>
   );
 }

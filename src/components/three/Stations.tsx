@@ -54,6 +54,9 @@ const CUES: Record<string, Cue> = {
   '09': { move: [0, 0.16, 0] }, // lift the arrow
 };
 
+/** Framing per module (bounding-sphere radius share); measured against the approved stills so each model fills its slot alike. */
+const FIT: Record<string, number> = { '01': 0.66, '02': 0.62, '03': 0.63, '04': 0.65, '05': 0.57, '06': 0.65, '07': 0.76, '08': 0.63, '09': 0.66 };
+
 function setEmissive(m: THREE.MeshStandardMaterial, v: number) {
   if (m.emissive && m.emissiveIntensity !== undefined) m.emissiveIntensity = v;
 }
@@ -65,18 +68,18 @@ function material(name: string): THREE.Material | null {
   switch (base) {
     case 'blue_resin':
       // No transmission on resin: nine views share one canvas, so the extra transmission pass is reserved for lens glass.
-      return phys({ color: '#1d6bff', roughness: 0.22, metalness: 0, clearcoat: 0.5, clearcoatRoughness: 0.2, envMapIntensity: 0.6 });
+      return phys({ color: '#2a7bff', emissive: new THREE.Color('#0a46e0'), emissiveIntensity: 0.06, roughness: 0.18, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.06, envMapIntensity: 0.9 });
     case 'blue_deep':
-      return phys({ color: '#0d47c9', roughness: 0.2, clearcoat: 0.8 });
+      return phys({ color: '#1456e6', roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.06 });
     case 'mint_resin':
-      return phys({ color: '#2fc9b4', roughness: 0.25, clearcoat: 0.4, clearcoatRoughness: 0.2, envMapIntensity: 0.6 });
+      return phys({ color: '#3fd6c0', emissive: new THREE.Color('#13a894'), emissiveIntensity: 0.05, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 0.9 });
     case 'mint_glow':
     case 'screen_mint':
       return phys({ color: '#6ff2df', emissive: new THREE.Color('#6ff2df'), emissiveIntensity: 1, roughness: 0.4 });
     case 'screen_blue':
       return phys({ color: '#4f9bff', emissive: new THREE.Color('#4f9bff'), emissiveIntensity: 1, roughness: 0.4 });
     case 'white':
-      return phys({ color: '#f3f6fb', roughness: 0.32, clearcoat: 0.4 });
+      return phys({ color: '#f7f9fd', roughness: 0.28, clearcoat: 0.6, clearcoatRoughness: 0.15 });
     case 'paper':
       return phys({ color: '#fbfcff', roughness: 0.55 });
     case 'line_gray':
@@ -137,13 +140,13 @@ function Model({ id, lifted, onReady }: { id: string; lifted: boolean; onReady?:
     cam.aspect = size.width / Math.max(1, size.height);
     const vfov = THREE.MathUtils.degToRad(cam.fov);
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * cam.aspect);
-    const dist = (sphere.radius * 0.8) / Math.sin(Math.min(vfov, hfov) / 2);
+    const dist = (sphere.radius * (FIT[n] ?? 0.8)) / Math.sin(Math.min(vfov, hfov) / 2);
     cam.position.copy(sphere.center).add(VIEW_DIR.clone().multiplyScalar(dist));
     cam.near = dist / 20;
     cam.far = dist * 20;
     cam.lookAt(sphere.center);
     cam.updateProjectionMatrix();
-  }, [root, camera, size.width, size.height]);
+  }, [root, camera, size.width, size.height, n]);
 
   useEffect(() => onReady?.(), [onReady]);
 
@@ -179,11 +182,11 @@ export function StationView({ id, lifted, onReady }: { id: string; lifted: boole
     <div ref={track} className="absolute inset-0">
       <View track={track} className="absolute inset-0">
         <PerspectiveCamera makeDefault position={[-2.4, 3.1, 5.8]} fov={32} />
-        <ambientLight intensity={0.45} />
-        <directionalLight position={[-4, 7, 5]} intensity={2.6} />
+        <ambientLight intensity={0.4} />
+        <directionalLight position={[-4, 7, 5]} intensity={3} />
         <directionalLight position={[5, 3, 3]} intensity={0.9} color="#d6ebff" />
         <Environment resolution={256}>
-          <color attach="background" args={['#26324a']} />
+          <color attach="background" args={['#3a4d6b']} />
           <Lightformer form="rect" intensity={1.4} position={[-3, 4, 5]} scale={[7, 5, 1]} />
           <Lightformer form="rect" intensity={0.7} color="#cfe6ff" position={[5, 2, 3]} scale={[5, 4, 1]} />
           <Lightformer form="rect" intensity={0.9} position={[0, 6, -3]} scale={[8, 2, 1]} />

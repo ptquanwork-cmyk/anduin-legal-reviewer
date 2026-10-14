@@ -51,7 +51,8 @@ export function DocumentMap() {
     return m;
   }, [ws.findings, ws.blocks]);
 
-  const selected = sections.find((s) => s.ref === sel) ?? sections.find((s) => findingsBySection.has(s.ref)) ?? sections[0];
+  const conflictRef = ws.edges.find((e) => e.relation === 'proposed_conflict')?.from_ref;
+  const selected = sections.find((s) => s.ref === sel) ?? sections.find((s) => s.ref === conflictRef) ?? sections.find((s) => findingsBySection.has(s.ref)) ?? sections[0];
 
   return (
     <>
@@ -232,7 +233,7 @@ export function DocumentMap() {
       </Panel>
 
       <Fade x={600} y={978}>
-        <p className="desktop-only text-[14px]" style={{ color: 'var(--ink)' }}>
+        <p className="text-[14px]" style={{ color: 'var(--ink)' }}>
           ⓘ Hover to explore · Click a section for details
         </p>
       </Fade>
@@ -308,6 +309,8 @@ function SectionNode({ data }: NodeProps<RFNode<{ title: string; sub: string; to
       <Handle type="source" position={Position.Bottom} className="!opacity-0" />
       <Handle id="l" type="source" position={Position.Left} className="!opacity-0" />
       <Handle id="r" type="target" position={Position.Right} className="!opacity-0" />
+      <Handle id="rs" type="source" position={Position.Right} className="!opacity-0" />
+      <Handle id="lt" type="target" position={Position.Left} className="!opacity-0" />
     </div>
   );
 }
@@ -342,19 +345,26 @@ function Graph({ sections, findingsBySection, selected, onSelect }: { sections: 
     // Key sections: those with relations or findings (document order), plus missing reference targets.
     let key = sections.filter((s) => involved.has(s.ref));
     if (key.length < 2) key = sections.slice(0, 4);
-    key = key.slice(0, 8);
-    const missing = [...new Set(rel.filter((e) => e.status === 'unresolved').map((e) => e.to_ref))].filter((r) => !sections.some((s) => s.ref === r)).slice(0, 2);
+    // At most four sections keep the cards readable: conflicts, broken references and references first.
+    const touches = (r: string, e: (typeof rel)[number]) => e.from_ref === r || e.to_ref === r;
+    const score = (r: string) =>
+      (rel.some((e) => e.relation === 'proposed_conflict' && touches(r, e)) ? 4 : 0) +
+      (rel.some((e) => e.from_ref === r && e.status === 'unresolved') ? 2 : 0) +
+      (rel.some((e) => e.relation === 'references' && touches(r, e)) ? 1 : 0) +
+      Math.min(0.9, (findingsBySection.get(r)?.length ?? 0) / 4);
+    const top = new Set([...key].sort((a, b) => score(b.ref) - score(a.ref)).slice(0, 4).map((s) => s.ref));
+    key = key.filter((s) => top.has(s.ref));
     const cols = 2;
-    // A section that points at a missing target is marked as a risk; the missing target itself is a dashed node.
-    const all = [
-      ...key.map((s) => ({ ref: s.ref, title: s.title, sub: `Page ${s.page ?? '–'} · ${s.label.replace('§', 'Section ')}`, tone: rel.some((e) => e.from_ref === s.ref && e.status === 'unresolved') ? 'risk' : 'normal' })),
-      ...missing.map((r) => ({ ref: r, title: refLabel(r), sub: 'Not found in document', tone: 'missing' })),
-    ];
+    // A section that points at a missing target is a risk card that names the target it could not find.
+    const all = key.map((s) => {
+      const lost = rel.find((e) => e.from_ref === s.ref && e.status === 'unresolved');
+      return { ref: s.ref, title: s.title, sub: lost ? `Cites ${refLabel(lost.to_ref)} · not found` : `Page ${s.page ?? '–'} · ${s.label.replace('§', 'Section ')}`, tone: lost ? 'risk' : 'normal' };
+    });
     const nodes: RFNode[] = [{ id: 'root', type: 'section', position: { x: 200, y: 0 }, data: { title: 'Agreement', sub: 'Entire document', tone: 'root', selected: false, icon: 0 } }];
     all.forEach((n, i) => {
       const row = Math.floor(i / cols);
       const col = i % cols;
-      nodes.push({ id: n.ref, type: 'section', position: { x: col === 0 ? 30 : 370, y: 150 + row * 180 }, data: { title: n.title, sub: n.sub, tone: n.tone, selected: n.ref === selected, icon: i + 1 } });
+      nodes.push({ id: n.ref, type: 'section', position: { x: col === 0 ? 30 : 370, y: 150 + row * 175 }, data: { title: n.title, sub: n.sub, tone: n.tone, selected: n.ref === selected, icon: i + 1 } });
     });
     const ids = new Set(nodes.map((n) => n.id));
     const edges: RFEdge[] = [];
@@ -363,7 +373,9 @@ function Graph({ sections, findingsBySection, selected, onSelect }: { sections: 
       if (!ids.has(e.from_ref) || !ids.has(e.to_ref) || e.from_ref === e.to_ref) continue;
       const id = `${e.relation}-${e.from_ref}-${e.to_ref}`;
       if (edges.some((x) => x.id === id)) continue;
-      if (e.relation === 'proposed_conflict') edges.push({ id, source: e.from_ref, sourceHandle: 'l', target: e.to_ref, targetHandle: 'r', type: 'conflict', markerEnd: { type: 'arrowclosed' as never, color: '#e5383b' }, markerStart: { type: 'arrowclosed' as never, color: '#e5383b' } });
+      // Conflict edges join the facing sides of the two cards.
+      const ltr = (nodes.find((n) => n.id === e.from_ref)?.position.x ?? 0) < (nodes.find((n) => n.id === e.to_ref)?.position.x ?? 0);
+      if (e.relation === 'proposed_conflict') edges.push({ id, source: e.from_ref, sourceHandle: ltr ? 'rs' : 'l', target: e.to_ref, targetHandle: ltr ? 'lt' : 'r', type: 'conflict', markerEnd: { type: 'arrowclosed' as never, color: '#e5383b' }, markerStart: { type: 'arrowclosed' as never, color: '#e5383b' } });
       else edges.push({ id, source: e.from_ref, target: e.to_ref, style: { stroke: 'var(--muted)', strokeWidth: 1.5, strokeDasharray: e.status === 'unresolved' ? '6 5' : undefined }, markerEnd: { type: 'arrowclosed' as never, color: '#8a97ad' } });
     }
     // Remaining key sections hang off the root in document order (containment, parsed).

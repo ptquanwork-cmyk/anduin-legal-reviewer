@@ -16,7 +16,7 @@ Updated 15 October 2026. Earlier infrastructure checks are recorded in the 13 Oc
 - Daily cron `GET /api/health` (vercel.json) — status check of the worker.
 - Environment variables:
   - `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (existing; exposed to the browser as `NEXT_PUBLIC_*` through `next.config.ts` because the publishable key is designed for clients).
-  - `OPENAI_API_KEY` (secret, entered by the owner) and optional `OPENAI_MODEL` (default `gpt-5-mini`). Without the key the semantic reviewer is reported as not configured and the deterministic rules still run.
+  - `OPENAI_API_KEY` (secret, entered by the owner) and optional `OPENAI_MODEL` (default `gpt-5-mini`). Without the key — or when the key is rejected or has no quota — the semantic reviewer runs through the Codex CLI on the worker; when the worker is offline as well, the deterministic rules still run and the report says the semantic review did not run. Optional `SEMANTIC_ENGINE=codex` forces the CLI engine.
   - `WORKER_URL` is **not** needed in production: the worker publishes its address to Supabase. Set it only to override locally.
 - Locally, `next.config.ts` prefers `.env.supabase.local`, because machine-wide `SUPABASE_*` variables on the owner's machine point at another project.
 
@@ -45,6 +45,7 @@ laya\.venv\Scripts\python.exe worker\run_local.py
 - `worker/.worker-secret` is created on first run and git-ignored; only its SHA-256 hash is stored in Supabase.
 - Untrusted uploads: before Word or LibreOffice opens a file, the worker rejects macro-enabled packages and removes every external relationship except plain hyperlinks (remote templates, OLE links, frames); Word runs with macros forced off (`AutomationSecurity = 3`), read-only, without password or encoding prompts. Check: `python worker/test_sanitize.py` from the worker folder.
 - Requests are accepted only with a valid Supabase session of an app user (verified against Supabase Auth) or an optional `WORKER_TOKEN`.
+- `/semantic` runs the semantic reviewer with the owner's signed-in Codex CLI (`codex` on PATH) while the OpenAI key is unfunded. The worker reads the fixed instructions and schema from `src/review/contract-review-v2.json`; callers send only document blocks, the section index and workspace examples (≤ 60 000 characters per call). Codex runs with `--ignore-user-config`, a read-only sandbox, shell, apps, browser, image and web-search features disabled, in an empty temporary directory, one call at a time. `/semantic/health` reports whether the CLI and prompt file are present.
 
 When the machine is off, `/api/health` and the footer report the decision agent offline, Word uploads are reviewed from their text without page geometry, and the screens say so.
 
@@ -52,5 +53,5 @@ When the machine is off, `/api/health` and the footer report the decision agent 
 
 1. Vercel deployment state READY (Vercel dashboard or MCP).
 2. `https://anduin-legal-reviewer.vercel.app` loads the hub; footer shows the live status.
-3. `https://anduin-legal-reviewer.vercel.app/api/health` returns the worker status and whether the semantic reviewer is configured.
+3. `https://anduin-legal-reviewer.vercel.app/api/health` returns the worker status and the semantic engine (`openai-api (codex-cli fallback)` or `codex-cli via worker`).
 4. Run **Use demo** and follow it to Legal review.

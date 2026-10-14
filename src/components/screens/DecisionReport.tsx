@@ -138,11 +138,11 @@ export function DecisionReport() {
           {rows.map((f) => {
             const on = f.id === sel?.id;
             return (
-              <button key={f.id} onClick={() => setSelId(f.id)} className="mt-2 grid w-full grid-cols-[1fr_170px_20px] items-center gap-2 rounded-2xl border px-3 py-3 text-left" style={{ borderColor: on ? 'var(--primary)' : 'transparent', background: on ? 'var(--selected)' : undefined }}>
-                <span className="flex min-w-0 items-center gap-3 text-[15.5px]" style={{ color: 'var(--ink)' }}>
+              <button key={f.id} onClick={() => setSelId(f.id)} className="mt-1.5 grid w-full grid-cols-[1fr_170px_20px] items-center gap-2 rounded-2xl border px-3 py-2.5 text-left" style={{ borderColor: on ? 'var(--primary)' : 'transparent', background: on ? 'var(--selected)' : undefined }}>
+                <span className="flex min-w-0 items-center gap-3 text-[15px]" style={{ color: 'var(--ink)' }}>
                   <FileText size={20} className="shrink-0" /> <span className="truncate">{f.title}</span>
                 </span>
-                <StateChip s={reviewState(f, ws.decisions)} className="justify-center text-center" />
+                <StateChip s={reviewState(f, ws.decisions)} short className="justify-center py-1 text-center text-[13.5px] leading-tight" />
                 <ChevronRight size={18} />
               </button>
             );
@@ -230,7 +230,7 @@ function ReportEntry({ f, timeline }: { f: FindingRow; timeline: ReturnType<type
       <div className="mt-3 flex gap-3 rounded-2xl px-4 py-3" style={{ background: 'var(--selected)' }}>
         <FileText size={26} style={{ color: 'var(--primary)' }} />
         <div>
-          <div className="text-[19px] font-semibold" style={{ color: 'var(--ink)' }}>
+          <div className="text-[18px] font-semibold" style={{ color: 'var(--ink)' }}>
             {f.title}
           </div>
           <div className="text-[14px]" style={{ color: 'var(--muted)' }}>
@@ -247,14 +247,14 @@ function ReportEntry({ f, timeline }: { f: FindingRow; timeline: ReturnType<type
             <div className="flex items-center gap-2 rounded-lg px-2 py-1 text-[13.5px]" style={{ background: 'var(--panel-2)', color: 'var(--primary)' }}>
               <FileText size={16} /> Page {e.page ?? '–'} {e.section ?? ''}
             </div>
-            <p className="paper mt-2 line-clamp-4 rounded-lg px-2 py-1 text-[14.5px]" style={{ color: 'var(--paper-ink)' }}>
+            <p className="paper mt-2 line-clamp-3 rounded-lg px-2 py-1 text-[14px]" style={{ color: 'var(--paper-ink)' }}>
               “{e.quote}”
             </p>
           </div>
         ))}
       </div>
       <div className="mt-3 rounded-2xl px-4 py-3" style={{ background: 'var(--panel-2)' }}>
-        <div className="text-[16px] font-semibold" style={{ color: 'var(--ink)' }}>
+        <div className="text-[15.5px] font-semibold leading-[21px]" style={{ color: 'var(--ink)' }}>
           {f.question}
         </div>
       </div>
@@ -264,7 +264,7 @@ function ReportEntry({ f, timeline }: { f: FindingRow; timeline: ReturnType<type
           {dismissed.note ? ` · ${dismissed.note}` : ''}
         </p>
       ) : (
-        <ol className="mt-3 space-y-3">
+        <ol className="mt-3 space-y-2.5">
           {steps.map((s, i) => (
             <li key={i} className="relative flex gap-3">
               {i < steps.length - 1 && <span className="absolute left-[11px] top-6 h-[calc(100%-6px)] w-px" style={{ background: 'var(--panel-border)' }} />}

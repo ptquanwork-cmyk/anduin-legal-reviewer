@@ -168,6 +168,61 @@ async def convert(file: UploadFile = File(...)):
         return Response(out.read_bytes(), media_type="application/pdf", headers={"x-converter": engine, "x-elapsed-ms": str(int((time.time() - started) * 1000))})
 
 
+PROMPT_FILE = Path(__file__).resolve().parent.parent / "src" / "review" / "contract-review-v2.json"
+codex_lock = threading.Lock()
+# Codex runs with every tool surface disabled and without the user's config/MCP servers: it can only write text.
+CODEX_LOCKDOWN = [
+    "--skip-git-repo-check", "--ephemeral", "--ignore-user-config", "--ignore-rules", "-s", "read-only", "--color", "never",
+    "--disable", "shell_tool", "--disable", "apps", "--disable", "browser_use", "--disable", "browser_use_external",
+    "--disable", "computer_use", "--disable", "in_app_browser", "--disable", "image_generation", "--disable", "tool_suggest",
+    "-c", 'web_search="disabled"',
+]
+
+
+class SemanticRequest(BaseModel):
+    document: list[dict] = Field(max_length=2000)
+    index: dict
+    guidance: str = Field(default="", max_length=4000)
+
+
+@app.post("/semantic", dependencies=[Depends(auth)])
+def semantic(req: SemanticRequest):
+    """Semantic review with the owner's Codex CLI. Instructions and schema are fixed here; callers send data only."""
+    codex = shutil.which("codex.cmd") or shutil.which("codex")
+    if not codex or not PROMPT_FILE.exists():
+        raise HTTPException(status_code=503, detail="semantic engine unavailable")
+    prompt = json.loads(PROMPT_FILE.read_text(encoding="utf-8"))
+    document = json.dumps(req.document, ensure_ascii=False)
+    if len(document) > 60000:
+        raise HTTPException(status_code=413, detail="document chunk too large")
+    text = (
+        f"{prompt['instructions']}\n\n"
+        + (f"{req.guidance}\n\n" if req.guidance else "")
+        + f"Index of the whole document (for cross-references):\n{json.dumps(req.index, ensure_ascii=False)}\n\n<document>\n{document}\n</document>"
+    )
+    started = time.time()
+    with codex_lock, tempfile.TemporaryDirectory() as tmp:
+        schema = Path(tmp) / "schema.json"
+        out = Path(tmp) / "out.json"
+        schema.write_text(json.dumps(prompt["schema"]), encoding="utf-8")
+        proc = subprocess.run(
+            [codex, "exec", *CODEX_LOCKDOWN, "-C", tmp, "--output-schema", str(schema), "-o", str(out), "-"],
+            input=text, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=210,
+        )
+        if proc.returncode != 0 or not out.exists():
+            raise HTTPException(status_code=502, detail=f"codex failed: {(proc.stderr or '')[-300:]}")
+        try:
+            result = json.loads(out.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=502, detail="codex returned invalid JSON")
+    return {"result": result, "engine": "codex-cli", "elapsed_ms": int((time.time() - started) * 1000)}
+
+
+@app.get("/semantic/health")
+def semantic_health():
+    return {"codex": bool(shutil.which("codex.cmd") or shutil.which("codex")), "prompt": PROMPT_FILE.exists()}
+
+
 class DecideRequest(BaseModel):
     state: str | None = Field(default=None, max_length=60000)
     states: list[str] | None = Field(default=None, max_length=64)
