@@ -16,6 +16,7 @@ import {
   Sun,
   ClipboardList,
   FileSpreadsheet,
+  type LucideIcon,
 } from 'lucide-react';
 import { box, useNav } from '../../lib/nav';
 import { RAIL_TARGET, railFor, STAGES, type RailId, type ScreenId } from '../../lib/stages';
@@ -144,7 +145,7 @@ function AvatarMenu() {
   );
 }
 
-const RAIL: { id: RailId; label: string; icon: React.ElementType }[] = [
+const RAIL: { id: RailId; label: string; icon: LucideIcon }[] = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'documents', label: 'Documents', icon: Files },
   { id: 'map', label: 'Document map', icon: Box },

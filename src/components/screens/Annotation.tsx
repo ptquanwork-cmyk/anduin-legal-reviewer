@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, CircleDot, Eye, FileText, Info, Lock, Maximize, Minus, PenLine, Plus, SquareCheck, TextCursorInput, TriangleAlert, Trash2, ZoomIn } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, CircleDot, Eye, FileText, Info, Lock, Maximize, Minus, PenLine, Plus, SquareCheck, TextCursorInput, TriangleAlert, Trash2, ZoomIn, type LucideIcon } from 'lucide-react';
 import { annotationQa, slug } from '../../digitize/fields';
 import { useNav } from '../../lib/nav';
 import { supabase } from '../../lib/supabase';
@@ -11,7 +11,7 @@ import { StageStrip } from '../shell/Chrome';
 import { Modal } from '../ui';
 import { Empty, Fade, HeaderArt, Panel, Title } from './Screen';
 
-export const TYPES: { id: AnnotationType; label: string; icon: React.ElementType; color: string; bg: string }[] = [
+export const TYPES: { id: AnnotationType; label: string; icon: LucideIcon; color: string; bg: string }[] = [
   { id: 'paragraph', label: 'Paragraph', icon: FileText, color: '#1f6bd6', bg: 'rgba(31,107,214,.08)' },
   { id: 'text_box', label: 'Text box', icon: TextCursorInput, color: '#1aa597', bg: 'rgba(26,165,151,.08)' },
   { id: 'radio', label: 'Radio box', icon: CircleDot, color: '#3557d6', bg: 'rgba(53,87,214,.07)' },

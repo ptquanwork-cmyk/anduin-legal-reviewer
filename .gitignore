@@ -55,3 +55,4 @@ desktop.ini
 /public/pdf.worker.min.mjs
 *.tsbuildinfo
 next-env.d.ts
+/public/draco/

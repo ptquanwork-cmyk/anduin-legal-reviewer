@@ -98,7 +98,7 @@ function Station({ stage, slot, active, hovered, onHover }: { stage: Stage; slot
       <StationArt stage={stage} role="hub" lifted={hovered} className="abs desktop-only" style={box(ax, ay, aw, ah)} />
       <button
         className="abs group text-left"
-        style={box(Math.min(ax, bx), ay, Math.max(ax + aw, bx + bw) - Math.min(ax, bx), by + bh - ay)}
+        style={{ ...box(Math.min(ax, bx), ay, Math.max(ax + aw, bx + bw) - Math.min(ax, bx), by + bh - ay), zIndex: 10 }}
         onMouseEnter={() => onHover(stage.id)}
         onMouseLeave={() => onHover(null)}
         onFocus={() => onHover(stage.id)}
@@ -139,7 +139,7 @@ function Station({ stage, slot, active, hovered, onHover }: { stage: Stage; slot
 function HoverCard({ stage }: { stage: Stage }) {
   const [x, y] = HUB_SLOTS[stage.id].card;
   return (
-    <motion.div key={stage.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="abs panel desktop-only pointer-events-none p-4" style={{ ...box(x, y, 184), borderRadius: 18 }}>
+    <motion.div key={stage.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="abs panel desktop-only pointer-events-none p-4" style={{ ...box(x, y, 184), borderRadius: 18, zIndex: 10 }}>
       <div className="text-[19px] font-semibold" style={{ color: 'var(--ink)' }}>
         {stage.label}
       </div>

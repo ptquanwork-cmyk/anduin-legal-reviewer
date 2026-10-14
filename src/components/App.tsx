@@ -7,7 +7,19 @@ import { WorkspaceProvider } from '../lib/workspace';
 import { ShellFrame } from './shell/Frame';
 import { Brand, CommandPalette, Footer, IconRail, TopBar } from './shell/Chrome';
 import { Hub } from './hub/Hub';
-import { FlyingCtx } from './hub/StationArt';
+import dynamic from 'next/dynamic';
+import { FlyingCtx, StationArt, ThreeCtx } from './hub/StationArt';
+
+const StationsCanvas = dynamic(() => import('./three/Stations'), { ssr: false });
+
+function webgl() {
+  try {
+    const c = document.createElement('canvas');
+    return !!(c.getContext('webgl2') || c.getContext('webgl'));
+  } catch {
+    return false;
+  }
+}
 import { Screen } from './screens/Screen';
 
 const SCREENS: ScreenId[] = ['home', 'intake', 'source', 'map', 'review', 'report', 'annotation', 'form', 'responses', 'export', 'templates', 'feedback'];
@@ -34,7 +46,14 @@ export default function App() {
   const [search, setSearch] = useState(false);
   const [toast, setToast] = useState<{ message: string; tone: 'info' | 'error' } | null>(null);
   const [fly, setFly] = useState<Fly | null>(null);
-  const flyEl = useRef<HTMLImageElement>(null);
+  const flyEl = useRef<HTMLDivElement>(null);
+  // Real-time 3D on capable desktops; the approved PNG stills stay for phones, reduced motion and ?static.
+  const [three] = useState(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.has('static')) return false;
+    if (q.has('three')) return webgl();
+    return window.innerWidth >= 900 && webgl() && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
 
   useEffect(() => {
     const sync = () => {
@@ -142,7 +161,9 @@ export default function App() {
   return (
     <NavCtx.Provider value={nav}>
       <WorkspaceProvider versionId={versionId} setVersionId={setVersionId}>
+        <ThreeCtx.Provider value={three}>
         <FlyingCtx.Provider value={fly?.id ?? null}>
+          {three && <StationsCanvas />}
           <div className="flex min-h-screen w-full items-start justify-center">
             <div className="stage" style={mobile ? undefined : { zoom }}>
               <ShellFrame />
@@ -162,8 +183,9 @@ export default function App() {
             </div>
           </div>
           {fly && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img ref={flyEl} src={`/3d/png/${fly.img}.webp`} alt="" className="pointer-events-none fixed z-[80] object-contain object-bottom" style={{ left: fly.from.left, top: fly.from.top, width: fly.from.width, height: fly.from.height }} />
+            <div ref={flyEl} className="pointer-events-none fixed z-[80]" style={{ left: fly.from.left, top: fly.from.top, width: fly.from.width, height: fly.from.height }}>
+              <StationArt stage={stageOf(fly.id as ScreenId)!} role="fly" className="absolute inset-0" />
+            </div>
           )}
           <CommandPalette open={search} onClose={() => setSearch(false)} />
           <AnimatePresence>
@@ -174,6 +196,7 @@ export default function App() {
             )}
           </AnimatePresence>
         </FlyingCtx.Provider>
+        </ThreeCtx.Provider>
       </WorkspaceProvider>
     </NavCtx.Provider>
   );

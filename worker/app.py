@@ -5,6 +5,7 @@ Contract text is treated as data: the caller chooses the fixed question set; not
 can select a command, model or file path.
 """
 import os
+import shutil
 import subprocess
 import tempfile
 import threading
@@ -45,8 +46,11 @@ def auth(authorization: str = Header(default="")):
 
 @app.get("/health")
 def health():
-    soffice = subprocess.run(["soffice", "--version"], capture_output=True, text=True, timeout=30)
-    return {"decision_agent": state["status"], "error": state["error"], "converter": soffice.stdout.strip() or "missing"}
+    try:
+        converter = subprocess.run(["soffice", "--version"], capture_output=True, text=True, timeout=30).stdout.strip() or "missing"
+    except (OSError, subprocess.SubprocessError):
+        converter = "missing"
+    return {"decision_agent": state["status"], "error": state["error"], "converter": converter}
 
 
 @app.post("/convert", dependencies=[Depends(auth)])
@@ -60,6 +64,8 @@ async def convert(file: UploadFile = File(...)):
         src = Path(tmp) / "source.docx"
         src.write_bytes(data)
         started = time.time()
+        if not shutil.which("soffice"):
+            raise HTTPException(status_code=503, detail="converter not installed")
         proc = subprocess.run(
             ["soffice", "--headless", "--norestore", f"-env:UserInstallation=file://{tmp}/profile",
              "--convert-to", "pdf", "--outdir", tmp, str(src)],
