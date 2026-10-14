@@ -49,3 +49,9 @@ coverage/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Local dev helpers and generated runtime copies
+/.claude/launch.json
+/public/pdf.worker.min.mjs
+*.tsbuildinfo
+next-env.d.ts
