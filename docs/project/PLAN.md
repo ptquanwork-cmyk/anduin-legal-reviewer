@@ -1,18 +1,18 @@
-# Overall Plan — System Design Proposal
+# English Workflow Summary
 
 14 October 2026 · **Proposal, not completed implementation**.
 
-This public English plan represents the owner's supplied overall workflow and confirmed design requirements. It is a structured project artifact for reviewers; the original local planning file is preserved separately. This plan introduces no completion dates or measured model claims.
+The primary Overall Plan is [01-first-overall-plan.md](01-first-overall-plan.md), the owner's explicitly identified original proposal, published without modification. This English summary is supporting material derived from that workflow and confirmed design requirements; it does not replace the original. It introduces no completion dates or measured model claims.
 
 ## Three primary documents
 
 | Document | Responsibility |
 | --- | --- |
-| This Overall Plan / Design Proposal | Overall system operation: processing sequence, evidence, human decisions, quality gates, reuse, feedback and build priorities |
+| [01-first-overall-plan.md](01-first-overall-plan.md) | Original overall system proposal: processing sequence, evidence, human decisions, quality gates, reuse, feedback and build priorities |
 | [design.md](../../design/design.md) | Design system: Anduin palette, typography, layout language, 3D materials, modular objects and Blender handoff |
 | [UI Master.md](../../design/UI%20Master.md) | UI system: homepage and nine interfaces, light/dark themes, controls, navigation, states and intended interactions |
 
-These are the owner's three requested primary specifications. Project Profile, Design Profile, System and Setup remain supporting documents; they are not additional primary specifications. Changes to system behavior belong here, changes to visual rules belong in `design.md`, and changes to screen behavior belong in `UI Master.md`.
+These are the owner's three requested primary specifications. This English summary, Project Profile, Design Profile, System and Setup remain supporting documents. Proposed changes to system behavior should be checked against the original plan and recorded as explicit decisions; changes to visual rules belong in `design.md`, and changes to screen behavior belong in `UI Master.md`. Preserve the published original unless the owner requests an edit.
 
 ## Problem and priority
 

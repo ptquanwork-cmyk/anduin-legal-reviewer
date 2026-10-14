@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-14 — Original Overall Plan publication
+
+- Published the owner's explicitly identified `01-first-overall-plan.md` without changing its bytes, language or diagrams.
+- Corrected primary reading links; labeled PLAN.md as a supporting English workflow summary.
+- Documented the newer publication authorization outside the original source; retained all local source/design/archive files.
+
 ## 2026-10-14 — Three primary specification roles
 
 - Corrected the judge reading route to the owner's three primary documents: Overall Plan / System Design Proposal, design.md and UI Master.md.

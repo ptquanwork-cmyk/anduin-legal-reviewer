@@ -44,4 +44,4 @@ The navigation exposes nine sections without pretending they are all implemented
 
 ## Links
 
-[Public repository](https://github.com/ptquanwork-cmyk/anduin-legal-reviewer) · [Existing hosted project hub](https://anduin-legal-reviewer.vercel.app) · [Plan](PLAN.md) · [System](SYSTEM.md) · [Setup](SETUP.md) · [UI Master](../../design/UI%20Master.md) · [Judge reading guide](../judging/README.md).
+[Public repository](https://github.com/ptquanwork-cmyk/anduin-legal-reviewer) · [Existing hosted project hub](https://anduin-legal-reviewer.vercel.app) · [Overall Plan](01-first-overall-plan.md) · [System](SYSTEM.md) · [Setup](SETUP.md) · [UI Master](../../design/UI%20Master.md) · [Judge reading guide](../judging/README.md).

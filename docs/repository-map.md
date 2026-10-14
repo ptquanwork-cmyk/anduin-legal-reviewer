@@ -116,4 +116,4 @@ anduin-legal-reviewer/
 
 `contract-reader-agent/` and `laya/` remain in the local workspace as independent repositories. They are excluded from this public repository and listed in [the reference register](../references/upstream.md). The hidden root `.git/` contains repository metadata and is not published as a folder.
 
-`design/references/source-images/` contains the owner's supplied JPEGs locally. `design/exports/` contains the local delivery ZIP. Both are untracked; the public package consists of the generated images and design documents. The private first overall plan remains in its existing ignored context location.
+`design/references/source-images/` contains the owner's supplied JPEGs locally. `design/exports/` contains the local delivery ZIP. Both are untracked; the public package consists of the generated images and design documents. The first overall plan's local source remains in its existing ignored context location. At the owner's explicit request, an unchanged public copy is available as [docs/project/01-first-overall-plan.md](project/01-first-overall-plan.md); other private planning inputs remain excluded.

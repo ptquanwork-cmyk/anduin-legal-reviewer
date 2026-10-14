@@ -9,7 +9,7 @@ git clone https://github.com/ptquanwork-cmyk/anduin-legal-reviewer.git
 cd anduin-legal-reviewer
 ```
 
-Read [the judge guide](../judging/README.md), then [Profile](PROFILE.md), [Plan](PLAN.md), [System](SYSTEM.md) and [UI Master](../../design/UI%20Master.md). [Repository map](../repository-map.md) identifies each artifact group.
+Read [the judge guide](../judging/README.md), then the three primary specifications: [Overall Plan](01-first-overall-plan.md), [design.md](../../design/design.md) and [UI Master](../../design/UI%20Master.md). [Profile](PROFILE.md), [English workflow summary](PLAN.md) and [System](SYSTEM.md) provide supporting context. [Repository map](../repository-map.md) identifies each artifact group.
 
 ## Run the existing static hub
 
@@ -44,7 +44,7 @@ The standalone images are references, not meshes. [Blender handoff](../../design
 
 `src/app/`, `src/review/` and `src/integrations/` contain responsibility/run-note placeholders for future application work. `tests/` is for deterministic implemented behavior; `evals/` for actual model-quality evaluation; `experiments/` for reproducible runs. Synthetic cases/output schema are seeds, not results.
 
-Before introducing a runtime, select dependencies using source/licensing review, implement the [Plan](PLAN.md) milestones, record actual installation/startup commands, and test a reproducible flow. Do not present the independent local reference checkouts as the hackathon application. Their provenance is in [references](../../references/README.md).
+Before introducing a runtime, select dependencies using source/licensing review, implement the [original plan](01-first-overall-plan.md) milestones with the [English summary](PLAN.md) as a reading aid, record actual installation/startup commands, and test a reproducible flow. Do not present the independent local reference checkouts as the hackathon application. Their provenance is in [references](../../references/README.md).
 
 ## Publishing and validation
 
