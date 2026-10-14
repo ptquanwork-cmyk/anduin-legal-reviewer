@@ -4,8 +4,8 @@ Usage (from the repository root):
     laya\\.venv\\Scripts\\python.exe worker\\run_local.py
 
 - Reads SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY from .env.supabase.local (public values).
-- Creates worker/.worker-secret on first run (git-ignored). Only its SHA-256 hash is stored in Supabase,
-  and only the holder of this file can change the published worker URL.
+- Creates worker/.worker-secret on first run (git-ignored). Only its SHA-256 hash is stored in Supabase
+  (seeded by the project owner), and only the holder of this file can change the published worker URL.
 - Restarts the tunnel if it exits and publishes each new https://*.trycloudflare.com address.
 """
 import json
@@ -58,7 +58,8 @@ def main():
     if not secret_file.exists():
         secret_file.write_text(secrets.token_hex(32), encoding="utf-8")
     secret = secret_file.read_text(encoding="utf-8").strip()
-    rpc(sb_url, sb_key, "claim_worker", {"p_secret": secret})  # first run claims; later runs are no-ops
+    # The endpoint accepts this secret only if its SHA-256 hash was seeded in Supabase out of band
+    # (see supabase/migrations/20261015020000_worker_endpoint_hardening.sql); otherwise publishing is refused.
 
     env = {**os.environ, "SUPABASE_URL": sb_url, "SUPABASE_PUBLISHABLE_KEY": sb_key, "PYTHONUTF8": "1"}
     api = subprocess.Popen([sys.executable, "-m", "uvicorn", "app:app", "--host", "127.0.0.1", "--port", str(PORT)], cwd=HERE, env=env)

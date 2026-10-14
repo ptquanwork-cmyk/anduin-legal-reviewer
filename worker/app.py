@@ -89,12 +89,46 @@ def health():
     return {"decision_agent": state["status"], "error": state["error"], "converter": _converter() or "missing"}
 
 
+HYPERLINK = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink"
+
+
+def sanitize_docx(data: bytes) -> bytes:
+    """Uploaded documents are untrusted. Reject macro-enabled packages and drop every external relationship
+    except plain hyperlinks (remote templates, OLE links, frames, linked images) before any converter opens it."""
+    import io
+    import re
+    import zipfile
+
+    src = zipfile.ZipFile(io.BytesIO(data))
+    names = src.namelist()
+    types = src.read("[Content_Types].xml").decode("utf-8", "replace") if "[Content_Types].xml" in names else ""
+    if "macroEnabled" in types or any(n.lower().endswith(("vbaproject.bin", ".bin")) and "vba" in n.lower() for n in names):
+        raise HTTPException(status_code=415, detail="macro-enabled documents are not accepted")
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as dst:
+        for name in names:
+            body = src.read(name)
+            if name.endswith(".rels"):
+                xml = body.decode("utf-8", "replace")
+                xml = re.sub(
+                    r"<Relationship\b[^>]*?/>",
+                    lambda m: m.group(0) if 'TargetMode="External"' not in m.group(0) or f'Type="{HYPERLINK}"' in m.group(0) else "",
+                    xml,
+                )
+                body = xml.encode("utf-8")
+            dst.writestr(name, body)
+    return out.getvalue()
+
+
 def _word_to_pdf(src: Path, out: Path):
     # Word COM through PowerShell; one conversion at a time because Word automation is single-instance.
+    # AutomationSecurity=3 forces macros off for this automation session; the document opens read-only, with an
+    # empty password (a protected file fails instead of prompting) and without encoding or conversion dialogs.
     script = (
         "$ErrorActionPreference='Stop';"
-        "$w=New-Object -ComObject Word.Application;$w.Visible=$false;$w.DisplayAlerts=0;"
-        "try{$d=$w.Documents.Open($env:SRC,$false,$true,$false);$d.SaveAs2($env:OUT,17);$d.Close(0)}finally{$w.Quit()}"
+        "$w=New-Object -ComObject Word.Application;$w.Visible=$false;$w.DisplayAlerts=0;$w.AutomationSecurity=3;"
+        "try{$d=$w.Documents.Open($env:SRC,$false,$true,$false,'','',$true,'','',0,0,$false,$false,0,$true);"
+        "$d.SaveAs2($env:OUT,17);$d.Close(0)}finally{$w.Quit()}"
     )
     env = {**os.environ, "SRC": str(src), "OUT": str(out)}
     with word_lock:
@@ -111,10 +145,16 @@ async def convert(file: UploadFile = File(...)):
     engine = _converter()
     if not engine:
         raise HTTPException(status_code=503, detail="converter not installed")
+    try:
+        clean = sanitize_docx(data)
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=415, detail="not a valid .docx package")
     with tempfile.TemporaryDirectory() as tmp:
         src = Path(tmp) / "source.docx"
         out = Path(tmp) / "source.pdf"
-        src.write_bytes(data)
+        src.write_bytes(clean)
         started = time.time()
         if engine == "libreoffice":
             proc = subprocess.run(

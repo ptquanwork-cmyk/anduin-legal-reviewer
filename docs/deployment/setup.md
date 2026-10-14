@@ -26,7 +26,8 @@ Migrations live in `supabase/migrations/` and were applied with the Supabase MCP
 
 1. `20261014000000_init.sql` — documents, versions, source blocks, graph edges, findings, append-only decision events, annotations, templates, submissions, exports, jobs; owner-only RLS (`owner = auth.uid()`); private `sources` and `exports` buckets with per-user folder policies; Realtime on `jobs`.
 2. `20261015000000_annotation_agent_and_help.sql` — decision-agent answer per annotation; cached plain-language help.
-3. `20261015010000_worker_endpoint.sql` — single-row `worker_endpoint` (readable URL, hidden secret hash) and two SECURITY DEFINER functions for the worker: `claim_worker` (first claim stores the hash) and `set_worker_url` (requires the same secret).
+3. `20261015010000_worker_endpoint.sql` — single-row `worker_endpoint` (readable URL, hidden secret hash) and SECURITY DEFINER functions for the worker.
+4. `20261015020000_worker_endpoint_hardening.sql` — after a security review: the anonymous claim function is removed (the hash had already been set by the owner's first run; on a fresh project the owner seeds it with SQL), and `set_worker_url` only accepts `https://*.trycloudflare.com` addresses. The app applies the same host check before sending any session token to the worker.
 
 Authentication: **Allow anonymous sign-ins** is enabled (owner action, 15 Oct). Each visitor's data is isolated by RLS. Security advisor notes after the migrations: warnings for anonymous-access policies (intentional) and for the two anon-callable worker functions (intentional, secret-gated); no errors.
 
@@ -42,6 +43,7 @@ laya\.venv\Scripts\python.exe worker\run_local.py
 - Converts Word with Microsoft Word through COM (LibreOffice is used instead when installed, e.g. in `worker/Dockerfile`).
 - Opens a Cloudflare quick tunnel (`cloudflared`, installed with winget), waits until the public address answers, then publishes it with `set_worker_url`. A watchdog recreates the tunnel when it stops answering; quick tunnels have no uptime guarantee.
 - `worker/.worker-secret` is created on first run and git-ignored; only its SHA-256 hash is stored in Supabase.
+- Untrusted uploads: before Word or LibreOffice opens a file, the worker rejects macro-enabled packages and removes every external relationship except plain hyperlinks (remote templates, OLE links, frames); Word runs with macros forced off (`AutomationSecurity = 3`), read-only, without password or encoding prompts. Check: `python worker/test_sanitize.py` from the worker folder.
 - Requests are accepted only with a valid Supabase session of an app user (verified against Supabase Auth) or an optional `WORKER_TOKEN`.
 
 When the machine is off, `/api/health` and the footer report the decision agent offline, Word uploads are reviewed from their text without page geometry, and the screens say so.

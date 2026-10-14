@@ -17,7 +17,9 @@ async function baseUrl() {
       cache: 'no-store',
     });
     const rows = (await res.json()) as { url: string | null }[];
-    cached = { url: rows[0]?.url?.replace(/\/$/, '') ?? null, at: Date.now() };
+    const url = rows[0]?.url?.replace(/\/$/, '') ?? null;
+    // Session tokens are only ever sent to a Cloudflare quick-tunnel host (same rule as the database function).
+    cached = { url: url && /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(url) ? url : null, at: Date.now() };
   } catch {
     cached = { url: null, at: Date.now() };
   }

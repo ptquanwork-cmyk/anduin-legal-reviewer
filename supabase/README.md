@@ -11,7 +11,8 @@ Applied in order (also recorded in the project's migration history):
 | --- | --- |
 | `migrations/20261014000000_init.sql` | Application tables, owner-only RLS (`owner = auth.uid()`), append-only `decision_events` with `finding_status` view, private `sources`/`exports` buckets with per-user folder policies, Realtime on `jobs` |
 | `migrations/20261015000000_annotation_agent_and_help.sql` | Decision-agent answer per annotation; cached plain-language help per version |
-| `migrations/20261015010000_worker_endpoint.sql` | `worker_endpoint` registry (public URL readable, secret hash hidden) with `claim_worker` / `set_worker_url` functions for the owner's worker |
+| `migrations/20261015010000_worker_endpoint.sql` | `worker_endpoint` registry (public URL readable, secret hash hidden) with functions for the owner's worker |
+| `migrations/20261015020000_worker_endpoint_hardening.sql` | Security review follow-up: removes the anonymous claim function; `set_worker_url` requires the seeded secret hash and accepts only `https://*.trycloudflare.com` addresses |
 
 Anonymous sign-ins are enabled so each visitor gets a private workspace without an account. Public demo data is synthetic; do not upload real contracts.
 
