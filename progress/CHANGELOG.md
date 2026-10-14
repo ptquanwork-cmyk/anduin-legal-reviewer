@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-14 — Dark-mode companions, UI Master and judge documentation
+
+- Added ten dark-mode sibling PNGs while preserving the approved light and component assets.
+- Added detailed UI Master and a design profile; recorded theme/preservation checks and exact prompts.
+- Added public English Plan, Project Profile, System and Setup documents and a judge reading guide at the owner's publication request.
+- Retained prior image/reference/prompt/asset files, original local planning source and old ZIP; created a separate light/dark delivery archive.
+- No application runtime, theme toggle, backend, Blender scene, animation or final hackathon submission was implemented.
+
 ## 2026-10-14 — Interface and component design package
 
 - Consolidated design specifications, reference JSONs, homepage and prompts under `design/`; original supplied JPEGs are organized locally and remain untracked.

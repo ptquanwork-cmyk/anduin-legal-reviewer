@@ -22,7 +22,8 @@ Upload a contract, inspect findings tied to source passages, and record which is
 | --- | --- |
 | Public repository and project structure | Published; public visibility verified |
 | Challenge interpretation and proposed workflow | Documented |
-| 3D workflow design package | [Design folder](design/README.md): approved homepage, two reference JSONs, nine interface concepts and nine component references; no Blender scene or interactive implementation |
+| 3D workflow design package | [Design folder](design/README.md): light hub/screens, nine component references, ten dark companions and UI Master; no Blender scene or interactive implementation |
+| Judge-facing planning documents | [Reading guide](docs/judging/README.md): project profile, overall plan, design profile, system and setup; proposals distinguished from implementation |
 | Context packs and versioned prompt drafts | Seeded; not evaluated |
 | Synthetic evaluation cases and finding schema | Seeded; no model runs |
 | Hackathon application in `src/` | Planned; no runtime yet |
@@ -44,6 +45,7 @@ Two independent upstream checkouts already exist in the local workspace. They ar
 7. [Build log](progress/build-log/2026-10-13.md) and [roadmap](progress/roadmap.md) — actual progress and next steps.
 8. [Complete folder map](docs/repository-map.md) — every public folder and its purpose.
 9. [Design package](design/README.md) — overall specification, approved homepage, nine functional interfaces, nine individual Blender object references and exact prompts. [Homepage preview](design/homepage/anduin-3d-workflow-hub-v1.png).
+10. [Judge reading guide](docs/judging/README.md) — how Profile, Plan, Design Profile, UI Master, System, Setup, prompts and actual progress fit together.
 
 ## Repository layout
 

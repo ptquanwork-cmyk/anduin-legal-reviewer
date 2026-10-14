@@ -9,6 +9,7 @@ Keep the exact reusable instructions here; store task background separately in `
 | EVAL-001 | [evaluation/grade-findings-v1.md](evaluation/grade-findings-v1.md) | Review output against the evaluation rubric | Draft; no model run |
 | DESIGN-001 | [design/3d-workflow-hub-v1.md](../design/prompts/3d-workflow-hub-v1.md) | Generate/refine the 3D workflow homepage approval image | Concept generated; no application or Blender implementation |
 | DESIGN-002 | [design/interfaces-components-v1.json](../design/prompts/interfaces-components-v1.json) | Generate nine functional interfaces and nine isolated 3D reference images | Design-only prompt matrix; per-asset output verification in design manifest |
+| DESIGN-003 | [design/dark-mode-v1.json](../design/prompts/dark-mode-v1.json) | Theme-edit the approved hub/nine screens into separate dark companions | Ten static companions; original assets preserved |
 
 Design prompts are consolidated under `design/prompts/` at the owner's request. [Generation appendices and refinements](../design/prompts/generation-refinements-v1.json) record targeted navigation/source/field corrections to the base prompt matrix.
 

@@ -6,6 +6,9 @@ This is the single home for the approved homepage, overall specification, refere
 
 - [Approved homepage](homepage/anduin-3d-workflow-hub-v1.png) — preserved byte-for-byte.
 - [Overall design](design.md) — palette, visual language, hierarchy and future hover/click behavior.
+- [UI Master](UI%20Master.md) — complete description of the hub, nine interfaces, light/dark colors and interaction/state rules.
+- [Dark-mode companions](dark-mode/README.md) — ten sibling images; originals remain unchanged.
+- [Design Profile](DESIGN%20PROFILE.md) — visual direction and why design artifacts are separated.
 - [Nine functional interfaces](interfaces/README.md).
 - [Nine individual 3D components](components-3d/README.md).
 - [Blender handoff](blender/README.md).
@@ -14,7 +17,9 @@ This is the single home for the approved homepage, overall specification, refere
 - [Exact generation appendices/refinements](prompts/generation-refinements-v1.json).
 - [Asset manifest](manifests/assets.json) and [actual validation](manifests/validation.json).
 - [Archive verification](manifests/archive-validation.json).
+- [Dark-mode preservation and validation](manifests/dark-mode-validation.json) with [asset metadata](manifests/dark-mode-assets.json).
 - Local export: `exports/anduin-design-package-2026-10-14.zip`; ZIP archives are untracked to avoid duplicating all PNGs in Git history.
+- Separate light/dark export: `exports/anduin-design-light-dark-2026-10-14.zip`; the previous ZIP is preserved.
 
 The original three JPEGs are organized in `references/source-images/` locally and remain untracked. The private first overall plan remains outside this public package. All interface examples are synthetic; their mock states are not evidence of completed processing.
 

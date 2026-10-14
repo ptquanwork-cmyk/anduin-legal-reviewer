@@ -11,10 +11,13 @@ anduin-legal-reviewer/
 │   ├── product/
 │   ├── architecture/
 │   ├── decisions/
+│   ├── project/
+│   ├── judging/
 │   └── deployment/
 ├── design/
 │   ├── homepage/
 │   ├── interfaces/
+│   ├── dark-mode/
 │   ├── components-3d/
 │   ├── references/
 │   ├── prompts/
@@ -60,9 +63,12 @@ anduin-legal-reviewer/
 | `docs/architecture/` | Proposed system flow and component responsibilities |
 | `docs/decisions/` | Dated decisions, alternatives when relevant, consequences |
 | `docs/deployment/` | Actual Vercel/Supabase setup, links, and reproduction steps |
+| `docs/project/` | Public English project profile, full workflow plan, proposed system and reproducible inspection/setup |
+| `docs/judging/` | Reading order and evidence boundaries for judges |
 | `design/` | Overall visual specification and complete design package index |
 | `design/homepage/` | Approved homepage image, preserved byte-for-byte |
 | `design/interfaces/` | Nine synthetic functional-screen concept stills |
+| `design/dark-mode/` | Ten separate dark companions for the hub and nine screens |
 | `design/components-3d/` | Nine individual transparent object modeling references |
 | `design/references/` | Structured UI 2/web and UI 3/object reference descriptions |
 | `design/prompts/` | Exact image prompts and targeted refinement records |

@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "date": "2026-10-14",
+  "kind": "Ten separate dark-mode companion stills",
+  "master_file": "UI Master.md",
+  "source_images_preserved": true,
+  "items": [
+    {
+      "id": "00",
+      "name": "Homepage / 3D hub",
+      "light_source": "homepage/anduin-3d-workflow-hub-v1.png",
+      "light_sha256": "81adc8ff26bfd7d09bdcef31821a1b672bdae8b9d591e7a7f56adfbd015b8bf9",
+      "dark_file": "dark-mode/00-homepage.png",
+      "dark_sha256": "9c9d97f4815eccb1661049a6adbfd66471c290d1282a96ed4b5e8784415a0aef",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "bytes": 1781155,
+      "same_canvas_as_light": true
+    },
+    {
+      "id": "01",
+      "name": "Intake",
+      "light_source": "interfaces/01-intake.png",
+      "light_sha256": "910d55bf3c6d7a6582704bce4985d3b1ff4edc6787f62873fc0a913733ed83b5",
+      "dark_file": "dark-mode/01-intake.png",
+      "dark_sha256": "852cbdc8fcc50d74114f8adc74eb7ed73d1f1742701af347daf72c3afdbed1d9",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "bytes": 1552951,
+      "same_canvas_as_light": true
+    },
+    {
+      "id": "02",
+      "name": "Source quality",
+      "light_source": "interfaces/02-source-quality.png",
+      "light_sha256": "38e91f62ab9c324b353209c3e620469aa05df8e0fc46f7e38dc40b60d647546f",
+      "dark_file": "dark-mode/02-source-quality.png",
+      "dark_sha256": "606fe95f4e90116ab392c54976f63b598ed377f0796ec9b043dd77c30e440051",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "bytes": 1712430,
+      "same_canvas_as_light": true
+    },
+    {
+      "id": "03",
+      "name": "Document map",
+      "light_source": "interfaces/03-document-map.png",
+      "light_sha256": "d6e24be59f0e65136d99cf37ae64b805c8c42a4806ee9a34d89f7b8f25fd880e",
+      "dark_file": "dark-mode/03-document-map.png",
+      "dark_sha256": "ec3078f88269acdf2d9bfaf400545ecea50d7055ea8aaf78bdfed7a1d9ecc8fa",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "bytes": 1530525,
+      "same_canvas_as_light": true
+    },
+    {
+      "id": "04",
+      "name": "Legal review",
+      "light_source": "interfaces/04-legal-review.png",
+      "light_sha256": "fa3b2799a2efb3f77aa07b91bf80179ebafbeb7f2fe801cc3b671702b7f6a6c4",
+      "dark_file": "dark-mode/04-legal-review.png",
+      "dark_sha256": "5a4d625e0936143b6dfe4c2fcc96d16d8a9f569b7c22b2d0d139260a7ce562ec",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "bytes": 1631636,
+      "same_canvas_as_light": true
+    },
+    {
+      "id": "05",
+      "name": "Decision / report",
+      "light_source": "interfaces/05-decision-report.png",
+      "light_sha256": "430a234e284a921a41711b50c99ffc828d837f9e844956f816e58fcd02e9a88e",
+      "dark_file": "dark-mode/05-decision-report.png",
+      "dark_sha256": "a64ed0ad1fee9c5b344abed0e82140597bc15cfc9f1eb81c25a34fbfbc6a0f1d",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "bytes": 1623520,
+      "same_canvas_as_light": true
+    },
+    {
+      "id": "06",
+      "name": "Annotation",
+      "light_source": "interfaces/06-annotation.png",
+      "light_sha256": "4ca2c09479bffc794535524a5a504482bb154b0a51856162111eb6fa205321dd",
+      "dark_file": "dark-mode/06-annotation.png",
+      "dark_sha256": "2e4041e8b5630dea45fd65d88eba74c690646c001ec2f0d93a3b2bf305025ee7",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "bytes": 1537212,
+      "same_canvas_as_light": true
+    },
+    {
+      "id": "07",
+      "name": "Form preview",
+      "light_source": "interfaces/07-form-preview.png",
+      "light_sha256": "c4a85f47d9cadc9d1a442a549baeb380d8272053aa3b225580a7f0e7f790fba9",
+      "dark_file": "dark-mode/07-form-preview.png",
+      "dark_sha256": "58728ac279025cccbf589d75bc47892fdd28645f98d27656390ac71afb1ea120",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "bytes": 1643929,
+      "same_canvas_as_light": true
+    },
+    {
+      "id": "08",
+      "name": "Responses",
+      "light_source": "interfaces/08-responses.png",
+      "light_sha256": "f720c22b52d5f24a0bb477bb2a2ef9d85111c91f2cde456a7304b57b42551786",
+      "dark_file": "dark-mode/08-responses.png",
+      "dark_sha256": "bc9bb39aa3753a3de92dff05c602285bf514c413a0a0f7ef9a0e5813817e8a74",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "bytes": 1530060,
+      "same_canvas_as_light": true
+    },
+    {
+      "id": "09",
+      "name": "PDF QA / export",
+      "light_source": "interfaces/09-pdf-qa-export.png",
+      "light_sha256": "6c18b48037d138952a9f477ff1d436998a11dd52fd5a7a9d3a2cc8b7e8a472b2",
+      "dark_file": "dark-mode/09-pdf-qa-export.png",
+      "dark_sha256": "39aa4d55e0898e29c570ebd27213abe883e37fc4dfd95b81d19f7c0f852cadbe",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "bytes": 1636100,
+      "same_canvas_as_light": true
+    }
+  ]
+}

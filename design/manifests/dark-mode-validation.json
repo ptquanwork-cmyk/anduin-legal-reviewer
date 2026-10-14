@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "date": "2026-10-14",
+  "checks": {
+    "protected_existing_assets": 31,
+    "changed_existing_assets": [],
+    "dark_png_count": 10,
+    "all_png_decode": true,
+    "all_dimensions_match_light": [
+      1536,
+      1024
+    ],
+    "all_new_images_are_siblings": true
+  },
+  "proposed_theme_token_contrast": [
+    {
+      "pair": "body on panel",
+      "foreground": "#F2F7FC",
+      "background": "#172B3E",
+      "ratio": 13.42,
+      "target": 4.5,
+      "passed": true
+    },
+    {
+      "pair": "muted on panel",
+      "foreground": "#B5C7D8",
+      "background": "#172B3E",
+      "ratio": 8.35,
+      "target": 4.5,
+      "passed": true
+    },
+    {
+      "pair": "body on raised surface",
+      "foreground": "#F2F7FC",
+      "background": "#20354A",
+      "ratio": 11.67,
+      "target": 4.5,
+      "passed": true
+    },
+    {
+      "pair": "muted on raised surface",
+      "foreground": "#B5C7D8",
+      "background": "#20354A",
+      "ratio": 7.26,
+      "target": 4.5,
+      "passed": true
+    },
+    {
+      "pair": "primary action label",
+      "foreground": "#0C141F",
+      "background": "#48AFF0",
+      "ratio": 7.63,
+      "target": 4.5,
+      "passed": true
+    },
+    {
+      "pair": "error label",
+      "foreground": "#FFADBD",
+      "background": "#351C26",
+      "ratio": 8.89,
+      "target": 4.5,
+      "passed": true
+    },
+    {
+      "pair": "warning label",
+      "foreground": "#FFD27C",
+      "background": "#352B17",
+      "ratio": 9.78,
+      "target": 4.5,
+      "passed": true
+    },
+    {
+      "pair": "mint label",
+      "foreground": "#9BEBDA",
+      "background": "#123833",
+      "ratio": 9.33,
+      "target": 4.5,
+      "passed": true
+    },
+    {
+      "pair": "source ink",
+      "foreground": "#182A38",
+      "background": "#F7F8FA",
+      "ratio": 13.85,
+      "target": 4.5,
+      "passed": true
+    }
+  ],
+  "manual_visual_review": [
+    {
+      "id": "00",
+      "notes": "Two hub lanes, nine objects/plaques, selected review hover action and headline retained."
+    },
+    {
+      "id": "01",
+      "notes": "Upload, version/job/candidate panels and Documents/step01 selection retained."
+    },
+    {
+      "id": "02",
+      "notes": "Word/PDF pages remain light; two-page source, font issue and blocked gate retained."
+    },
+    {
+      "id": "03",
+      "notes": "Outline/graph/source panel, five nodes, source anchors and proposed edge retained."
+    },
+    {
+      "id": "04",
+      "notes": "30/60-day source evidence, four findings, two-page viewer and review actions retained."
+    },
+    {
+      "id": "05",
+      "notes": "Open/clarification/resolved statuses, source snippets, timeline and disabled handoff retained."
+    },
+    {
+      "id": "06",
+      "notes": "Four annotation types, field ID, option groups, field/page counts and uncertain gate retained."
+    },
+    {
+      "id": "07",
+      "notes": "Full-content dark app form, light source page, choices/help and unmapped-block gate retained."
+    },
+    {
+      "id": "08",
+      "notes": "Example Client Ltd, Company/Email selections, empty required date and disabled draft retained."
+    },
+    {
+      "id": "09",
+      "notes": "Nine stages, two-page draft, clipping issue/QA states and disabled final export retained."
+    }
+  ],
+  "limits": [
+    "Theme token ratios are calculated from proposed hex colors; they do not establish per-pixel contrast or compliance of the generated raster or an unbuilt application.",
+    "Dark twins were manually compared for core composition, controls, text anchors, selections and gates; generative rerasterization is not a lossless CSS/theme transform.",
+    "No theme toggle, website runtime, Blender scene or animation was implemented."
+  ]
+}

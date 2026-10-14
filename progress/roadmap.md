@@ -19,4 +19,6 @@ The owner requested a design-only 3D workflow hub package on 14 October. [The co
 
 The follow-up design package organizes the approved hub, nine functional-screen concepts and nine separate object references in [design/](../design/README.md). These are visual briefs for future implementation/modeling, not completed application milestones.
 
+Ten dark-mode companions and [UI Master](../design/UI%20Master.md) now specify theme appearance and detailed screen responsibilities. [The public overall plan](../docs/project/PLAN.md) expands processing/build priorities; [the judge guide](../docs/judging/README.md) connects product profile, design, system, setup and evidence. These documents and images do not advance an unimplemented runtime milestone.
+
 Choose a minimal runtime and implement extraction with stable page/section evidence before adding model analysis. Review upstream reuse and record actual run steps. Update this roadmap when scope or progress changes.
