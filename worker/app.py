@@ -82,7 +82,8 @@ async def convert(file: UploadFile = File(...)):
 
 
 class DecideRequest(BaseModel):
-    state: str = Field(max_length=60000)
+    state: str | None = Field(default=None, max_length=60000)
+    states: list[str] | None = Field(default=None, max_length=64)
     questions: dict
     model: str | None = Field(default=None, pattern="^(english|multilingual)$")
     max_len: int = Field(default=1024, ge=128, le=8192)
@@ -90,12 +91,19 @@ class DecideRequest(BaseModel):
 
 @app.post("/decide", dependencies=[Depends(auth)])
 def decide(req: DecideRequest):
+    """One state, or a batch of states sharing one fixed question set (one batched forward pass)."""
     if state["status"] != "ready":
         raise HTTPException(status_code=503, detail=f"decision agent {state['status']}")
+    if (req.state is None) == (req.states is None):
+        raise HTTPException(status_code=422, detail="send either state or states")
     started = time.time()
-    kwargs = {"max_len": req.max_len}
+    extra = {"max_len": req.max_len}
     if req.model:
-        kwargs["model"] = req.model
-    result = state["router"].predict(req.state, req.questions, **kwargs)
+        extra["model"] = req.model
+    router = state["router"]
+    if req.states is not None:
+        results = router.predict_batch([{"state": s[:20000], "questions": req.questions, **extra} for s in req.states])
+        return {"results": results, "elapsed_ms": int((time.time() - started) * 1000)}
+    result = router.predict(req.state, req.questions, **extra)
     result["elapsed_ms"] = int((time.time() - started) * 1000)
     return result

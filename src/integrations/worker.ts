@@ -48,15 +48,13 @@ interface LayaAnswer {
   confidence?: number;
 }
 
-/** Typed decisions from the Laya decision agent. Text is passed as state only; the question set is fixed by the caller. */
-export async function decide(state: string, questions: Record<string, Question>, lang: 'en' | 'vi') {
-  const model = lang === 'vi' ? 'multilingual' : 'english';
-  const res = await call(
-    '/decide',
-    { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ state: state.slice(0, 30000), questions, model, max_len: state.length > 3500 ? 4096 : 1024 }) },
-    45000,
-  );
-  const json = (await res.json()) as { answers: Record<string, LayaAnswer>; routing?: { model?: string; truncated?: boolean }; elapsed_ms?: number };
+interface LayaResult {
+  answers: Record<string, LayaAnswer>;
+  routing?: { model?: string };
+  usage?: { truncated?: boolean };
+}
+
+function normalize(json: LayaResult, model: string) {
   const checkpoint = json.routing?.model ?? model;
   const out: Record<string, DecisionAgentAnswer> = {};
   for (const [k, a] of Object.entries(json.answers)) {
@@ -67,7 +65,28 @@ export async function decide(state: string, questions: Record<string, Question>,
       const top = Object.entries(a.probabilities).sort((x, y) => y[1] - x[1])[0][0];
       value = a.legend?.[top] ?? top;
     }
-    out[k] = { value, confidence: a.answer_confidence ?? null, checkpoint, field: 'answer_confidence', truncated: !!json.routing?.truncated };
+    out[k] = { value, confidence: a.answer_confidence ?? null, checkpoint, field: 'answer_confidence', truncated: !!json.usage?.truncated };
   }
-  return { answers: out, elapsedMs: json.elapsed_ms ?? null };
+  return out;
+}
+
+/** Typed decisions from the Laya decision agent. Text is passed as state only; the question set is fixed by the caller. */
+export async function decide(state: string, questions: Record<string, Question>, lang: 'en' | 'vi') {
+  const model = lang === 'vi' ? 'multilingual' : 'english';
+  const res = await call(
+    '/decide',
+    { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ state: state.slice(0, 30000), questions, model, max_len: state.length > 3500 ? 4096 : 1024 }) },
+    60000,
+  );
+  const json = (await res.json()) as LayaResult & { elapsed_ms?: number };
+  return { answers: normalize(json, model), elapsedMs: json.elapsed_ms ?? null };
+}
+
+/** Many short states with one question set in a single batched call (findings, proposed fields). */
+export async function decideBatch(states: string[], questions: Record<string, Question>, lang: 'en' | 'vi') {
+  if (!states.length) return { answers: [] as Record<string, DecisionAgentAnswer>[], elapsedMs: 0 };
+  const model = lang === 'vi' ? 'multilingual' : 'english';
+  const res = await call('/decide', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ states: states.map((s) => s.slice(0, 4000)), questions, model }) }, 120000);
+  const json = (await res.json()) as { results: LayaResult[]; elapsed_ms?: number };
+  return { answers: json.results.map((r) => normalize(r, model)), elapsedMs: json.elapsed_ms ?? null };
 }

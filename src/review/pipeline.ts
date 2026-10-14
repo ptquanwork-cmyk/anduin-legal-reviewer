@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { JobStep, Routing, SourceIssue, SourceReport, VersionRow } from '../lib/types';
-import { convertDocx, decide, WorkerUnavailable } from '../integrations/worker';
+import { convertDocx, decide, decideBatch, WorkerUnavailable } from '../integrations/worker';
 import { detectFields, transferStates } from '../digitize/fields';
 import { download } from '../integrations/supabase-server';
 import { runRules, type Speller } from './checks';
@@ -230,22 +230,21 @@ async function feedbackExamples(sb: SupabaseClient): Promise<Example[]> {
 }
 
 async function agentAnnotateFindings(findings: Finding[], routing: Routing, lang: 'en' | 'vi') {
-  if (routing.agent !== 'online') return;
-  for (const f of findings.slice(0, 20)) {
-    try {
-      const r = await decide(
-        `${f.title}. ${f.rationale} Evidence: ${f.evidence.map((e) => e.quote).join(' | ')}`,
-        {
-          needs_counsel: { type: 'noul', instructions: 'Does this issue need confirmation from legal counsel before the contract is digitized?' },
-          impact: { type: 'score', instructions: 'How much could this issue affect the parties if left unresolved?', criteria: ['low', 'medium', 'high'] },
-        },
-        lang,
-      );
-      f.provenance.agent = { needs_counsel: r.answers.needs_counsel, impact: r.answers.impact };
-    } catch (e) {
-      if (e instanceof WorkerUnavailable) return;
-      console.error(e);
-    }
+  if (routing.agent !== 'online' || !findings.length) return;
+  const subset = findings.slice(0, 40);
+  try {
+    const r = await decideBatch(
+      subset.map((f) => `${f.title}. ${f.rationale} Evidence: ${f.evidence.map((e) => e.quote).join(' | ')}`),
+      {
+        needs_counsel: { type: 'noul', instructions: 'Does this issue need confirmation from legal counsel before the contract is digitized?' },
+        impact: { type: 'score', instructions: 'How much could this issue affect the parties if left unresolved?', criteria: ['low', 'medium', 'high'] },
+      },
+      lang,
+    );
+    subset.forEach((f, i) => (f.provenance.agent = { needs_counsel: r.answers[i].needs_counsel, impact: r.answers[i].impact }));
+    (routing.notes ??= []).push(`Decision agent ordered ${subset.length} finding(s) in ${r.elapsedMs ?? '?'} ms.`);
+  } catch (e) {
+    if (!(e instanceof WorkerUnavailable)) console.error(e);
   }
 }
 
@@ -275,21 +274,22 @@ async function storeFields(sb: SupabaseClient, version: VersionRow, blocks: Bloc
     detected = transferStates(detected, blocks, (prev ?? []).map((p) => ({ ...p, text: textOf.get(p.source_block_idx) ?? '' })));
   }
   // The decision agent double-checks the type of each proposed input; disagreement or low confidence → uncertain.
-  if (routing.agent === 'online') {
-    for (const d of detected.filter((x) => x.type !== 'paragraph').slice(0, 20)) {
-      try {
-        const text = blocks.find((b) => b.idx === d.source_block_idx)?.text ?? d.label;
-        const r = await decide(
-          text,
-          { field_type: { type: 'choice', instructions: 'What kind of form control does this line need?', criteria: { text_box: 'a blank line for a written answer', radio: 'choose exactly one of several options', checkbox: 'tick any number of options', paragraph: 'text to read, no answer needed' } } },
-          lang,
-        );
-        const a = r.answers.field_type;
+  const inputs = detected.filter((x) => x.type !== 'paragraph').slice(0, 40);
+  if (routing.agent === 'online' && inputs.length) {
+    try {
+      const r = await decideBatch(
+        inputs.map((d) => blocks.find((b) => b.idx === d.source_block_idx)?.text ?? d.label),
+        { field_type: { type: 'choice', instructions: 'What kind of form control does this line need?', criteria: { text_box: 'a blank line for a written answer', radio: 'choose exactly one of several options', checkbox: 'tick any number of options', paragraph: 'text to read, no answer needed' } } },
+        lang,
+      );
+      inputs.forEach((d, i) => {
+        const a = r.answers[i].field_type;
         (d as typeof d & { agent?: unknown }).agent = a;
+        // Disagreement with the layout heuristic, or a weak answer, sends the region to human confirmation.
         if (a.value !== d.type || (a.confidence ?? 0) < 0.5) d.transfer_state = 'uncertain';
-      } catch (e) {
-        if (e instanceof WorkerUnavailable) break;
-      }
+      });
+    } catch (e) {
+      if (!(e instanceof WorkerUnavailable)) console.error(e);
     }
   }
   if (detected.length) {
