@@ -1,5 +1,6 @@
 // Builds the synthetic demo agreement (v1 with defects, v2 revised) as DOCX files in public/demo/.
-// Synthetic content only. Section 2 deliberately uses Cambria so conversion exposes a real font substitution.
+// Synthetic content only. Section 2 deliberately uses a font that common converters do not have (Helvetica Neue
+// is absent from Windows/Word and from the Linux container), so source quality exposes a real font substitution.
 import { writeFile, mkdir } from 'node:fs/promises';
 import { Document, Packer, Paragraph, TextRun, AlignmentType, PageBreak } from 'docx';
 
@@ -30,7 +31,7 @@ function agreement(version) {
           p('Agreement date: ____________________'),
           heading('2. Payment'),
           new Paragraph({
-            children: [run('The Client shall pay each invoice within 30 calendar days of receipt.', { font: 'Cambria' })],
+            children: [run('The Client shall pay each invoice within 30 calendar days of receipt.', { font: 'Helvetica Neue' })],
             spacing: { after: 160 },
           }),
           heading('3. Payment deadline'),

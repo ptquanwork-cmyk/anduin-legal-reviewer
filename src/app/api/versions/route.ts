@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { after } from 'next/server';
 import { download, handle, HttpError, requireUser } from '../../../integrations/supabase-server';
 import { initialSteps, runPipeline } from '../../../review/pipeline';
+import { withWorkerSession } from '../../../integrations/worker';
 
 export const maxDuration = 300;
 
@@ -46,7 +47,6 @@ export const POST = handle(async (req) => {
   const { data: job, error: jobErr } = await sb.from('jobs').insert({ version_id: version.id, task: 'process', status: 'queued', steps: initialSteps() }).select('id').single();
   if (jobErr) throw new HttpError(500, jobErr.message);
 
-  after(() => runPipeline(sb, user.id, version.id, job.id));
-  void token;
+  after(() => withWorkerSession(token, () => runPipeline(sb, user.id, version.id, job.id)));
   return Response.json({ versionId: version.id, documentId, duplicateOf: null });
 });

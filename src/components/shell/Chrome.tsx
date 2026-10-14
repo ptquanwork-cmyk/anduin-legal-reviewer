@@ -216,10 +216,37 @@ export function StageStrip({ y = 152, x = 132, w = 1360 }: { y?: number; x?: num
   );
 }
 
+/** Live worker status (Word conversion + decision agent), refreshed every minute. */
+function useWorkerStatus() {
+  const [s, setS] = useState<'online' | 'warming' | 'offline' | null>(null);
+  useEffect(() => {
+    const check = () =>
+      fetch('/api/health')
+        .then((r) => r.json())
+        .then((j: { worker?: { decision_agent?: string; error?: string } }) => setS(j.worker?.decision_agent === 'ready' ? 'online' : j.worker?.decision_agent === 'loading' ? 'warming' : 'offline'))
+        .catch(() => setS('offline'));
+    check();
+    const t = setInterval(check, 60000);
+    return () => clearInterval(t);
+  }, []);
+  return s;
+}
+
 export function Footer({ hint }: { hint?: string }) {
   const ws = useWorkspace();
-  const agent = ws.version?.routing?.agent;
-  const status = ws.authError ? `Workspace unavailable: ${ws.authError}` : !ws.ready ? 'Connecting…' : agent === 'offline' ? 'Live processing · decision agent offline' : 'Live processing · private workspace';
+  const worker = useWorkerStatus();
+  const agent = worker === 'online' ? 'online' : worker === null ? undefined : 'offline';
+  const status = ws.authError
+    ? `Workspace unavailable: ${ws.authError}`
+    : !ws.ready
+      ? 'Connecting…'
+      : worker === 'online'
+        ? 'Live processing · decision agent online'
+        : worker === 'warming'
+          ? 'Live processing · decision agent warming up'
+          : worker === 'offline'
+            ? 'Live processing · decision agent offline'
+            : 'Live processing · private workspace';
   return (
     <>
       {hint && (

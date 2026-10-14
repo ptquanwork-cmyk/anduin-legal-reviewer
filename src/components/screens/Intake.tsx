@@ -95,7 +95,7 @@ export function Intake() {
           </h2>
           {v && (
             <button className="flex items-center gap-2 text-[15px]" style={{ color: 'var(--primary)' }} onClick={() => api(`/api/versions/${v.id}/process`, {}).then(() => ws.reload()).catch((e) => nav.notify(String(e.message), 'error'))} disabled={running}>
-              {running ? <Loader2 size={18} className="animate-spin" /> : <History size={18} />} {running ? 'Processing' : ws.job?.status === 'failed' || ws.job?.status === 'offline' ? 'Resume job' : 'Re-run checks'}
+              {running ? <Loader2 size={18} className="animate-spin" /> : <History size={18} />} {running ? 'Processing' : ws.job?.status === 'failed' || ws.job?.status === 'offline' || ws.job?.steps.some((s) => s.status === 'offline' || s.status === 'failed') ? 'Resume job' : 'Re-run checks'}
             </button>
           )}
         </div>

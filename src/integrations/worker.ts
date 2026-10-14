@@ -1,15 +1,44 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import type { DecisionAgentAnswer } from '../lib/types';
 
 export class WorkerUnavailable extends Error {}
 
-const url = () => process.env.WORKER_URL?.replace(/\/$/, '');
-const headers = () => (process.env.WORKER_TOKEN ? { authorization: `Bearer ${process.env.WORKER_TOKEN}` } : ({} as Record<string, string>));
+// The worker runs on the owner's machine behind a tunnel whose address changes on restart; it publishes the
+// current address to Supabase (worker_endpoint). WORKER_URL overrides it for local development.
+let cached: { url: string | null; at: number } | null = null;
+
+async function baseUrl() {
+  if (process.env.WORKER_URL) return process.env.WORKER_URL.replace(/\/$/, '');
+  if (cached && Date.now() - cached.at < 30_000) return cached.url;
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/worker_endpoint?select=url,updated_at&id=eq.1`, {
+      headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY! },
+      signal: AbortSignal.timeout(5000),
+      cache: 'no-store',
+    });
+    const rows = (await res.json()) as { url: string | null }[];
+    cached = { url: rows[0]?.url?.replace(/\/$/, '') ?? null, at: Date.now() };
+  } catch {
+    cached = { url: null, at: Date.now() };
+  }
+  return cached.url;
+}
+
+// The caller's Supabase session token authenticates each request (the worker verifies it with Supabase Auth).
+// AsyncLocalStorage keeps concurrent pipeline runs on a shared function instance from mixing sessions.
+const session = new AsyncLocalStorage<string>();
+export const withWorkerSession = <T>(token: string, fn: () => Promise<T>) => session.run(token, fn);
+const headers = (): Record<string, string> => {
+  const t = process.env.WORKER_TOKEN || session.getStore();
+  return t ? { authorization: `Bearer ${t}` } : {};
+};
 
 async function call(path: string, init: RequestInit, timeoutMs: number) {
-  const base = url();
-  if (!base) throw new WorkerUnavailable('Worker is not configured (WORKER_URL).');
+  const base = await baseUrl();
+  if (!base) throw new WorkerUnavailable('Worker is offline (no published address).');
   try {
     const res = await fetch(`${base}${path}`, { ...init, headers: { ...headers(), ...(init.headers ?? {}) }, signal: AbortSignal.timeout(timeoutMs) });
+    if (res.status === 530 || res.status === 1033) throw new WorkerUnavailable(`Worker tunnel is not connected (${res.status}).`);
     if (res.status === 503 || res.status === 502 || res.status === 504) throw new WorkerUnavailable(`Worker ${path} unavailable (${res.status}).`);
     if (!res.ok) throw new Error(`Worker ${path} failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
     return res;
@@ -25,7 +54,7 @@ export async function workerHealth() {
   return (await res.json()) as { decision_agent: string; converter: string; error: string | null };
 }
 
-/** DOCX → PDF with LibreOffice in the worker container. */
+/** DOCX → PDF in the worker (Microsoft Word on the owner's machine, or LibreOffice in a container). */
 export async function convertDocx(data: Uint8Array, name: string) {
   const form = new FormData();
   form.append('file', new Blob([data as BlobPart]), name);

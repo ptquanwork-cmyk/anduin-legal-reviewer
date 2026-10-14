@@ -13,6 +13,12 @@ The local Contract Reader README and `LOCAL_WINDOWS.md` describe PDF text extrac
 
 Both checkouts have local uncommitted files. Their original remotes remain intact. Local environments, feedback databases, model files, and checkout contents are not imported into the new public repository.
 
+## Use in the application (15 October 2026)
+
+- **Laya** is used as a library, not copied: `worker/requirements.txt` installs `laya==0.4.7` from PyPI (Apache-2.0); on the owner's machine the worker runs in the existing local Laya environment. The app calls `Router.predict` / `Router.predict_batch` with fixed question sets and reports `answer_confidence` as not calibrated (Laya's own documentation states shipped temperatures must be fitted on task data before gating). No Laya source or model weights are committed here; checkpoints are downloaded from Hugging Face (`convaiinnovations/laya`) at runtime.
+- **contract-reader-agent** code is not used. Its idea of learning from accepted/ignored suggestions informed the Feedback page, implemented independently (decision events, reviewer-selected examples).
+- **Liberation Sans** fonts (SIL Open Font License, licence in `src/assets/fonts/LICENSE_LIBERATION`) are copied from `pdfjs-dist` for Vietnamese-capable PDF output.
+
 ## Reuse policy
 
 The initial hackathon scaffold contains no copied upstream implementation. Before reuse, record the exact source commit and files, review licensing and attribution, describe the modifications, and validate adapted behavior. Keep upstream claims distinct from this project's own evidence.

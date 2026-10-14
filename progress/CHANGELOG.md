@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-15 — Working application
+
+- Replaced the static hub with the single-page application: 3D hub (Blender stations rendered live), nine workspaces, Templates, Feedback, light/dark themes.
+- Supabase schema with owner-only RLS, private storage, Realtime job status, anonymous workspaces, worker endpoint registry.
+- Review pipeline: extraction with anchors, Word/PDF comparison, rules (EN/VI), semantic reviewer adapter, evidence validator, decision-agent routing; report PDF; revision comparison.
+- Digitisation: four-type annotation editor and QA, full-content form, responses, PDF fill with read-back QA and confirmed final export.
+- Worker (Laya + Word/LibreOffice) with Supabase-session auth and a local tunnel runner; end-to-end run on the synthetic demo recorded in the build log.
+
 ## 2026-10-14 — Original Overall Plan publication
 
 - Published the owner's explicitly identified `01-first-overall-plan.md` without changing its bytes, language or diagrams.

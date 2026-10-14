@@ -5,7 +5,8 @@ Keep the exact reusable instructions here; store task background separately in `
 | ID | File | Purpose | Status |
 | --- | --- | --- | --- |
 | DEV-001 | [development/build-task-v1.md](development/build-task-v1.md) | Implement a bounded task with context and validation | Draft |
-| REVIEW-001 | [review/contract-review-v1.md](review/contract-review-v1.md) | Produce source-backed contract findings | Draft; no model run |
+| REVIEW-001 | [review/contract-review-v1.md](review/contract-review-v1.md) | Produce source-backed contract findings | Superseded by REVIEW-002 |
+| REVIEW-002 | [review/contract-review-v2.md](review/contract-review-v2.md) | Semantic reviewer: contradictions, ambiguities, undefined terms with verbatim block quotes (strict JSON schema) | In the application (`src/review/semantic.ts`); not yet evaluated on labelled data |
 | EVAL-001 | [evaluation/grade-findings-v1.md](evaluation/grade-findings-v1.md) | Review output against the evaluation rubric | Draft; no model run |
 | DESIGN-001 | [design/3d-workflow-hub-v1.md](../design/prompts/3d-workflow-hub-v1.md) | Generate/refine the 3D workflow homepage approval image | Concept generated; no application or Blender implementation |
 | DESIGN-002 | [design/interfaces-components-v1.json](../design/prompts/interfaces-components-v1.json) | Generate nine functional interfaces and nine isolated 3D reference images | Design-only prompt matrix; per-asset output verification in design manifest |

@@ -1,9 +1,10 @@
-# Application source — planned
+# Application source
 
-The static project hub is implemented in `app/public/index.html` and deployed on Vercel. The contract-review application will live here; its runtime is not implemented yet.
+Next.js App Router application deployed on Vercel. See the [README](../README.md#architecture) for the architecture and run instructions.
 
-- `app/`: upload/review/export interface and application state.
-- `review/`: extraction, deterministic checks, finding assembly, evidence validation.
-- `integrations/`: server-side OpenAI and optional external adapters.
-
-Add actual installation, launch, configuration, and deployment instructions when choosing and implementing the runtime. Existing nested upstream checkouts are references and are not part of a fresh clone of this repository.
+- `app/`: the single page (`page.tsx`), layout, global styles and API routes (`api/versions`, `api/versions/[id]/{process,report,help,fill}`, `api/health`).
+- `components/`: shell, 3D hub, nine workspaces, PDF viewer and three.js stations.
+- `review/`: extraction, deterministic checks, semantic adapter, evidence validator and the processing pipeline.
+- `digitize/`: field detection, annotation QA, form model, PDF fill and read-back QA.
+- `integrations/`: Supabase server client and the worker client.
+- `lib/`: shared types, navigation, workspace state, uploads, review outcome.

@@ -33,9 +33,16 @@ anduin-legal-reviewer/
 ├── openai/
 ├── src/
 │   ├── app/
-│   │   └── public/
+│   ├── components/
 │   ├── review/
-│   └── integrations/
+│   ├── digitize/
+│   ├── integrations/
+│   └── lib/
+├── public/
+│   ├── 3d/
+│   └── demo/
+├── worker/
+├── scripts/
 ├── tests/
 ├── supabase/
 ├── data/
@@ -72,7 +79,7 @@ anduin-legal-reviewer/
 | `design/components-3d/` | Nine individual transparent object modeling references |
 | `design/references/` | Structured UI 2/web and UI 3/object reference descriptions |
 | `design/prompts/` | Exact image prompts and targeted refinement records |
-| `design/blender/` | Future modeling/scene/motion handoff; no implemented scene |
+| `design/blender/` | Blender build script, saved scene and station documentation |
 | `design/manifests/` | Actual asset metadata, integrity/alpha checks and archive verification |
 | `context/` | Development context conventions |
 | `context/briefs/` | Public-safe user request summaries and reusable context packs |
@@ -82,13 +89,18 @@ anduin-legal-reviewer/
 | `prompts/review/` | Contract reviewer instruction drafts |
 | `prompts/evaluation/` | Optional evaluator instruction drafts |
 | `openai/` | Official-source notes, concepts, and integration plan |
-| `src/` | Future application source and run instructions |
-| `src/app/` | Future UI, application state, review actions, export |
-| `src/app/public/` | Deployed static project hub; entry point `index.html` |
-| `src/review/` | Future extraction, checks, and evidence validation |
-| `src/integrations/` | Future OpenAI and external service adapters |
+| `src/` | Application source (see `src/README.md`) |
+| `src/app/` | Next.js page, layout and API routes |
+| `src/components/` | Shell, 3D hub, nine workspaces, PDF viewer, three.js stations |
+| `src/review/` | Extraction, checks, semantic adapter, evidence validation, pipeline |
+| `src/digitize/` | Field detection, annotation QA, form model, PDF fill and QA |
+| `src/integrations/` | Supabase server client and worker client |
+| `src/lib/` | Shared types, navigation, workspace state, uploads |
+| `public/` | Station models (`3d/`), PNG fallbacks and synthetic demo files (`demo/`) |
+| `worker/` | Decision-agent and conversion worker, local tunnel runner, Dockerfile |
+| `scripts/` | Demo builder, asset helpers, screenshot and PDF text helpers |
 | `tests/` | Meaningful tests of implemented application code |
-| `supabase/` | Backend project record and future migration conventions |
+| `supabase/` | Backend record and applied SQL migrations |
 | `data/` | Public data conventions |
 | `data/synthetic/` | Fictional, publishable demonstration documents |
 | `data/schemas/` | Versioned model/application output contracts |

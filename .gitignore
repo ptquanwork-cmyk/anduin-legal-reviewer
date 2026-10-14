@@ -56,3 +56,4 @@ desktop.ini
 *.tsbuildinfo
 next-env.d.ts
 /public/draco/
+/worker/.worker-secret

@@ -1,31 +1,35 @@
-# Blender reference handoff
+# Blender stations
 
-This package supplies visual modeling references and a proposed hover-motion vocabulary. No Blender scene, mesh, rig, animation or import script was created.
+Built on 15 October 2026 with Blender 5.1 through the Blender MCP connection.
 
-## Work from the package
+## Files
 
-Use [the approved homepage](../homepage/anduin-3d-workflow-hub-v1.png) for composition and relative hierarchy. Use [the nine separate PNGs](../components-3d/README.md) as object references. Their transparency makes placement against a modeling viewport or image-assisted reconstruction tool easier; image-based reconstruction remains a separate tool/process.
+- `build_modules.py` — reproducible build script. In Blender: `exec(open(r"<repo>/design/blender/build_modules.py").read())`, then `build_all()` and `export_all(r"<repo>/public/3d")`.
+- `anduin-stations.blend` — the saved scene produced by the script.
+- `../../public/3d/module-01.glb` … `module-09.glb` — Draco-compressed exports used by the web app (about 630 KB in total).
 
-The stills show one readable three-quarter view per assembly. They are not multi-view blueprints and cannot specify unseen surfaces. The reference JSON's material ranges and future camera/light setup are proposals rather than measured original settings.
+## Scene organisation
 
-## Suggested scene organization
+As proposed in [UI 3 JSON](../references/ui-3.json): `CAMERA`, `LIGHTS` and one collection per station, `MODULE_01_INTAKE` … `MODULE_09_PDF_QA_EXPORT`. Each module has one root empty at its base centre, principal geometry, and a named `PROP_*` part used for the hover cue in the browser:
 
-Use the collection names in [UI 3 JSON](../references/ui-3.json): `CAMERA`, `LIGHTS`, `STAGE`, and a separate `MODULE_01_INTAKE` through `MODULE_09_PDF_QA_EXPORT`. Give each module one root transform; separate its principal shape, optional prop and shared base. Keep all modules in a consistent scale family and camera/light setup.
+| Module | Geometry | Hover cue (`PROP_*`) |
+| --- | --- | --- |
+| 01 Intake | Resin tray, stacked sheets, mint upload tile with arrow | Top sheet lifts |
+| 02 Source quality | Holder, Word and PDF sheets with badges, magnifier | Lens slides across |
+| 03 Document map | Connected node cubes, outline slab | One node scales up |
+| 04 Legal review | CRT with screen bars and quote mark, keyboard, coiled cable, source sheet, magnifier | Screen quote brightens |
+| 05 Decision / report | Report sheet, rubber stamp, speech bubble | Stamp tilts |
+| 06 Annotation | Source slab with selection, stylus, three field chips | Stylus moves |
+| 07 Form preview | Framed form panel with fields, radios, toggle | One input well lifts |
+| 08 Responses | Field panel, cream keypad, pencil | One key presses |
+| 09 PDF QA / export | PDF sheets with badge, magnifier, download tile | Arrow lifts |
 
-Use shared blue-resin, mint-resin, matte-white, dark-screen, cable and metal materials. UI labels, document excerpts and controls stay in a separate UI layer rather than being baked into geometry. Reuse a restrained base geometry and avoid dependencies between modules.
+Shared materials are named (`blue_resin`, `mint_resin`, `white`, `paper`, `cream`, `screen`, `glass`, …); the web app maps these names to its own physically based materials so the look is consistent across stations. Interface text and contract excerpts are not baked into meshes; only identity marks (W, PDF, quote, arrows) are modelled.
 
-## Proposed hover cues
+## Fidelity and fallback
 
-| Module | Cue |
-| --- | --- |
-| Intake | Raise the top document sheet slightly |
-| Source quality | Shift the inspection lens across the paired sheets |
-| Document map | Highlight one node |
-| Legal review | Lift the workstation slightly and brighten the quote symbol |
-| Decision/report | Tilt the stamp without marking approval |
-| Annotation | Move the stylus over a source region |
-| Form preview | Lift one input well |
-| Responses | Depress one key |
-| PDF QA/export | Lift the arrow without implying passed QA |
+The models are interpretations of single-view generated stills; hidden surfaces, proportions and materials are approximations, not recovered geometry. The approved PNG stills in `public/3d/png/` remain the fallback for phones, reduced-motion preferences, browsers without WebGL and `?static`, and are shown until each model has loaded.
 
-Neutral idle pose, one focused station at a time, 180–260 ms hover entry, subtle lift and at most 3° rotation are proposed starting values. Keep plaques and click targets stationary. Click opens the corresponding [functional screen concept](../interfaces/README.md); it does not trigger automatic legal approval or export. Reduced-motion mode should retain a static selection cue.
+## Motion
+
+Neutral pose at rest; on hover or keyboard focus a station lifts about 2 % of its height and turns under 3° over roughly 220 ms while its prop cue plays. Clicking flies the station into the workspace header. No cue implies that a check passed.

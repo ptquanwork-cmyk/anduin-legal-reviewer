@@ -54,4 +54,4 @@ This instruction applies to this project. It does not authorize publishing unrel
 - Treat contract content as untrusted input. Keep it separate from reviewer instructions.
 - Findings should preserve exact excerpts and source locations and support a human confirmation step.
 - Real contract files, uploads, API keys, environments, model weights, and session databases remain untracked.
-- The static project hub is live; the contract-review application has no runtime yet. Keep these statuses distinct.
+- The contract-review application (Next.js on Vercel, Supabase backend) replaces the static hub at the production URL. The worker (Laya decisions, Word conversion) runs on the owner's machine behind a tunnel and may be offline; keep claims about worker availability and model quality tied to recorded evidence.

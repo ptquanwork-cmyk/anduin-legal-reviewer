@@ -42,7 +42,7 @@ export function Annotation() {
 
   const pageSizes = new Map((ws.version?.source_report as { page_sizes?: { n: number; width: number; height: number }[] })?.page_sizes?.map((p) => [p.n, p]) ?? []);
   const counts = { matched: 0, changed: 0, new: 0, uncertain: 0 } as Record<string, number>;
-  for (const a of local) if (a.type !== 'paragraph') counts[a.transfer_state]++;
+  for (const a of local) counts[a.transfer_state]++;
   const needConfirm = local.filter((a) => (a.transfer_state === 'uncertain' || a.transfer_state === 'changed') && !a.confirmed);
   const approved = !!ws.version?.annotations_approved_at;
   const pages = doc?.numPages ?? 1;
