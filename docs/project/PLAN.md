@@ -1,8 +1,18 @@
-# Overall product and build plan
+# Overall Plan — System Design Proposal
 
 14 October 2026 · **Proposal, not completed implementation**.
 
 This public English plan represents the owner's supplied overall workflow and confirmed design requirements. It is a structured project artifact for reviewers; the original local planning file is preserved separately. This plan introduces no completion dates or measured model claims.
+
+## Three primary documents
+
+| Document | Responsibility |
+| --- | --- |
+| This Overall Plan / Design Proposal | Overall system operation: processing sequence, evidence, human decisions, quality gates, reuse, feedback and build priorities |
+| [design.md](../../design/design.md) | Design system: Anduin palette, typography, layout language, 3D materials, modular objects and Blender handoff |
+| [UI Master.md](../../design/UI%20Master.md) | UI system: homepage and nine interfaces, light/dark themes, controls, navigation, states and intended interactions |
+
+These are the owner's three requested primary specifications. Project Profile, Design Profile, System and Setup remain supporting documents; they are not additional primary specifications. Changes to system behavior belong here, changes to visual rules belong in `design.md`, and changes to screen behavior belong in `UI Master.md`.
 
 ## Problem and priority
 
@@ -54,7 +64,15 @@ The UI separates model score/provenance, evidence validation and human decision 
 
 The hub opens Intake, Source quality, Document map, Legal review, Decision/report, Annotation, Form preview, Responses and PDF QA/export. Duplicate candidates belong with intake/source quality. Feedback and Templates are separate management destinations rather than extra mandatory processing steps.
 
-[UI Master](../../design/UI%20Master.md) details every destination. The approved light views remain unchanged; dark companions reuse their composition and semantics. [Design Profile](../../design/DESIGN%20PROFILE.md) explains the visual organization and artifact separation.
+[UI Master](../../design/UI%20Master.md) details every destination. The approved light views remain unchanged; dark companions reuse their composition and semantics. [design.md](../../design/design.md) defines the shared visual rules; the supporting [Design Profile](../../design/DESIGN%20PROFILE.md) explains artifact organization.
+
+## How the proposed system operates
+
+The browser presents the 3D hub, opens a functional workspace when a station is selected, and displays the current document/version and actual job state. Hover motion is proposed navigation feedback; it does not execute document processing or approve a stage. An authenticated backend would authorize work, register immutable versions and queue processing jobs. Workers would perform conversion, extraction, comparison, review and rendering, while validators check coverage, evidence anchors and export fidelity before accepting their outputs.
+
+Each downstream artifact links to its source version and relevant configuration. Candidate findings remain distinct from human decisions. Annotation approval, response validation and final PDF QA are separate gates. Corrections create a new version and require review of affected findings and mappings; a completed status on an older version does not silently carry forward. Jobs expose pending, running, blocked, failed and completed states, including retry/return-to-step paths where applicable.
+
+Document versions, source blocks, findings, decisions, annotations, forms, submissions, exports and job records would retain the evidence needed to reproduce a handoff. Contract content stays separate from processing instructions. Feedback is recorded with its scope before any curated reuse or later training. The supporting [System](SYSTEM.md) specifies proposed responsibilities and entities; these paragraphs describe intended operation, not a working runtime.
 
 ## Implementation priorities
 

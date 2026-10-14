@@ -10,4 +10,4 @@ Read [challenge](challenge/brief.md), [MVP scope](product/mvp.md), [architecture
 
 All design artifacts now live in [the design package](../design/README.md), including functional screen concepts and individual 3D modeling references.
 
-[Judge reading guide](judging/README.md) connects [Project Profile](project/PROFILE.md), [Overall Plan](project/PLAN.md), [System](project/SYSTEM.md), [Setup](project/SETUP.md), [Design Profile](../design/DESIGN%20PROFILE.md) and [UI Master](../design/UI%20Master.md). The public English planning/system documents represent confirmed requirements and remain proposals; the local original planning file is retained.
+[Judge reading guide](judging/README.md) starts with the three primary specifications: [Overall Plan / Design Proposal](project/PLAN.md) for overall system operation, [design.md](../design/design.md) for the design system, and [UI Master.md](../design/UI%20Master.md) for the UI system. Project Profile, Design Profile, System and Setup remain supporting documents. The public English plan represents confirmed requirements and remains a proposal; the local original planning file is retained.

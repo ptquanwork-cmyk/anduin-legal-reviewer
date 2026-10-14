@@ -1,21 +1,22 @@
 # Judge reading guide
 
-This repository separates requirements, product identity, design, system responsibilities, setup, prompts and actual progress so a reviewer can inspect how the proposal becomes concrete artifacts.
+The owner requests three primary Markdown specifications: overall system operation, the design system and the UI system. Read them together to understand how the proposed workflow becomes a consistent visual and interface specification.
 
 ## Suggested reading order
 
 | Order | Artifact | Question it answers |
 | --- | --- | --- |
-| 1 | [Challenge brief](../challenge/brief.md) | What problem was supplied by the hackathon? |
-| 2 | [Project Profile](../project/PROFILE.md) | Who is the intended user and what outcome matters? |
-| 3 | [Overall Plan](../project/PLAN.md) | What stages, quality gates and build priorities were chosen? |
-| 4 | [Design Profile](../../design/DESIGN%20PROFILE.md) | Why separate a 3D hub, functional screens, objects, themes and reference descriptions? |
-| 5 | [UI Master](../../design/UI%20Master.md) | What exactly appears on each interface, and how should it behave? |
-| 6 | [System](../project/SYSTEM.md) | Which layers/entities own source evidence, decisions, jobs and export validation? |
-| 7 | [Setup](../project/SETUP.md) | How can the existing hub and artifact package be inspected locally? |
-| 8 | [Prompt registry](../../prompts/README.md) | What instructions and versions produced the designs/review proposal? |
-| 9 | [Evaluation plan](../../evals/README.md) | How will grounding and false positives be tested? |
-| 10 | [Build log](../../progress/build-log/2026-10-14.md) | What actually happened, passed or remains unimplemented? |
+| 1 | [Overall Plan / Design Proposal](../project/PLAN.md) | How does the overall system operate: processing stages, source evidence, human decisions, quality gates, reuse, feedback and priorities? |
+| 2 | [Design system — design.md](../../design/design.md) | Which Anduin colors, typography, layout, 3D materials and modular Blender conventions define the visual language? |
+| 3 | [UI system — UI Master.md](../../design/UI%20Master.md) | What appears on the homepage and nine interfaces, and how should navigation, controls, states and light/dark themes behave? |
+
+The existing filenames are retained. “Design Proposal” names the overall system proposal in `docs/project/PLAN.md`; `design/design.md` owns visual rules, and `design/UI Master.md` owns screen-level behavior. The approved images and delivery archives are preserved.
+
+## Supporting evidence and inspection
+
+[Challenge brief](../challenge/brief.md) supplies the problem. [Project Profile](../project/PROFILE.md) and [Design Profile](../../design/DESIGN%20PROFILE.md) provide background. [System](../project/SYSTEM.md) expands proposed responsibilities/entities; [Setup](../project/SETUP.md) explains local inspection. These support the three primary documents.
+
+[Prompt registry](../../prompts/README.md), [evaluation plan](../../evals/README.md) and [build log](../../progress/build-log/2026-10-14.md) separate intended instructions and checks from actual results.
 
 ## Evidence boundaries
 

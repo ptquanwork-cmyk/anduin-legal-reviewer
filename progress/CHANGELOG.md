@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-14 — Three primary specification roles
+
+- Corrected the judge reading route to the owner's three primary documents: Overall Plan / System Design Proposal, design.md and UI Master.md.
+- Expanded the overall plan's proposed operation and clarified responsibility for system, visual and screen behavior changes.
+- Kept previously published profiles/system/setup as supporting documents; preserved approved design files, images and archives.
+
 ## 2026-10-14 — Dark-mode companions, UI Master and judge documentation
 
 - Added ten dark-mode sibling PNGs while preserving the approved light and component assets.
