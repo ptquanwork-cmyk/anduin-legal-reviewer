@@ -29,7 +29,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], a
 
 state = {"router": None, "status": "loading", "error": None, "loaded_at": None}
 word_lock = threading.Lock()
-_verified: dict[str, float] = {}
+_verified: dict[str, tuple[float, str]] = {}
 
 
 def _load():
@@ -48,32 +48,36 @@ def _load():
 threading.Thread(target=_load, daemon=True).start()
 
 
-def _valid_session(token: str) -> bool:
-    """Verifies an app user's access token with Supabase Auth; positive results are cached for 5 minutes."""
+def _session_user(token: str) -> str | None:
+    """Verifies an app user's access token with Supabase Auth and returns the user id; cached for 5 minutes."""
     now = time.time()
-    if _verified.get(token, 0) > now:
-        return True
+    hit = _verified.get(token)
+    if hit and hit[0] > now:
+        return hit[1]
     if not (SUPABASE_URL and SUPABASE_KEY):
-        return False
+        return None
     req = urllib.request.Request(f"{SUPABASE_URL}/auth/v1/user", headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {token}"})
     try:
         with urllib.request.urlopen(req, timeout=8) as res:
-            ok = res.status == 200 and bool(json.loads(res.read()).get("id"))
+            uid = json.loads(res.read()).get("id") if res.status == 200 else None
     except Exception:
-        ok = False
-    if ok:
+        uid = None
+    if uid:
         if len(_verified) > 5000:
-            _verified.clear()
-        _verified[token] = now + 300
-    return ok
+            _verified.clear()  # only a cache: entries are re-verified with Supabase
+        _verified[token] = (now + 300, uid)
+    return uid
 
 
-def auth(authorization: str = Header(default="")):
+def auth(authorization: str = Header(default="")) -> str:
+    """Returns the caller: the Supabase user id, or "service" for the shared WORKER_TOKEN."""
     token = authorization.removeprefix("Bearer ").strip()
     if TOKEN and token == TOKEN:
-        return
-    if not token or not _valid_session(token):
+        return "service"
+    uid = _session_user(token) if token else None
+    if not uid:
         raise HTTPException(status_code=401, detail="unauthorized")
+    return uid
 
 
 def _converter():
@@ -185,28 +189,30 @@ class SemanticRequest(BaseModel):
     guidance: str = Field(default="", max_length=4000)
 
 
-# Any visitor can hold an anonymous session, so the owner's CLI quota is capped per session and overall.
+# Any visitor can hold an anonymous session, so the owner's CLI quota is capped per verified user and overall.
 # ponytail: in-memory sliding windows, reset on restart; enough for one local worker.
-SEMANTIC_PER_SESSION, SEMANTIC_GLOBAL = 12, 60  # calls per hour (a document uses up to 2)
-_semantic_calls: dict[str, list[float]] = {}
+SEMANTIC_PER_USER, SEMANTIC_GLOBAL = 12, 60  # calls per hour (a document uses up to 2)
+_user_calls: dict[str, list[float]] = {}
+_global_calls: list[float] = []
+quota_lock = threading.Lock()
 
 
-def _semantic_quota(authorization: str = Header(default="")):
-    now = time.time()
-    token = authorization.removeprefix("Bearer ").strip()
-    for key, cap in ((token, SEMANTIC_PER_SESSION), ("*", SEMANTIC_GLOBAL)):
-        recent = [t for t in _semantic_calls.get(key, []) if now - t < 3600]
-        if len(recent) >= cap:
+def take_semantic_quota(user: str):
+    """Records one call for the user, or raises 429; the global window is never reset by per-user eviction."""
+    with quota_lock:
+        now = time.time()
+        _global_calls[:] = [t for t in _global_calls if now - t < 3600]
+        mine = [t for t in _user_calls.get(user, []) if now - t < 3600]
+        if len(mine) >= SEMANTIC_PER_USER or len(_global_calls) >= SEMANTIC_GLOBAL:
             raise HTTPException(status_code=429, detail="semantic review limit reached; try again later")
-        _semantic_calls[key] = recent
-    for key in (token, "*"):
-        _semantic_calls[key].append(now)
-    if len(_semantic_calls) > 5000:
-        _semantic_calls.clear()
+        for key in [k for k, v in _user_calls.items() if not v or now - v[-1] >= 3600]:
+            del _user_calls[key]  # drop only expired windows
+        _user_calls[user] = mine + [now]
+        _global_calls.append(now)
 
 
-@app.post("/semantic", dependencies=[Depends(auth), Depends(_semantic_quota)])
-def semantic(req: SemanticRequest):
+@app.post("/semantic")
+def semantic(req: SemanticRequest, user: str = Depends(auth)):
     """Semantic review with the owner's Codex CLI. Instructions and schema are fixed here; callers send data only."""
     codex = shutil.which("codex.cmd") or shutil.which("codex")
     if not codex or not PROMPT_FILE.exists():
@@ -216,6 +222,7 @@ def semantic(req: SemanticRequest):
     index = json.dumps(req.index, ensure_ascii=False)
     if len(document) > 60000 or len(index) > 20000:
         raise HTTPException(status_code=413, detail="document chunk too large")
+    take_semantic_quota(user)
     # Everything after the fixed instructions is caller-supplied data in delimited sections.
     text = (
         f"{prompt['instructions']}\n\n"

@@ -4,22 +4,27 @@ from fastapi import HTTPException
 import app
 
 
-def blocked(token):
+def blocked(user):
     try:
-        app._semantic_quota(f"Bearer {token}")
+        app.take_semantic_quota(user)
         return False
     except HTTPException as exc:
         assert exc.status_code == 429
         return True
 
 
-app._semantic_calls.clear()
-assert not any(blocked("a") for _ in range(app.SEMANTIC_PER_SESSION))
-assert blocked("a"), "per-session cap"
-assert not blocked("b"), "other sessions unaffected"
+def reset():
+    app._user_calls.clear()
+    app._global_calls.clear()
 
-app._semantic_calls.clear()
-tokens = [f"t{i}" for i in range(app.SEMANTIC_GLOBAL)]
-assert not any(blocked(t) for t in tokens)
-assert blocked("fresh"), "global cap across sessions"
+
+reset()
+assert not any(blocked("a") for _ in range(app.SEMANTIC_PER_USER))
+assert blocked("a"), "per-user cap"
+assert not blocked("b"), "other users unaffected"
+
+reset()
+assert not any(blocked(f"u{i}") for i in range(app.SEMANTIC_GLOBAL))
+assert blocked("fresh"), "global cap across users"
+assert "fresh" not in app._user_calls, "a rejected call records nothing"
 print("semantic quota ok")
