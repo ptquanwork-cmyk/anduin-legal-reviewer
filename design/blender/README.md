@@ -6,7 +6,7 @@ Built on 15 October 2026 with Blender 5.1 through the Blender MCP connection.
 
 - `build_modules.py` — reproducible build script. In Blender: `exec(open(r"<repo>/design/blender/build_modules.py").read())`, then `build_all()` and `export_all(r"<repo>/public/3d")`.
 - `anduin-stations.blend` — the saved scene produced by the script.
-- `../../public/3d/module-01.glb` … `module-09.glb` — Draco-compressed exports used by the web app (about 720 KB in total; the largest, 04, is 188 KB).
+- `../../public/3d/module-01.glb` … `module-09.glb` — Draco-compressed exports used by the web app (about 750 KB in total; the largest, 04, is 188 KB).
 
 ## Scene organisation
 
@@ -20,8 +20,8 @@ As proposed in [UI 3 JSON](../references/ui-3.json): `CAMERA`, `LIGHTS` and one 
 | 04 Legal review | Wide CRT with rounded bezel, screen bars and quote mark, keyboard, coiled cable; source sheet on a stand and magnifier to the right | Screen quote brightens |
 | 05 Decision / report | Thick report slab, rubber stamp with turned handle and collar, speech bubble with tail | Stamp tilts |
 | 06 Annotation | Upright source slab on a blue backing, selection with frame and handles, marker, three linked field chips | Stylus moves |
-| 07 Form preview | Framed form panel with fields, radios, toggle | One input well lifts |
-| 08 Responses | Field panel, cream keypad, pencil | One key presses |
+| 07 Form preview | Wide form panel on a thick blue frame with a set-back top bar; two input wells, two radios and two square buttons (the selected ones with lighter faces); turned so the frame's right side shows, as in the still | One input well lifts |
+| 08 Responses | Cream 3 × 6 keyboard in an open tray on a thin blue base; blue field panel with two input bars in front of a pale panel and a blue back panel; mint pen with cap, ring and clip resting on a key | One key presses |
 | 09 PDF QA / export | Two rounded PDF sheets with badge, magnifier, download tile with block arrow | Arrow lifts |
 
 Shared materials are named (`blue_resin`, `mint_resin`, `white`, `paper`, `cream`, `screen`, `glass`, …); the web app maps these names to its own physically based materials so the look is consistent across stations. Interface text and contract excerpts are not baked into meshes; only identity marks (W, PDF, quote, arrows) are modelled.

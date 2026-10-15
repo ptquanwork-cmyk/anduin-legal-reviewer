@@ -499,35 +499,53 @@ def m06_annotation(x=0):
 
 def m07_form(x=0):
     root, c = new_module("MODULE_07_FORM_PREVIEW", x)
-    rbox("frame", (1.2, 0.3, 1.45), (0, 0.15, 0.75), root, c, "blue_resin", bevel=0.14, rot=(-8, 0, 0))
-    rbox("panel", (1.0, 0.1, 1.25), (0, -0.02, 0.76), root, c, "white", bevel=0.08, rot=(-8, 0, 0))
-    for i in range(2):
-        rbox(f"field{i}", (0.7, 0.06, 0.1), (0, -0.09, 1.18 - i * 0.2), root, c, "line_gray", bevel=0.03, rot=(-8, 0, 0))
-    torus("radio0", 0.07, 0.025, (-0.28, -0.1, 0.62), root, c, "mint_resin", rot=(82, 0, 0))
-    sphere("radio1", 0.08, (-0.28, -0.12, 0.42), root, c, "mint_resin", scale=(1, 0.5, 1))
-    rbox("line_a", (0.3, 0.05, 0.06), (0.05, -0.1, 0.62), root, c, "line_gray", bevel=0.02, rot=(-8, 0, 0))
-    rbox("line_b", (0.3, 0.05, 0.06), (0.05, -0.12, 0.42), root, c, "line_gray", bevel=0.02, rot=(-8, 0, 0))
-    rbox("toggle", (0.18, 0.06, 0.12), (0.33, -0.1, 0.62), root, c, "white", bevel=0.04, rot=(-8, 0, 0))
-    rbox("PROP_field", (0.18, 0.08, 0.14), (0.33, -0.14, 0.42), root, c, "mint_resin", bevel=0.05, rot=(-8, 0, 0))
+    # wide form panel on a thicker blue frame with a raised top bar; turned so the frame's right side shows, as in the still
+    form = node("form", root, c, (0, 0, 0), (0, 0, -46))
+    rslab("frame", 1.7, 1.34, 0.3, 0.18, (0.02, 0.12, 0.71), form, c, "blue_resin", bevel=0.07)
+    rslab("top_bar", 1.2, 0.34, 0.2, 0.14, (0.06, 0.17, 1.38), form, c, "blue_resin", bevel=0.07)  # set back, standing above the frame
+    panel = node("panel", form, c, (-0.03, -0.09, 0.66))
+    rslab("panel_slab", 1.6, 1.32, 0.16, 0.16, (0, 0, 0), panel, c, "white", bevel=0.06)
+    f = -0.08  # front face of the panel
+    rslab("well0", 1.2, 0.17, 0.03, 0.05, (-0.04, f, 0.42), panel, c, "line_gray", bevel=0.01)
+    well = node("PROP_field", panel, c, (-0.04, f, 0.15))
+    rslab("well1", 1.2, 0.17, 0.03, 0.05, (0, 0, 0), well, c, "line_gray", bevel=0.01)
+    for i, z in enumerate((-0.13, -0.43)):
+        cyl(f"radio{i}", 0.11, 0.08, (-0.54, f - 0.03, z), panel, c, "mint_resin", rot=(90, 0, 0), bevel=0.03)
+        rslab(f"line{i}", 0.46, 0.1, 0.03, 0.05, (-0.08, f, z), panel, c, "line_gray", bevel=0.01)
+        rslab(f"button{i}", 0.24, 0.24, 0.08, 0.06, (0.4, f - 0.03, z), panel, c, "mint_resin", bevel=0.035)
+    # the selected radio and button have lighter faces
+    cyl("radio0_face", 0.074, 0.02, (-0.54, f - 0.075, -0.13), panel, c, "mint_glow", rot=(90, 0, 0))
+    rslab("button0_face", 0.17, 0.17, 0.02, 0.045, (0.4, f - 0.075, -0.13), panel, c, "mint_glow", bevel=0.006)
     return root
 
 
 def m08_responses(x=0):
     root, c = new_module("MODULE_08_RESPONSES", x)
-    rbox("panel_back", (1.3, 0.2, 0.8), (-0.1, 0.35, 0.75), root, c, "blue_resin", bevel=0.1, rot=(-12, 0, 0))
-    for i in range(2):
-        rbox(f"field_tile{i}", (0.85, 0.1, 0.2), (-0.1, 0.22, 0.95 - i * 0.3), root, c, "white", bevel=0.06, rot=(-12, 0, 0))
-    rbox("keypad", (1.6, 1.0, 0.24), (0, -0.25, 0.12), root, c, "cream", bevel=0.1)
-    for r in range(4):
-        for k in range(7):
-            name = "PROP_key" if (r, k) == (2, 3) else f"pkey_{r}_{k}"
-            rbox(name, (0.16, 0.16, 0.1), (-0.58 + k * 0.19, -0.6 + r * 0.2, 0.3), root, c, "white", bevel=0.035)
-    pen = bpy.data.objects.new("pencil", None)
-    c.objects.link(pen)
-    pen.parent = root
-    pen.location = (0.62, 0.2, 0.95)
-    pen.rotation_euler = (0, math.radians(-20), math.radians(20))
-    cyl("pencil_body", 0.07, 1.0, (0, 0, 0), pen, c, "mint_resin", bevel=0.02)
+    kb = node("keyboard", root, c, (0, 0, 0), (0, 0, 6))
+    # panels standing behind the keyboard: blue back panel, pale panel, blue field panel with two input bars
+    for name, w, h, t, px, py, m in [("panel_back", 1.4, 0.98, 0.14, -0.2, 1.1, "blue_resin"), ("panel_pale", 1.7, 1.36, 0.1, 0.1, 0.94, "white"), ("panel_field", 1.6, 1.16, 0.14, 0.12, 0.78, "blue_resin")]:
+        stand = node(name, kb, c, (px, py, 0), (-6, 0, 0))
+        rslab(name + "_slab", w, h, t, 0.14, (0, 0, h / 2), stand, c, m, bevel=0.05)
+    for i in range(2):  # on the field panel, the last stand
+        rslab(f"field_bar{i}", 1.12, 0.18, 0.06, 0.09, (0.04, -0.08, 0.94 - i * 0.26), stand, c, "white", bevel=0.02)
+    # cream keyboard (3 x 6 tall keys) in an open tray on a thin blue base
+    rslab("kb_base", 2.58, 1.43, 0.08, 0.26, (0, 0, 0.04), kb, c, "blue_resin", rot=(90, 0, 0), bevel=0.03)
+    tray("kb_tray", 2.44, 1.3, 0.36, 0.36, 0.14, 0.18, 0.22, (0, 0, 0.07), kb, c, "cream", bevel=0.05)
+    for r in range(3):
+        for k in range(6):
+            key = node("PROP_key" if (r, k) == (0, 2) else f"key_{r}_{k}", kb, c, (-0.85 + k * 0.34, -0.3 + r * 0.3, 0.25))
+            rbox(f"cap_{r}_{k}", (0.3, 0.26, 0.34), (0, 0, 0.16), key, c, "cream", bevel=0.06)
+            rbox(f"dash_{r}_{k}", (0.09, 0.024, 0.012), (0, 0, 0.332), key, c, "line_gray", bevel=0.008)
+    # mint pen with a cap and clip, its tip resting on a key
+    pen = node("pen", kb, c, (0.53, 0.03, 0.585))
+    pen.rotation_euler = Vector((0.5, 0.25, 0.83)).to_track_quat("Z", "Y").to_euler()
+    lathe("pen_lead", [(0, 0), (0.028, 0.045), (0.046, 0.09)], (0, 0, 0), pen, c, "navy")
+    lathe("pen_wood", [(0.044, 0.088), (0.113, 0.29)], (0, 0, 0), pen, c, "cream")
+    cyl("pen_body", 0.116, 0.6, (0, 0, 0.59), pen, c, "mint_resin", bevel=0.015)
+    cyl("pen_ring", 0.12, 0.045, (0, 0, 0.912), pen, c, "white")
+    cyl("pen_cap", 0.125, 0.4, (0, 0, 1.134), pen, c, "mint_resin", bevel=0.08)
+    clip = node("pen_clip", pen, c, (0, 0, 0), (0, 0, 115))
+    rslab("pen_clip_bar", 0.085, 0.36, 0.045, 0.04, (0, 0.145, 1.11), clip, c, "mint_resin", bevel=0.016)
     return root
 
 

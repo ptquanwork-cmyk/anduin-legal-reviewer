@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-15 — Form preview and responses stations closer to their stills
+
+- Form preview (07): a wide form panel on a thick blue frame with a set-back top bar, two input wells, two radios and two square buttons, turned so the frame's right side shows as in the still. Hovering lifts one input well.
+- Responses (08): a cream 3 × 6 keyboard in a tray on a thin blue base, a field panel with two input bars standing behind it in front of a pale and a blue panel, and a mint pen with a clip resting on a key.
+- GLBs re-exported for 07 and 08 only (37 KB and 123 KB).
+
 ## 2026-10-15 — Station geometry closer to the approved stills
 
 - Six stations remodelled in `design/blender/build_modules.py`: thick open intake tray with fanned rounded sheets and a block-arrow tile (01); a real tray and larger badges (02); a wider monitor with the source sheet and magnifier to its right (04); a larger stamp with a turned handle and a speech bubble with a tail (05); an upright annotation slab on a blue backing with a framed selection, marker and linked chips (06); rounded, thicker PDF sheets and a block-arrow download tile (09). All sheets now have thickness and rounded corners.
