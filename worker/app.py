@@ -96,17 +96,45 @@ def health():
     return {"decision_agent": state["status"], "error": state["error"], "converter": _converter() or "missing"}
 
 
-HYPERLINK = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink"
-REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
-W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+HYPERLINK = "hyperlink"
 SAFE_LINK = re.compile(r"^(https?://|mailto:)", re.I)
 ABSOLUTE = re.compile(r"^([a-z][a-z0-9+.-]*:|\\\\|//)", re.I)  # any scheme, UNC (\\host) or network path
-# Field codes that make Word load or execute something outside the package when fields update.
-REMOTE_FIELD = re.compile(r"\b(INCLUDEPICTURE|INCLUDETEXT|LINK|DDE|DDEAUTO|IMPORT)\b", re.I)
+# Relationship types Word may follow inside an accepted package (last segment of the Type URI, so Transitional,
+# Strict and Microsoft-extension namespaces all match). Anything else — altChunk imports, OLE objects, embedded
+# packages, sub-documents, charts, templates, add-ins, customisations — rejects the package.
+SAFE_RELS = {
+    "officeDocument", "styles", "stylesWithEffects", "settings", "webSettings", "fontTable", "theme", "numbering",
+    "footnotes", "endnotes", "comments", "commentsExtended", "commentsIds", "commentsExtensible", "people", "header",
+    "footer", "image", "hyperlink", "core-properties", "extended-properties", "custom-properties", "thumbnail",
+    "glossaryDocument", "customXml", "customXmlProps", "font", "printerSettings", "classificationlabels",
+    "diagramData", "diagramLayout", "diagramQuickStyle", "diagramColors", "diagramDrawing",
+}
+# Non-XML parts allowed in the package; HTML, MHT, RTF, text, OLE and nested packages are refused.
+SAFE_BINARY = re.compile(r"^(image/|font/|application/(x-font|vnd\.openxmlformats-officedocument\.(obfuscatedFont|wordprocessingml\.printerSettings)))", re.I)
+# Field keywords that only format or reference content inside the document. Anything else (INCLUDEPICTURE,
+# INCLUDETEXT, LINK, DDE, DDEAUTO, IMPORT, QUOTE, RD, MACROBUTTON, ADDIN, FILLIN...) rejects the package.
+SAFE_FIELDS = {
+    "PAGE", "NUMPAGES", "SECTIONPAGES", "SECTION", "PAGEREF", "REF", "NOTEREF", "STYLEREF", "HYPERLINK", "TOC", "TOA",
+    "TC", "TA", "XE", "INDEX", "SEQ", "LISTNUM", "AUTONUM", "AUTONUMLGL", "AUTONUMOUT", "DATE", "TIME", "CREATEDATE",
+    "SAVEDATE", "PRINTDATE", "EDITTIME", "TITLE", "SUBJECT", "AUTHOR", "KEYWORDS", "COMMENTS", "LASTSAVEDBY",
+    "DOCPROPERTY", "DOCVARIABLE", "NUMWORDS", "NUMCHARS", "FILENAME", "FILESIZE", "TEMPLATE", "USERNAME",
+    "USERINITIALS", "USERADDRESS", "INFO", "MERGEFIELD", "MERGEREC", "MERGESEQ", "NEXT", "NEXTIF", "SKIPIF", "SET",
+    "FORMTEXT", "FORMCHECKBOX", "FORMDROPDOWN", "SYMBOL", "EQ", "ADVANCE", "IF", "COMPARE", "BIDIOUTLINE",
+    "GREETINGLINE", "ADDRESSBLOCK", "BARCODE", "DISPLAYBARCODE", "CITATION", "BIBLIOGRAPHY",
+}
+UNSUPPORTED = "documents with embedded objects, imported content or linked data are not accepted"
 
 
 def _reject(detail: str):
     raise HTTPException(status_code=415, detail=detail)
+
+
+def _local(name: str) -> str:
+    return name.rsplit("}", 1)[-1]
+
+
+def _attr(el, name: str):
+    return next((v for k, v in el.attrib.items() if _local(k) == name), None)
 
 
 def _parse(name: str, body: bytes):
@@ -126,50 +154,104 @@ def _parse(name: str, body: bytes):
     return ET.fromstring(body)
 
 
-def _clean_rels(name: str, body: bytes) -> bytes:
-    """Keeps package-internal relationships and http(s)/mailto hyperlinks; drops every other external or absolute target
-    (remote templates, OLE links, frames, linked images, file: and UNC paths), however the attributes are written."""
-    root = _parse(name, body)
+def _content_types(src) -> tuple[dict, dict]:
+    if "[Content_Types].xml" not in src.namelist():
+        _reject("not a valid .docx package")
+    defaults, overrides = {}, {}
+    for el in _parse("[Content_Types].xml", src.read("[Content_Types].xml")):
+        kind, ctype = _local(el.tag), (_attr(el, "ContentType") or "").strip()
+        if kind == "Default":
+            defaults[(_attr(el, "Extension") or "").lower()] = ctype
+        elif kind == "Override":
+            overrides[(_attr(el, "PartName") or "").lstrip("/").lower()] = ctype
+    return defaults, overrides
+
+
+def _local_ns(tag: str) -> str:
+    return tag[1:].split("}", 1)[0] if tag.startswith("{") else ""
+
+
+def _clean_rels(name: str, root) -> bytes:
+    """Drops every external or absolute target (remote templates, OLE links, frames, linked images, file: and UNC
+    paths) except http(s)/mailto hyperlinks, however the attributes are written; rejects non-allowlisted types."""
     for rel in list(root):
-        target = (rel.get("Target") or "").strip()
-        external = (rel.get("TargetMode") or "").strip().lower() == "external" or bool(ABSOLUTE.match(target))
-        if external and not (rel.get("Type") == HYPERLINK and SAFE_LINK.match(target)):
-            root.remove(rel)
-    ET.register_namespace("", REL_NS)
+        target = (_attr(rel, "Target") or "").strip()
+        kind = (_attr(rel, "Type") or "").strip().rsplit("/", 1)[-1]
+        external = (_attr(rel, "TargetMode") or "").strip().lower() == "external" or bool(ABSOLUTE.match(target))
+        if external:
+            if not (kind == HYPERLINK and SAFE_LINK.match(target)):
+                root.remove(rel)
+        elif kind not in SAFE_RELS:
+            _reject(UNSUPPORTED)
+    ET.register_namespace("", _local_ns(root.tag))
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
 
-def _check_fields(name: str, body: bytes):
-    root = _parse(name, body)
-    # Word splits a field instruction across runs, so the pieces are joined before matching.
-    instr = "".join(t.text or "" for t in root.iter(f"{{{W_NS}}}instrText"))
-    instr += " " + " ".join(e.get(f"{{{W_NS}}}instr", "") for e in root.iter(f"{{{W_NS}}}fldSimple"))
-    if REMOTE_FIELD.search(instr):
-        _reject("documents with linked or DDE fields are not accepted")
+def _check_fields(root):
+    """Every field instruction (simple or complex, nested, any namespace) must start with an allowlisted keyword."""
+
+    def check(instr: str):
+        word = (instr.strip().split() or [""])[0].upper()
+        if word and not word.startswith("=") and word not in SAFE_FIELDS:
+            _reject(UNSUPPORTED)
+
+    stack: list = []  # one instruction buffer per open complex field; None once its instruction has ended
+    for el in root.iter():
+        tag = _local(el.tag)
+        if tag in ("fldData", "mailMerge", "altChunk", "subDoc", "object"):
+            _reject(UNSUPPORTED)
+        elif tag == "fldSimple":
+            check(_attr(el, "instr") or "")
+        elif tag == "fldChar":
+            kind = _attr(el, "fldCharType")
+            if kind == "begin":
+                stack.append([])
+            elif kind in ("separate", "end") and stack:
+                if stack[-1] is not None:
+                    check("".join(stack[-1]))
+                    stack[-1] = None
+                if kind == "end":
+                    stack.pop()
+        elif tag == "instrText":
+            if not stack:
+                check(el.text or "")
+            elif stack[-1] is not None:
+                stack[-1].append(el.text or "")
+    for buf in stack:
+        if buf is not None:
+            check("".join(buf))
 
 
 def sanitize_docx(data: bytes) -> bytes:
-    """Uploaded documents are untrusted. Reject macro-enabled packages, DTDs and remote-loading fields, and drop every
-    external relationship except plain web/mail hyperlinks, before any converter opens the file."""
+    """Uploaded documents are untrusted. Content types (not file names) decide how each part is checked: XML parts are
+    parsed without DTDs, relationship parts lose external targets and must use allowlisted types, every XML part's
+    fields must be allowlisted, and only image/font binaries are kept. Anything else rejects the package."""
     import io
     import zipfile
 
-    src = zipfile.ZipFile(io.BytesIO(data))
-    names = src.namelist()
-    types = src.read("[Content_Types].xml").decode("utf-8", "replace") if "[Content_Types].xml" in names else ""
-    if "macroEnabled" in types or any(n.lower().endswith(("vbaproject.bin", ".bin")) and "vba" in n.lower() for n in names):
-        _reject("macro-enabled documents are not accepted")
+    try:
+        src = zipfile.ZipFile(io.BytesIO(data))
+    except zipfile.BadZipFile:
+        _reject("not a valid .docx package")
+    defaults, overrides = _content_types(src)
     out = io.BytesIO()
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as dst:
-        for name in names:
+        for name in src.namelist():
+            if name.endswith("/"):
+                continue
             body = src.read(name)
-            if name.lower().endswith(".rels"):
-                body = _clean_rels(name, body)
-            elif name.lower().endswith(".xml"):
-                if name.lower().startswith("word/"):
-                    _check_fields(name, body)
-                else:
-                    _parse(name, body)
+            if name == "[Content_Types].xml":
+                if "macroenabled" in body.decode("utf-8", "replace").lower():
+                    _reject("macro-enabled documents are not accepted")
+            else:
+                ext = name.rsplit(".", 1)[-1].lower() if "." in name.rsplit("/", 1)[-1] else ""
+                ctype = overrides.get(name.lower()) or defaults.get(ext, "")
+                if ctype.endswith("relationships+xml") or ext == "rels":
+                    body = _clean_rels(name, _parse(name, body))
+                elif ctype.endswith(("+xml", "/xml")):
+                    _check_fields(_parse(name, body))
+                elif not SAFE_BINARY.match(ctype):
+                    _reject(UNSUPPORTED)
             dst.writestr(name, body)
     return out.getvalue()
 
