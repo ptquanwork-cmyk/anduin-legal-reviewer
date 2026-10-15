@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-15 — Station geometry closer to the approved stills
+
+- Six stations remodelled in `design/blender/build_modules.py`: thick open intake tray with fanned rounded sheets and a block-arrow tile (01); a real tray and larger badges (02); a wider monitor with the source sheet and magnifier to its right (04); a larger stamp with a turned handle and a speech bubble with a tail (05); an upright annotation slab on a blue backing with a framed selection, marker and linked chips (06); rounded, thicker PDF sheets and a block-arrow download tile (09). All sheets now have thickness and rounded corners.
+- The hub frames each model from its own geometry (contain and rest on the bottom, like the stills) instead of per-module numbers; models that were cut off at the bottom of their slots (01, 05, 08) now fit.
+- GLBs re-exported: about 720 KB in total, largest 188 KB.
+
 ## 2026-10-15 — Full-bleed desktop layout, screen polish, CLI semantic reviewer
 
 - The interface fills the browser window: height sets the scale and wider windows widen the content area while the rail and right-hand controls stay at the edges. Mobile layout removed at the owner's request.

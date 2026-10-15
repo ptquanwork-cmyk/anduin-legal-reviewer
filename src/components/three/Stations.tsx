@@ -54,8 +54,9 @@ const CUES: Record<string, Cue> = {
   '09': { move: [0, 0.16, 0] }, // lift the arrow
 };
 
-/** Framing per module (bounding-sphere radius share); measured against the approved stills so each model fills its slot alike. */
-const FIT: Record<string, number> = { '01': 0.66, '02': 0.62, '03': 0.63, '04': 0.65, '05': 0.57, '06': 0.65, '07': 0.76, '08': 0.63, '09': 0.66 };
+/** Camera distance in bounding-sphere radii (sets the perspective strength) and the share of the slot a model fills. */
+const DIST = 2.4;
+const FILL = 0.94;
 
 function setEmissive(m: THREE.MeshStandardMaterial, v: number) {
   if (m.emissive && m.emissiveIntensity !== undefined) m.emissiveIntensity = v;
@@ -132,21 +133,48 @@ function Model({ id, lifted, onReady }: { id: string; lifted: boolean; onReady?:
   const t = useRef(0);
   const { camera, size } = useThree();
 
-  // Frame the model from the shared elevated three-quarter direction so it fills its rectangle.
+  // Camera pose from the shared elevated three-quarter direction, and the model's extent as seen from it (view tangents).
+  const pose = useMemo(() => {
+    root.updateMatrixWorld(true);
+    const sphere = new THREE.Box3().setFromObject(root).getBoundingSphere(new THREE.Sphere());
+    const dist = sphere.radius * DIST;
+    const eye = new THREE.PerspectiveCamera();
+    eye.position.copy(sphere.center).addScaledVector(VIEW_DIR, dist);
+    eye.lookAt(sphere.center);
+    eye.updateMatrixWorld();
+    const ext = new THREE.Box2();
+    const v = new THREE.Vector3();
+    const p = new THREE.Vector2();
+    root.traverse((o) => {
+      const pos = (o as THREE.Mesh).isMesh ? (o as THREE.Mesh).geometry.attributes.position : undefined;
+      for (let i = 0; pos && i < pos.count; i++) {
+        v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld).applyMatrix4(eye.matrixWorldInverse);
+        ext.expandByPoint(p.set(v.x / -v.z, v.y / -v.z));
+      }
+    });
+    return { position: eye.position, center: sphere.center, dist, ext };
+  }, [root]);
+
+  // Contain the model in its rectangle and rest it on the bottom edge, as the stills are (object-contain, object-bottom).
   useLayoutEffect(() => {
-    const box = new THREE.Box3().setFromObject(root);
-    const sphere = box.getBoundingSphere(new THREE.Sphere());
     const cam = camera as THREE.PerspectiveCamera;
-    cam.aspect = size.width / Math.max(1, size.height);
-    const vfov = THREE.MathUtils.degToRad(cam.fov);
-    const hfov = 2 * Math.atan(Math.tan(vfov / 2) * cam.aspect);
-    const dist = (sphere.radius * (FIT[n] ?? 0.8)) / Math.sin(Math.min(vfov, hfov) / 2);
-    cam.position.copy(sphere.center).add(VIEW_DIR.clone().multiplyScalar(dist));
+    const { position, center, dist, ext } = pose;
+    cam.position.copy(position);
+    cam.lookAt(center);
     cam.near = dist / 20;
     cam.far = dist * 20;
-    cam.lookAt(sphere.center);
+    const w = Math.max(1, size.width);
+    const h = Math.max(1, size.height);
+    cam.aspect = w / h;
+    const ty = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2));
+    const tx = ty * cam.aspect;
+    // Share of the full frame (in normalised device units) that the cropped view keeps.
+    const k = Math.max((ext.max.x - ext.min.x) / 2 / tx, (ext.max.y - ext.min.y) / 2 / ty) / FILL;
+    const cx = (ext.max.x + ext.min.x) / 2 / tx;
+    const bottom = ext.min.y / ty;
+    cam.setViewOffset(w, h, ((cx - k + 1) / 2) * w, ((1 - bottom - 2 * k) / 2) * h, k * w, k * h);
     cam.updateProjectionMatrix();
-  }, [root, camera, size.width, size.height, n]);
+  }, [pose, camera, size.width, size.height]);
 
   useEffect(() => onReady?.(), [onReady]);
 

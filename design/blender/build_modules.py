@@ -175,19 +175,152 @@ def tube(name, points, radius, parent, coll, material):
     return o
 
 
-def sheet_lines(prefix, w, h, loc, parent, coll, rows=6, accents=(), rot=(-10, 0, 0), thickness=0.03, paper="paper"):
-    """A sheet with rounded corners and inset text bars (gray, with optional blue/mint accent rows)."""
-    root = bpy.data.objects.new(prefix, None)
-    coll.objects.link(root)
-    root.parent = parent
-    root.location = loc
-    root.rotation_euler = [math.radians(a) for a in rot]
-    rbox(prefix + "_paper", (w, thickness, h), (0, 0, 0), root, coll, paper, bevel=0.035)
+def node(name, parent, coll, loc=(0, 0, 0), rot=(0, 0, 0)):
+    o = bpy.data.objects.new(name, None)
+    coll.objects.link(o)
+    o.parent = parent
+    o.location = loc
+    o.rotation_euler = [math.radians(a) for a in rot]
+    return o
+
+
+def round_poly(pts, radius, seg=6):
+    """Fillets the corners of a closed 2D polygon; radius is one value or one per corner (0 keeps it sharp)."""
+    radii = radius if isinstance(radius, (list, tuple)) else [radius] * len(pts)
+    out = []
+    for i, p in enumerate(pts):
+        p, a, b = Vector(p), Vector(pts[i - 1]), Vector(pts[(i + 1) % len(pts)])
+        u, v = a - p, b - p
+        half = u.angle(v) / 2
+        if radii[i] <= 0 or half > math.pi / 2 - 1e-3:
+            out.append(p)
+            continue
+        d = min(radii[i] / math.tan(half), u.length / 2, v.length / 2)
+        r = d * math.tan(half)
+        u.normalize()
+        v.normalize()
+        c = p + (u + v).normalized() * (r / math.sin(half))
+        t1, t2 = p + u * d - c, p + v * d - c
+        a1 = math.atan2(t1.y, t1.x)
+        sweep = (math.atan2(t2.y, t2.x) - a1 + math.pi) % (2 * math.pi) - math.pi
+        out += [c + Vector((math.cos(a1 + sweep * k / seg), math.sin(a1 + sweep * k / seg))) * r for k in range(seg + 1)]
+    # adjoining fillets can meet in one point (pill ends); drop the duplicate
+    out = [q for k, q in enumerate(out) if (q - out[k - 1]).length > 1e-6]
+    return [(q.x, q.y) for q in out]
+
+
+def _mesh_obj(name, bm, parent, coll, material, loc, rot, bevel, segments=3):
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    me.shade_smooth()
+    me.materials.append(mat(material))
+    o = bpy.data.objects.new(name, me)
+    coll.objects.link(o)
+    o.parent = parent
+    o.location = loc
+    o.rotation_euler = [math.radians(a) for a in rot]
+    if bevel:
+        m = o.modifiers.new("bevel", "BEVEL")
+        m.width = bevel
+        m.segments = segments
+        m.limit_method = "ANGLE"
+        m.angle_limit = math.radians(40)
+        m.harden_normals = True
+    return o
+
+
+def prism(name, outline, depth, loc, parent, coll, material, rot=(0, 0, 0), bevel=0.02):
+    """Extrudes a closed 2D outline (x, z) by depth along y; the front face looks towards -y like the sheets."""
+    bm = bmesh.new()
+    front = [bm.verts.new((x, -depth / 2, z)) for x, z in outline]
+    back = [bm.verts.new((x, depth / 2, z)) for x, z in outline]
+    bm.faces.new(front)
+    bm.faces.new(back[::-1])
+    for i in range(len(outline)):
+        j = (i + 1) % len(outline)
+        bm.faces.new((front[i], front[j], back[j], back[i]))
+    return _mesh_obj(name, bm, parent, coll, material, loc, rot, bevel)
+
+
+def rect(w, h):
+    return [(-w / 2, -h / 2), (w / 2, -h / 2), (w / 2, h / 2), (-w / 2, h / 2)]
+
+
+def rslab(name, w, h, t, r, loc, parent, coll, material, rot=(0, 0, 0), bevel=None):
+    """Slab with rounded corners (w across, h up, t deep): sheets, tiles, badges, panels."""
+    return prism(name, round_poly(rect(w, h), r), t, loc, parent, coll, material, rot, min(t * 0.4, 0.05) if bevel is None else bevel)
+
+
+def tray(name, w, d, h_front, h_back, wall, floor, r, loc, parent, coll, material, bevel=0.04):
+    """Open tray with thick rounded walls; the rim slopes from the back wall down to the front."""
+    outer = round_poly(rect(w, d), r, seg=8)
+    inner = round_poly(rect(w - 2 * wall, d - 2 * wall), r - wall, seg=8)
+    rim = lambda y: h_front + (h_back - h_front) * (y + d / 2) / d
+    bm = bmesh.new()
+    ob = [bm.verts.new((x, y, 0)) for x, y in outer]
+    ot = [bm.verts.new((x, y, rim(y))) for x, y in outer]
+    it = [bm.verts.new((x, y, rim(y))) for x, y in inner]
+    ib = [bm.verts.new((x, y, floor)) for x, y in inner]
+    for i in range(len(outer)):
+        j = (i + 1) % len(outer)
+        for lo, hi in ((ob, ot), (ot, it), (it, ib)):
+            bm.faces.new((lo[i], lo[j], hi[j], hi[i]))
+    bm.faces.new(ib)
+    bm.faces.new(ob[::-1])
+    return _mesh_obj(name, bm, parent, coll, material, loc, (0, 0, 0), bevel)
+
+
+def lathe(name, profile, loc, parent, coll, material, verts=48):
+    """Revolves an (r, z) profile around z; a radius of 0 closes that end."""
+    bm = bmesh.new()
+    ring = lambda r, z: [bm.verts.new((r * math.cos(2 * math.pi * k / verts), r * math.sin(2 * math.pi * k / verts), z)) for k in range(verts)] if r > 0 else [bm.verts.new((0, 0, z))]
+    rings = [ring(r, z) for r, z in profile]
+    for a, b in zip(rings, rings[1:]):
+        for k in range(verts):
+            q = (k + 1) % verts
+            if len(a) == 1:
+                bm.faces.new((a[0], b[q], b[k]))
+            elif len(b) == 1:
+                bm.faces.new((a[k], a[q], b[0]))
+            else:
+                bm.faces.new((a[k], a[q], b[q], b[k]))
+    for end in (rings[0], rings[-1]):
+        if len(end) > 1:
+            bm.faces.new(end)
+    return _mesh_obj(name, bm, parent, coll, material, loc, (0, 0, 0), 0)
+
+
+def arrow_outline(w=0.46, h=0.5, shaft=0.2, head=0.24, down=False):
+    """Block arrow (up, or down) with softened corners, as on the upload and download tiles."""
+    s = -1 if down else 1
+    pts = [(-shaft / 2, -h / 2), (shaft / 2, -h / 2), (shaft / 2, h / 2 - head), (w / 2, h / 2 - head), (0, h / 2), (-w / 2, h / 2 - head), (-shaft / 2, h / 2 - head)]
+    return round_poly([(x, s * z) for x, z in pts], [0.03, 0.03, 0.02, 0.035, 0.05, 0.035, 0.02], seg=5)
+
+
+def magnifier(name, loc, R, parent, coll, turn=0, handle=1.2):
+    """Chunky lens ring with glass, a darker collar and a handle pointing down-right."""
+    lens = node(name, parent, coll, loc, (0, 0, turn))
+    part = name.removeprefix("PROP_")  # only the group carries the hover-cue prefix
+    tor = R * 0.2
+    torus(part + "_ring", R, tor, (0, 0, 0), lens, coll, "blue_resin", rot=(90, 0, 0))
+    cyl(part + "_glass", R, 0.02, (0, 0, 0), lens, coll, "glass", rot=(90, 0, 0))
+    d = Vector((math.sqrt(0.5), 0, -math.sqrt(0.5)))
+    cyl(part + "_collar", tor * 1.2, 0.14, d * (R + tor + 0.04), lens, coll, "blue_deep", rot=(0, 135, 0), bevel=0.02)
+    cyl(part + "_handle", tor * 1.05, R * handle, d * (R + tor + 0.08 + R * handle / 2), lens, coll, "blue_resin", rot=(0, 135, 0), bevel=0.03)
+    return lens
+
+
+def sheet_lines(prefix, w, h, loc, parent, coll, rows=6, accents=(), rot=(-10, 0, 0), thickness=0.06, paper="paper", radius=0.1):
+    """A sheet with rounded corners and inset pill-shaped text bars (gray, with optional blue/mint accent rows)."""
+    root = node(prefix, parent, coll, loc, rot)
+    rslab(prefix + "_paper", w, h, thickness, radius, (0, 0, 0), root, coll, paper)
     top = h / 2 - h * 0.16
     for i in range(rows):
         frac = 0.62 if i % 3 == 2 else 0.78
         col = dict(accents).get(i, "line_gray")
-        rbox(f"{prefix}_line{i}", (w * frac, 0.012, h * 0.045), (-w * (1 - frac) / 2 + w * 0.0, -thickness / 2 - 0.004, top - i * h * 0.12), root, coll, col, bevel=0.01)
+        rslab(f"{prefix}_line{i}", w * frac, h * 0.05, 0.016, h * 0.025, (-w * 0.39 + w * frac / 2, -thickness / 2 - 0.004, top - i * h * 0.12), root, coll, col, bevel=0.006)
     return root
 
 
@@ -208,42 +341,30 @@ def base(root, coll, w=2.2, d=1.6, h=0.18):
 # ---------------------------------------------------------------- modules
 def m01_intake(x=0):
     root, c = new_module("MODULE_01_INTAKE", x)
-    tray = bpy.data.objects.new("TRAY", None)
-    c.objects.link(tray)
-    tray.parent = root
-    # open box tray: floor + four walls in blue resin
-    rbox("tray_floor", (1.5, 1.1, 0.1), (0, 0, 0.05), tray, c, "blue_resin", bevel=0.04)
-    rbox("tray_back", (1.5, 0.1, 0.55), (0, 0.5, 0.32), tray, c, "blue_resin", bevel=0.04)
-    rbox("tray_front", (1.5, 0.1, 0.38), (0, -0.5, 0.24), tray, c, "blue_resin", bevel=0.04)
-    rbox("tray_left", (0.1, 1.1, 0.48), (-0.7, 0, 0.28), tray, c, "blue_resin", bevel=0.04)
-    rbox("tray_right", (0.1, 1.1, 0.48), (0.7, 0, 0.28), tray, c, "blue_resin", bevel=0.04)
+    tray_root = node("TRAY", root, c)
+    # thick open tray, back wall higher than the front, holding a fanned stack of sheets
+    tray("tray", 1.9, 1.3, 0.42, 0.62, 0.13, 0.12, 0.24, (0, 0.05, 0), tray_root, c, "blue_resin")
     for i in range(3):
-        sheet_lines(f"sheet{i}", 1.0, 1.25, (-0.12 + i * 0.08, 0.15 - i * 0.12, 0.72 + i * 0.03), tray, c, rows=6, rot=(-14 + i * 3, 0, -6 + i * 4))
-    prop = bpy.data.objects.new("PROP_sheet", None)
-    c.objects.link(prop)
-    prop.parent = tray
-    sheet_lines("sheet_top", 1.0, 1.25, (0.05, -0.12, 0.8), prop, c, rows=6, rot=(-18, 0, 2))
-    tile = rbox("upload_tile", (0.72, 0.28, 0.72), (0.62, -0.55, 0.42), tray, c, "mint_resin", bevel=0.12)
-    glyph("upload_arrow", "↑", 0.75, (0.62, -0.7, 0.4), tray, c, "white", rot=(90, 0, 0), extrude=0.05)
+        sheet_lines(f"sheet{i}", 1.0, 1.3, (-0.3 + i * 0.12, 0.32 - i * 0.12, 0.86 - i * 0.025), tray_root, c, rows=6, rot=(-12 + i * 2, -6 + i * 3, -14))
+    prop = node("PROP_sheet", tray_root, c)
+    sheet_lines("sheet_top", 1.0, 1.3, (0.08, -0.06, 0.78), prop, c, rows=6, rot=(-8, 2, -14))
+    up = node("upload", tray_root, c, (0.55, -0.7, 0.4), (0, 0, -16))
+    rslab("upload_tile", 0.8, 0.8, 0.3, 0.18, (0, 0, 0), up, c, "mint_resin", bevel=0.06)
+    prism("upload_arrow", arrow_outline(), 0.08, (0, -0.17, 0), up, c, "white")
     return root
 
 
 def m02_source(x=0):
     root, c = new_module("MODULE_02_SOURCE_QUALITY", x)
-    rbox("holder", (1.8, 1.0, 0.22), (0, 0, 0.11), root, c, "blue_resin", bevel=0.08)
-    word = sheet_lines("word_sheet", 0.95, 1.2, (-0.42, 0.1, 0.8), root, c, rows=6, rot=(-10, 0, 10))
-    rbox("word_badge", (0.36, 0.06, 0.36), (-0.2, -0.06, 0.32), word, c, "blue_deep", bevel=0.06)
-    glyph("word_W", "W", 0.28, (-0.2, -0.1, 0.32), word, c, "white", rot=(90, 0, 0))
-    pdf = sheet_lines("pdf_sheet", 0.95, 1.2, (0.48, 0.2, 0.82), root, c, rows=6, rot=(-10, 0, -10))
-    rbox("pdf_badge", (0.42, 0.06, 0.3), (0.1, -0.06, 0.32), pdf, c, "red", bevel=0.06)
-    glyph("pdf_text", "PDF", 0.16, (0.1, -0.1, 0.32), pdf, c, "white", rot=(90, 0, 0))
-    lens = bpy.data.objects.new("PROP_lens", None)
-    c.objects.link(lens)
-    lens.parent = root
-    lens.location = (0.05, -0.55, 0.62)
-    torus("lens_ring", 0.32, 0.06, (0, 0, 0), lens, c, "blue_resin", rot=(90, 0, 0))
-    cyl("lens_glass", 0.3, 0.02, (0, 0, 0), lens, c, "glass", rot=(90, 0, 0))
-    cyl("lens_handle", 0.07, 0.55, (0.42, -0.05, -0.38), lens, c, "blue_resin", rot=(0, 135, 0), bevel=0.02)
+    tray("holder", 2.1, 1.1, 0.3, 0.42, 0.12, 0.1, 0.22, (0, 0, 0), root, c, "blue_resin")
+    sheet_lines("word_back", 0.92, 1.2, (-0.45, 0.22, 0.78), root, c, rows=6, rot=(-10, -4, -10))
+    word = sheet_lines("word_sheet", 0.92, 1.2, (-0.34, 0.08, 0.74), root, c, rows=6, rot=(-10, -4, -10))
+    rslab("word_badge", 0.46, 0.44, 0.08, 0.08, (-0.06, -0.06, 0.22), word, c, "blue_deep")
+    glyph("word_W", "W", 0.34, (-0.06, -0.105, 0.22), word, c, "white", rot=(90, 0, 0))
+    pdf = sheet_lines("pdf_sheet", 0.92, 1.2, (0.45, 0.2, 0.78), root, c, rows=6, rot=(-10, 5, -14))
+    rslab("pdf_badge", 0.58, 0.4, 0.08, 0.08, (0.02, -0.06, 0.22), pdf, c, "red")
+    glyph("pdf_text", "PDF", 0.2, (0.02, -0.105, 0.22), pdf, c, "white", rot=(90, 0, 0))
+    magnifier("PROP_lens", (0.12, -0.58, 0.68), 0.34, root, c, turn=-14)
     return root
 
 
@@ -266,7 +387,7 @@ def m03_map(x=0):
 def m04_review(x=0):
     root, c = new_module("MODULE_04_LEGAL_REVIEW", x)
     # keyboard base
-    rbox("kb_base", (2.0, 1.45, 0.24), (0, -0.1, 0.12), root, c, "blue_resin", bevel=0.1)
+    rbox("kb_base", (2.3, 1.5, 0.26), (0.05, -0.1, 0.13), root, c, "blue_resin", bevel=0.12)
     rbox("kb_deck", (1.55, 0.78, 0.06), (0.05, -0.38, 0.27), root, c, "blue_deep", bevel=0.04)
     keys = bpy.data.objects.new("keys", None)
     c.objects.link(keys)
@@ -278,26 +399,20 @@ def m04_review(x=0):
     for i in range(3):
         rbox(f"key_side_l{i}", (0.2, 0.16, 0.12), (-0.78, -0.72 + i * 0.2, 0.35), keys, c, "blue_resin", bevel=0.04)
         rbox(f"key_side_r{i}", (0.24, 0.16, 0.12), (0.85, -0.7 + i * 0.2, 0.35), keys, c, "blue_resin", bevel=0.04)
-    # CRT
-    crt = bpy.data.objects.new("CRT", None)
-    c.objects.link(crt)
-    crt.parent = root
-    crt.location = (-0.05, 0.38, 0.28)
-    rbox("crt_back", (1.05, 0.8, 0.9), (0, 0.45, 0.62), crt, c, "blue_resin", bevel=0.18)
-    rbox("crt_body", (1.45, 0.62, 1.12), (0, -0.05, 0.66), crt, c, "blue_resin", bevel=0.14)
-    rbox("crt_bezel", (1.22, 0.06, 0.9), (0, -0.37, 0.7), crt, c, "blue_deep", bevel=0.1)
-    rbox("crt_screen", (1.04, 0.06, 0.74), (0, -0.4, 0.72), crt, c, "screen", bevel=0.1)
+    # CRT: wide rounded body, deep bezel and a large rounded screen
+    crt = node("CRT", root, c, (-0.1, 0.38, 0.28))
+    rbox("crt_back", (1.25, 0.8, 1.0), (0, 0.45, 0.68), crt, c, "blue_resin", bevel=0.22)
+    rbox("crt_body", (1.8, 0.62, 1.3), (0, -0.05, 0.73), crt, c, "blue_resin", bevel=0.18)
+    rslab("crt_bezel", 1.58, 1.12, 0.06, 0.18, (0, -0.37, 0.78), crt, c, "blue_deep")
+    rslab("crt_screen", 1.34, 0.9, 0.06, 0.15, (0, -0.4, 0.8), crt, c, "screen")
     rbox("crt_neck", (0.6, 0.3, 0.14), (0, -0.3, 0.06), crt, c, "blue_deep", bevel=0.05)
-    for i, xo in enumerate((-0.18, 0.12, 0.24)):
-        cyl(f"knob{i}", 0.055, 0.06, (xo, -0.42, 0.13), crt, c, "gray" if i else "navy", rot=(90, 0, 0))
-    prop = bpy.data.objects.new("PROP_quote", None)
-    c.objects.link(prop)
-    prop.parent = crt
-    prop.location = (0, -0.44, 0.72)
-    glyph("quote_mark", "“", 0.42, (-0.33, 0, 0.12), prop, c, "screen_mint", rot=(90, 0, 0), extrude=0.01)
-    rbox("bar_blue", (0.62, 0.02, 0.08), (0.03, 0, 0.02), prop, c, "screen_blue", bevel=0.03)
-    rbox("bar_mint", (0.55, 0.02, 0.08), (0.0, 0, -0.13), prop, c, "screen_mint", bevel=0.03)
-    rbox("bar_small", (0.14, 0.02, 0.05), (-0.29, 0, -0.27), prop, c, "screen_mint", bevel=0.02)
+    for i, xo in enumerate((0.4, 0.55, 0.68)):
+        cyl(f"knob{i}", 0.055, 0.06, (xo, -0.42, 0.15), crt, c, "gray" if i else "navy", rot=(90, 0, 0))
+    prop = node("PROP_quote", crt, c, (0, -0.44, 0.8))
+    glyph("quote_mark", "“", 0.48, (-0.45, 0, 0.16), prop, c, "screen_mint", rot=(90, 0, 0), extrude=0.01)
+    rbox("bar_blue", (0.78, 0.02, 0.09), (0.06, 0, 0.03), prop, c, "screen_blue", bevel=0.03)
+    rbox("bar_mint", (0.68, 0.02, 0.09), (0.01, 0, -0.14), prop, c, "screen_mint", bevel=0.03)
+    rbox("bar_small", (0.18, 0.02, 0.055), (-0.42, 0, -0.3), prop, c, "screen_mint", bevel=0.02)
     # coiled cable around the front-left corner
     pts = []
     turns = 26
@@ -311,66 +426,74 @@ def m04_review(x=0):
         off = nrm * math.cos(phase) * 0.09 + Vector((0, 0, 1)) * math.sin(phase) * 0.09
         pts.append(Vector((cx, cy, 0.13)) + off)
     tube("cable", pts, 0.03, root, c, "cream")
-    # source sheet with magnifier
-    doc = sheet_lines("source_sheet", 0.95, 1.2, (1.0, 0.65, 0.95), root, c, rows=7, accents=[(3, "line_blue"), (5, "line_mint")], rot=(-8, 0, -14))
-    rbox("sheet_stand", (0.7, 0.35, 0.22), (1.05, 0.5, 0.36), root, c, "white", bevel=0.06)
-    lens = bpy.data.objects.new("lens", None)
-    c.objects.link(lens)
-    lens.parent = root
-    lens.location = (1.25, 0.25, 1.0)
-    torus("lens_ring", 0.3, 0.055, (0, 0, 0), lens, c, "blue_resin", rot=(90, 0, -18))
-    cyl("lens_glass", 0.28, 0.02, (0, 0, 0), lens, c, "glass", rot=(90, 0, -18))
-    cyl("lens_handle", 0.065, 0.5, (0.35, -0.1, -0.38), lens, c, "blue_resin", rot=(0, 135, 0), bevel=0.02)
+    # source sheet on its stand, spread to the right of the monitor, with a magnifier in front
+    sheet_lines("source_sheet", 0.95, 1.2, (1.15, 0.85, 0.85), root, c, rows=7, accents=[(3, "line_blue"), (5, "line_mint")], rot=(-8, 0, -18))
+    rbox("sheet_stand", (0.72, 0.36, 0.24), (1.17, 0.75, 0.12), root, c, "white", bevel=0.06)
+    magnifier("lens", (1.45, 0.3, 0.95), 0.3, root, c, turn=-18)
     return root
 
 
 def m05_report(x=0):
     root, c = new_module("MODULE_05_DECISION_REPORT", x)
-    sheet_lines("report", 1.0, 1.3, (0.35, 0.45, 0.85), root, c, rows=7, rot=(-10, 0, -8))
-    stamp = bpy.data.objects.new("PROP_stamp", None)
-    c.objects.link(stamp)
-    stamp.parent = root
-    stamp.location = (-0.35, -0.15, 0)
-    rbox("stamp_pad", (0.9, 0.7, 0.2), (0, 0, 0.1), stamp, c, "blue_resin", bevel=0.05)
-    cyl("stamp_neck", 0.11, 0.35, (0, 0, 0.38), stamp, c, "navy")
-    sphere("stamp_knob", 0.24, (0, 0, 0.72), stamp, c, "navy", scale=(1, 1, 1.1))
-    bubble = rbox("bubble", (0.8, 0.22, 0.6), (0.55, -0.35, 0.55), root, c, "mint_resin", bevel=0.18)
+    sheet_lines("report", 1.15, 1.5, (0.3, 0.4, 0.8), root, c, rows=6, rot=(-8, 0, -20), thickness=0.14, paper="white", radius=0.12)
+    stamp = node("PROP_stamp", root, c, (-0.42, -0.22, 0), (0, 0, -18))
+    rbox("stamp_pad", (0.98, 0.8, 0.24), (0, 0, 0.12), stamp, c, "blue_deep", bevel=0.07)
+    rbox("stamp_plate", (0.8, 0.64, 0.08), (0, 0, 0.27), stamp, c, "blue_resin", bevel=0.035)
+    cyl("stamp_collar", 0.23, 0.13, (0, 0, 0.365), stamp, c, "gray", bevel=0.03)
+    # turned handle: narrow neck flaring into a bulb
+    lathe("stamp_handle", [(0.19, 0), (0.15, 0.04), (0.12, 0.12), (0.13, 0.22), (0.19, 0.31), (0.26, 0.41), (0.29, 0.51), (0.27, 0.61), (0.2, 0.68), (0.1, 0.715), (0, 0.725)], (0, 0, 0.42), stamp, c, "navy")
+    bubble = node("bubble", root, c, (0.62, -0.38, 0.5), (0, 0, -20))
+    w, h = 0.92, 0.62
+    outline = [(-w / 2, -h / 2), (-w / 2 + 0.3, -h / 2), (-w / 2 + 0.2, -h / 2 - 0.2), (-w / 2 + 0.52, -h / 2), (w / 2, -h / 2), (w / 2, h / 2), (-w / 2, h / 2)]
+    prism("bubble_body", round_poly(outline, [0.18, 0.05, 0.03, 0.08, 0.18, 0.18, 0.18]), 0.26, (0, 0, 0), bubble, c, "mint_resin", bevel=0.06)
     for i in range(3):
-        sphere(f"dot{i}", 0.06, (0.33 + i * 0.22, -0.48, 0.56), root, c, "white")
+        sphere(f"dot{i}", 0.085, (-0.24 + i * 0.24, -0.15, 0.0), bubble, c, "white", scale=(1, 0.55, 1))
     return root
 
 
 def m06_annotation(x=0):
     root, c = new_module("MODULE_06_ANNOTATION", x)
-    rbox("slab", (1.5, 1.2, 0.16), (-0.35, 0, 0.5), root, c, "white", bevel=0.06, rot=(18, 0, 0))
-    sel = bpy.data.objects.new("selection", None)
-    c.objects.link(sel)
-    sel.parent = root
-    sel.location = (-0.35, -0.05, 0.58)
-    sel.rotation_euler = (math.radians(18), 0, 0)
-    for i in range(4):
-        rbox(f"slab_line{i}", (0.95 if i % 2 else 1.1, 0.06, 0.02), (-0.05, 0.4 - i * 0.2, 0.04), sel, c, "line_blue" if 1 <= i <= 2 else "line_gray", bevel=0.01)
-    rbox("sel_box", (1.15, 0.5, 0.02), (0, -0.05, 0.05), sel, c, "glass", bevel=0.02)
-    pen = bpy.data.objects.new("PROP_stylus", None)
-    c.objects.link(pen)
-    pen.parent = root
-    pen.location = (0.2, 0.0, 1.1)
-    pen.rotation_euler = (0, math.radians(-50), math.radians(35))
-    cyl("stylus_body", 0.075, 1.1, (0, 0, 0), pen, c, "blue_resin", bevel=0.03)
-    bpy.ops.mesh.primitive_cone_add(radius1=0.075, depth=0.18, location=(0, 0, -0.64))
+    # upright source slab on a blue backing, with a selection around three lines
+    rslab("backing", 1.32, 1.5, 0.12, 0.14, (-0.36, 0.2, 0.74), root, c, "blue_resin", rot=(-10, 0, 0))
+    doc = node("doc", root, c, (-0.26, 0.06, 0.78), (-10, 0, 0))
+    t = 0.14
+    f = -t / 2 - 0.004
+    rslab("doc_slab", 1.3, 1.5, t, 0.14, (0, 0, 0), doc, c, "white")
+    for i, (z, w) in enumerate([(0.52, 0.95), (0.37, 0.8), (-0.45, 0.95), (-0.6, 0.72)]):
+        rslab(f"doc_line{i}", w, 0.07, 0.016, 0.035, (-0.48 + w / 2, f, z), doc, c, "line_gray", bevel=0.006)
+    rslab("sel_fill", 0.98, 0.5, 0.012, 0.03, (0, f, -0.04), doc, c, "line_blue", bevel=0.004)
+    for i, (z, w) in enumerate([(0.1, 0.8), (-0.04, 0.8), (-0.18, 0.6)]):
+        rslab(f"sel_line{i}", w, 0.07, 0.016, 0.035, (-0.4 + w / 2, f - 0.008, z), doc, c, "blue_deep", bevel=0.006)
+    for name, size, loc in [("top", (1.0, 0.02, 0.025), (0, f - 0.01, 0.21)), ("bottom", (1.0, 0.02, 0.025), (0, f - 0.01, -0.29)),
+                            ("left", (0.025, 0.02, 0.52), (-0.49, f - 0.01, -0.04)), ("right", (0.025, 0.02, 0.52), (0.49, f - 0.01, -0.04))]:
+        rbox(f"sel_{name}", size, loc, doc, c, "blue_deep", bevel=0.008)
+    for i, (sx, sz) in enumerate([(-0.49, 0.21), (0.49, 0.21), (-0.49, -0.29), (0.49, -0.29)]):
+        sphere(f"sel_handle{i}", 0.04, (sx, f - 0.02, sz), doc, c, "blue_deep")
+    # marker resting its tip on the selection's top-right corner
+    pen = node("PROP_stylus", doc, c, (0.49, f - 0.06, 0.21))
+    pen.rotation_euler = Vector((0.55, -0.35, 0.8)).to_track_quat("Z", "Y").to_euler()
+    bpy.ops.mesh.primitive_cone_add(radius1=0.015, radius2=0.085, depth=0.22, location=(0, 0, 0))
     tip = bpy.context.active_object
     tip.name = "stylus_tip"
-    tip.rotation_euler = (math.radians(180), 0, 0)
+    tip.location = (0, 0, 0.11)
     tip.data.materials.append(mat("navy"))
+    bpy.ops.object.shade_smooth()
     _link(tip, pen, c)
-    for i, (m, shape) in enumerate([("mint_resin", "box"), ("blue_resin", "ring"), ("blue_resin", "check")]):
-        chip = rbox(f"chip{i}", (0.65, 0.1, 0.28), (0.85, -0.2 - i * 0.05, 0.95 - i * 0.33), root, c, "white", bevel=0.07)
-        if shape == "box":
-            rbox(f"chip{i}_mark", (0.14, 0.05, 0.14), (0.62, -0.27, 0.95), root, c, m, bevel=0.03)
-        elif shape == "ring":
-            torus(f"chip{i}_mark", 0.07, 0.022, (0.62, -0.32, 0.62), root, c, m, rot=(90, 0, 0))
+    cyl("stylus_body", 0.09, 0.75, (0, 0, 0.595), pen, c, "blue_resin", bevel=0.02)
+    cyl("stylus_cap", 0.095, 0.24, (0, 0, 1.09), pen, c, "navy", bevel=0.045)
+    # field chips linked to the source
+    for i in range(3):
+        chip = node(f"chip{i}", root, c, (0.98, -0.04, 1.2 - i * 0.48), (-10, 0, 0))
+        rslab(f"chip{i}_body", 0.8, 0.4, 0.14, 0.12, (0, 0, 0), chip, c, "white")
+        rslab(f"chip{i}_line", 0.32, 0.07, 0.016, 0.035, (0.12, -0.076, 0), chip, c, "line_gray", bevel=0.006)
+        rbox(f"chip{i}_link", (0.2, 0.06, 0.06), (-0.49, 0, 0), chip, c, "line_gray", bevel=0.02)
+        if i == 0:
+            rslab("chip0_mark", 0.18, 0.18, 0.05, 0.045, (-0.21, -0.08, 0), chip, c, "mint_resin")
+        elif i == 1:
+            torus("chip1_mark", 0.08, 0.026, (-0.21, -0.08, 0), chip, c, "blue_resin", rot=(90, 0, 0))
         else:
-            rbox(f"chip{i}_mark", (0.15, 0.05, 0.15), (0.62, -0.37, 0.29), root, c, m, bevel=0.03)
+            rslab("chip2_mark", 0.19, 0.19, 0.05, 0.045, (-0.21, -0.08, 0), chip, c, "blue_deep")
+            tube("chip2_check", [(-0.265, -0.11, 0.0), (-0.23, -0.11, -0.045), (-0.155, -0.11, 0.05)], 0.017, chip, c, "white")
     return root
 
 
@@ -410,23 +533,14 @@ def m08_responses(x=0):
 
 def m09_export(x=0):
     root, c = new_module("MODULE_09_PDF_QA_EXPORT", x)
-    for i in range(2):
-        sheet_lines(f"pdf_sheet{i}", 0.95, 1.2, (-0.25 + i * 0.12, 0.35 - i * 0.12, 0.75), root, c, rows=6, rot=(-10, 0, 6 - i * 4))
-    rbox("pdf_badge", (0.5, 0.06, 0.34), (-0.18, 0.12, 0.98), root, c, "red", bevel=0.06, rot=(-10, 0, 2))
-    glyph("pdf_text", "PDF", 0.2, (-0.18, 0.07, 0.98), root, c, "white", rot=(80, 0, 2))
-    lens = bpy.data.objects.new("lens", None)
-    c.objects.link(lens)
-    lens.parent = root
-    lens.location = (0.62, -0.05, 1.05)
-    torus("lens_ring", 0.3, 0.055, (0, 0, 0), lens, c, "blue_resin", rot=(90, 0, 10))
-    cyl("lens_glass", 0.28, 0.02, (0, 0, 0), lens, c, "glass", rot=(90, 0, 10))
-    cyl("lens_handle", 0.065, 0.5, (0.32, -0.1, -0.38), lens, c, "blue_resin", rot=(0, 135, 0), bevel=0.02)
-    arrow = bpy.data.objects.new("PROP_arrow", None)
-    c.objects.link(arrow)
-    arrow.parent = root
-    arrow.location = (0.25, -0.5, 0.42)
-    rbox("arrow_tile", (0.75, 0.35, 0.75), (0, 0, 0), arrow, c, "blue_resin", bevel=0.13)
-    glyph("arrow_glyph", "↓", 0.75, (0, -0.19, -0.02), arrow, c, "white", rot=(90, 0, 0), extrude=0.05)
+    sheet_lines("pdf_sheet0", 1.0, 1.3, (-0.38, 0.32, 0.8), root, c, rows=6, rot=(-8, 0, -12))
+    front = sheet_lines("pdf_sheet1", 1.0, 1.3, (-0.24, 0.16, 0.76), root, c, rows=7, rot=(-8, 0, -12))
+    rslab("pdf_badge", 0.58, 0.38, 0.1, 0.08, (-0.06, -0.07, 0.16), front, c, "red")
+    glyph("pdf_text", "PDF", 0.22, (-0.06, -0.125, 0.16), front, c, "white", rot=(90, 0, 0))
+    magnifier("lens", (0.55, -0.12, 0.92), 0.38, root, c, turn=-14)
+    arrow = node("PROP_arrow", root, c, (0.08, -0.55, 0.36), (0, 0, -12))
+    rslab("arrow_tile", 0.84, 0.68, 0.3, 0.16, (0, 0, 0), arrow, c, "blue_resin", bevel=0.06)
+    prism("arrow_glyph", arrow_outline(0.44, 0.46, 0.18, 0.22, down=True), 0.08, (0, -0.17, 0), arrow, c, "white")
     return root
 
 
