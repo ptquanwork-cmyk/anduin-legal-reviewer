@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-16: GitHub About section and judge contents
+
+- README reorganised for judges:
+  - About me (portfolio, LinkedIn, CV summary) and the owner's take on The Legal Reviewer challenge.
+  - A contents table and a two-minute walkthrough.
+  - Technology and languages, testing and evidence with recorded results, security, and current status and limitations.
+- Repository description and topics updated.
+- The judge guide, tests and evals pages no longer say that nothing has run; recorded runs are listed in `evals/results/`.
+
 ## 2026-10-16: Page freeze and crash on long documents
 
 - Worker: model work runs on one thread. Before this, every job left a PyTorch thread pool behind, and the worker grew to 17.7 GB, which starved the browser on the same laptop.

@@ -24,9 +24,11 @@ The original plan's opening sentence records an earlier local-only publication i
 
 ## Evidence boundaries
 
-The public repository has a static hosted project hub, infrastructure records, synthetic fixtures and a detailed static design package. The approved light hub/screens and object references remain available with separate dark companions. Image/ZIP/hash checks are actual artifact-delivery evidence.
+*Updated 16 October 2026. The paragraphs further below describe the 14 October planning package.*
 
-The proposed legal-review runtime, model-quality benchmark, authenticated application storage and Blender mesh/animation are not completed. All contract/answer/job states in UI concepts are synthetic. Plans, intended control behavior and evaluation criteria are clearly labeled, and are not presented as successful application runs.
+The application is now built and live: Next.js on Vercel, Supabase storage and database, and a worker on the owner's laptop. Blender station models are rendered live. Evidence of what runs, and how well, is in the [README's testing section](../../README.md#testing-and-evidence) and the [build logs](../../progress/build-log/). It includes end-to-end runs of eight synthetic contracts against production, scored against expected results. These are synthetic documents written for this project. No benchmark on real contracts and no confidence calibration is claimed.
+
+The original planning package remains: synthetic fixtures, a detailed static design package, and the approved light hub/screens and object references with separate dark companions. Image/ZIP/hash checks are actual artifact-delivery evidence. All contract, answer and job states in the UI concepts are synthetic.
 
 The published original plan and English supporting documents describe proposed product/system requirements. Publication includes only the specifically identified original plan from the private planning folder; raw recordings/transcripts, other private inputs, real contracts, credentials and unrelated checkouts remain outside the public repository. The owner authorizes this judge-readable planning/design package; publication does not submit the hackathon entry.
 
