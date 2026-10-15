@@ -7,13 +7,16 @@ data: the caller chooses the fixed question set; nothing in the text can select 
 """
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
 import threading
 import time
 import urllib.request
+import xml.etree.ElementTree as ET
 from pathlib import Path
+from xml.parsers import expat
 
 from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -94,32 +97,79 @@ def health():
 
 
 HYPERLINK = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink"
+REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
+W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+SAFE_LINK = re.compile(r"^(https?://|mailto:)", re.I)
+ABSOLUTE = re.compile(r"^([a-z][a-z0-9+.-]*:|\\\\|//)", re.I)  # any scheme, UNC (\\host) or network path
+# Field codes that make Word load or execute something outside the package when fields update.
+REMOTE_FIELD = re.compile(r"\b(INCLUDEPICTURE|INCLUDETEXT|LINK|DDE|DDEAUTO|IMPORT)\b", re.I)
+
+
+def _reject(detail: str):
+    raise HTTPException(status_code=415, detail=detail)
+
+
+def _parse(name: str, body: bytes):
+    # A first expat pass (any declared encoding) refuses DOCTYPE and ENTITY declarations; without a DTD there is
+    # nothing to expand or fetch, so the stdlib tree parser below is then safe (the same guard defusedxml applies).
+    def forbid(*_):
+        raise ValueError("dtd")
+
+    scan = expat.ParserCreate()
+    scan.StartDoctypeDeclHandler = scan.EntityDeclHandler = forbid
+    try:
+        scan.Parse(body, True)
+    except ValueError:
+        _reject(f"document type declarations are not accepted ({name})")
+    except expat.ExpatError:
+        _reject(f"unreadable package part ({name})")
+    return ET.fromstring(body)
+
+
+def _clean_rels(name: str, body: bytes) -> bytes:
+    """Keeps package-internal relationships and http(s)/mailto hyperlinks; drops every other external or absolute target
+    (remote templates, OLE links, frames, linked images, file: and UNC paths), however the attributes are written."""
+    root = _parse(name, body)
+    for rel in list(root):
+        target = (rel.get("Target") or "").strip()
+        external = (rel.get("TargetMode") or "").strip().lower() == "external" or bool(ABSOLUTE.match(target))
+        if external and not (rel.get("Type") == HYPERLINK and SAFE_LINK.match(target)):
+            root.remove(rel)
+    ET.register_namespace("", REL_NS)
+    return ET.tostring(root, encoding="utf-8", xml_declaration=True)
+
+
+def _check_fields(name: str, body: bytes):
+    root = _parse(name, body)
+    # Word splits a field instruction across runs, so the pieces are joined before matching.
+    instr = "".join(t.text or "" for t in root.iter(f"{{{W_NS}}}instrText"))
+    instr += " " + " ".join(e.get(f"{{{W_NS}}}instr", "") for e in root.iter(f"{{{W_NS}}}fldSimple"))
+    if REMOTE_FIELD.search(instr):
+        _reject("documents with linked or DDE fields are not accepted")
 
 
 def sanitize_docx(data: bytes) -> bytes:
-    """Uploaded documents are untrusted. Reject macro-enabled packages and drop every external relationship
-    except plain hyperlinks (remote templates, OLE links, frames, linked images) before any converter opens it."""
+    """Uploaded documents are untrusted. Reject macro-enabled packages, DTDs and remote-loading fields, and drop every
+    external relationship except plain web/mail hyperlinks, before any converter opens the file."""
     import io
-    import re
     import zipfile
 
     src = zipfile.ZipFile(io.BytesIO(data))
     names = src.namelist()
     types = src.read("[Content_Types].xml").decode("utf-8", "replace") if "[Content_Types].xml" in names else ""
     if "macroEnabled" in types or any(n.lower().endswith(("vbaproject.bin", ".bin")) and "vba" in n.lower() for n in names):
-        raise HTTPException(status_code=415, detail="macro-enabled documents are not accepted")
+        _reject("macro-enabled documents are not accepted")
     out = io.BytesIO()
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as dst:
         for name in names:
             body = src.read(name)
-            if name.endswith(".rels"):
-                xml = body.decode("utf-8", "replace")
-                xml = re.sub(
-                    r"<Relationship\b[^>]*?/>",
-                    lambda m: m.group(0) if 'TargetMode="External"' not in m.group(0) or f'Type="{HYPERLINK}"' in m.group(0) else "",
-                    xml,
-                )
-                body = xml.encode("utf-8")
+            if name.lower().endswith(".rels"):
+                body = _clean_rels(name, body)
+            elif name.lower().endswith(".xml"):
+                if name.lower().startswith("word/"):
+                    _check_fields(name, body)
+                else:
+                    _parse(name, body)
             dst.writestr(name, body)
     return out.getvalue()
 
@@ -128,11 +178,16 @@ def _word_to_pdf(src: Path, out: Path):
     # Word COM through PowerShell; one conversion at a time because Word automation is single-instance.
     # AutomationSecurity=3 forces macros off for this automation session; the document opens read-only, with an
     # empty password (a protected file fails instead of prompting) and without encoding or conversion dialogs.
+    # Link and field updates are switched off while converting; Word stores these options per user, so the
+    # owner's values are restored afterwards.
     script = (
         "$ErrorActionPreference='Stop';"
         "$w=New-Object -ComObject Word.Application;$w.Visible=$false;$w.DisplayAlerts=0;$w.AutomationSecurity=3;"
+        "$o=$w.Options;$keep=@($o.UpdateLinksAtOpen,$o.UpdateFieldsAtPrint,$o.UpdateLinksAtPrint);"
+        "$o.UpdateLinksAtOpen=$false;$o.UpdateFieldsAtPrint=$false;$o.UpdateLinksAtPrint=$false;"
         "try{$d=$w.Documents.Open($env:SRC,$false,$true,$false,'','',$true,'','',0,0,$false,$false,0,$true);"
-        "$d.SaveAs2($env:OUT,17);$d.Close(0)}finally{$w.Quit()}"
+        "$d.SaveAs2($env:OUT,17);$d.Close(0)}"
+        "finally{$o.UpdateLinksAtOpen=$keep[0];$o.UpdateFieldsAtPrint=$keep[1];$o.UpdateLinksAtPrint=$keep[2];$w.Quit()}"
     )
     env = {**os.environ, "SRC": str(src), "OUT": str(out)}
     with word_lock:
