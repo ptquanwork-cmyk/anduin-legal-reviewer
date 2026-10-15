@@ -113,6 +113,10 @@ for path in ["file:///C:/secret.png", "C:\\secret.png", " \\\\evil\\x", "/\\evil
 assert not rejected({"word/document.xml": doc(pict.format("12:30"))}), "ordinary values pass"
 href = '<w:r><w:pict xmlns:o="urn:schemas-microsoft-com:office:office"><o:x o:href="https://evil.example/x.png"/></w:pict></w:r>'
 assert rejected({"word/document.xml": doc(href)}), "linked-picture URL attribute"
+for attr in ['o:althref="x.png"', 'o:val="https://evil.example/x"', 'o:val="mhtml:https://evil/x!y"', 'o:uri="https://evil.example/x"']:
+    assert rejected({"word/document.xml": doc(pict.replace('o:val="{}"', attr))}), f"URL-like attribute {attr}"
+graphic = '<w:r><a:graphicData xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" uri="http://schemas.openxmlformats.org/drawingml/2006/picture"/></w:r>'
+assert not rejected({"word/document.xml": doc(graphic)}), "schema uri on pictures passes"
 
 # Relationship targets fail closed and must be written plainly.
 assert rejected({"word/_rels/document.xml.rels": rels(("styles", "missing.xml"))}), "missing target part"

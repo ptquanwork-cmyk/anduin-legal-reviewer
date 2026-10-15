@@ -103,6 +103,10 @@ SAFE_LINK = re.compile(r"^(https?://|mailto:)", re.I)
 # Matched against values with whitespace/control characters removed and percent-encoding decoded (see _norm).
 ABSOLUTE = re.compile(r"^([a-z][a-z0-9+.-]*:|[\\/]{2})", re.I)  # any scheme or drive letter, UNC or network path
 LINKISH = re.compile(r"^(file:|[a-z]:[\\/]|[\\/]{2})", re.I)  # values Word could resolve to a local or network file
+# URL-like values (any scheme://, or schemes Windows and Office resolve without slashes); only `uri` attributes holding
+# the standard schema identifiers Word writes (e.g. a:graphicData uri="http://schemas.openxmlformats.org/...") pass.
+URLISH = re.compile(r"^([a-z][a-z0-9+.-]*://|(mhtml|ms-[a-z0-9-]+|javascript|vbscript|data|res|its|mk|shell):)", re.I)
+SCHEMA_URI = re.compile(r"^https?://(schemas\.(openxmlformats\.org|microsoft\.com)|purl\.oclc\.org)/", re.I)
 BAD_PART_CHARS = set("%\\?#")  # characters OPC part names and internal targets must not contain
 CT_NS = "http://schemas.openxmlformats.org/package/2006/content-types"
 REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
@@ -250,9 +254,12 @@ def _check_part(root):
     for el in root.iter():
         ns, tag = _split(el.tag)
         for key, value in el.attrib.items():
-            # Linked-picture paths and URLs (o:href, v:imagedata src, ...) are refused outright; any other value that
-            # resolves to a drive, file: or network path too.
-            if LINKISH.match(_norm(value)) or (_split(key)[1].lower() in ("href", "src") and value.strip()):
+            # Linked-picture paths and URLs (o:href, o:althref, v:imagedata src, ...) are refused outright, as is any
+            # value that resolves to a drive, file: or network path, or looks like a URL other than a schema id.
+            local, norm = _split(key)[1].lower(), _norm(value)
+            if norm and local.endswith(("href", "src")):
+                _reject()
+            if LINKISH.match(norm) or (URLISH.match(norm) and not (local == "uri" and SCHEMA_URI.match(norm))):
                 _reject()
         if ns in W_SPACES and tag in BLOCKED_TAGS:
             _reject()
