@@ -1,6 +1,6 @@
 # Complete repository map
 
-Every directory below exists locally and is represented on GitHub by a meaningful document or fixture. Directories for future implementation are explicitly labeled as planned.
+Every directory below exists and is represented on GitHub by a meaningful document, fixture or code. For the workflow and how the folders fit together, start with the [architecture and workflow map](architecture/overview.md).
 
 ```text
 anduin-legal-reviewer/
@@ -46,6 +46,7 @@ anduin-legal-reviewer/
 ├── tests/
 ├── supabase/
 ├── data/
+│   ├── demo-contracts/
 │   ├── synthetic/
 │   └── schemas/
 ├── evals/
@@ -67,7 +68,7 @@ anduin-legal-reviewer/
 | `docs/` | Project documentation index and this complete map |
 | `docs/challenge/` | Source-backed organizer challenge and event constraints |
 | `docs/product/` | User problem, proposed workflow, scope, acceptance criteria |
-| `docs/architecture/` | Proposed system flow and component responsibilities |
+| `docs/architecture/` | Workflow, system and pipeline maps; folder categories |
 | `docs/decisions/` | Dated decisions, alternatives when relevant, consequences |
 | `docs/deployment/` | Actual Vercel/Supabase setup, links, and reproduction steps |
 | `docs/project/` | Public English project profile, full workflow plan, proposed system and reproducible inspection/setup |
@@ -98,11 +99,12 @@ anduin-legal-reviewer/
 | `src/lib/` | Shared types, navigation, workspace state, uploads |
 | `public/` | Station models (`3d/`), PNG fallbacks and synthetic demo files (`demo/`) |
 | `worker/` | Decision-agent and conversion worker, local tunnel runner, Dockerfile |
-| `scripts/` | Demo builder, asset helpers, screenshot and PDF text helpers |
-| `tests/` | Meaningful tests of implemented application code |
+| `scripts/` | Demo builders (`build-demo.mjs`, `build-demo-contracts.mjs`), end-to-end contract run (`e2e-contracts.mjs`), asset, screenshot and PDF text helpers |
+| `tests/` | Deterministic tests of application code (worker tests live in `worker/test_*.py`) |
 | `supabase/` | Backend record and applied SQL migrations |
 | `data/` | Public data conventions |
-| `data/synthetic/` | Fictional, publishable demonstration documents |
+| `data/demo-contracts/` | Synthetic fund subscription documents (Word, PDF, scrambled scan, long booklet, Vietnamese, fillable AcroForm) with their planted problems |
+| `data/synthetic/` | Fictional plain-text samples used by tests and evaluations |
 | `data/schemas/` | Versioned model/application output contracts |
 | `evals/` | Model-quality plan and scoring rubric |
 | `evals/datasets/` | Synthetic inputs with expected finding labels |
@@ -121,7 +123,8 @@ anduin-legal-reviewer/
 - `AGENTS.md`: persistent project instructions, including GitHub synchronization after each project task.
 - `.gitignore`: exclusions for existing independent checkouts, secrets, private inputs, environments, and local runtime data.
 - `.gitattributes`: text/line-ending conventions.
-- `vercel.json` and `.vercelignore`: static hosting configuration and upload exclusions.
+- `package.json`, `next.config.ts`, `tsconfig.json`, `postcss.config.mjs`: Next.js application configuration.
+- `vercel.json` and `.vercelignore`: Vercel framework settings, daily health cron, security headers and upload exclusions.
 - `.env.example`: configuration variable names and placeholders; actual values remain ignored.
 
 ## Local-only existing folders

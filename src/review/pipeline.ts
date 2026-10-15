@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { JobStep, Routing, SourceIssue, SourceReport, VersionRow } from '../lib/types';
 import { convertDocx, decide, decideBatch, WorkerUnavailable } from '../integrations/worker';
-import { detectFields, transferStates } from '../digitize/fields';
+import { acroFields, detectFields, transferStates } from '../digitize/fields';
 import { download } from '../integrations/supabase-server';
 import { runRules, type Speller } from './checks';
 import { blocksFromDocx, extractPdf, inspectDocx } from './extract';
@@ -164,7 +164,7 @@ export async function runPipeline(sb: SupabaseClient, userId: string, versionId:
     } else {
       try {
         const examples = await feedbackExamples(sb);
-        const sem = await semanticReview(blocks, rules.definitions, examples);
+        const sem = await semanticReview(blocks, rules.definitions, examples, lang);
         candidates.push(...sem.candidates);
         routing.semantic_review = 'run';
         if (sem.truncated) report.limitations!.push('Semantic review covered the first sections only (document too long).');
@@ -185,7 +185,7 @@ export async function runPipeline(sb: SupabaseClient, userId: string, versionId:
     await set('fields', 'running');
     if (!pdfPath) await set('fields', 'skipped', 'Needs a PDF with page geometry.');
     else {
-      const n = await storeFields(sb, version, blocks, routing, lang);
+      const n = await storeFields(sb, version, blocks, routing, lang, version.mime === 'application/pdf' ? original : null);
       await set('fields', 'done', `${n.inputs} input field(s), ${n.paragraphs} paragraph region(s), ${n.uncertain} uncertain`);
     }
     await finish(sb, jobId, steps, 'done', versionId, routing, 'reviewed');
@@ -268,8 +268,11 @@ async function storeFindings(sb: SupabaseClient, versionId: string, findings: Fi
   if (edges.length) await sb.from('graph_edges').insert(edges.map((e) => ({ ...e, version_id: versionId })));
 }
 
-async function storeFields(sb: SupabaseClient, version: VersionRow, blocks: Block[], routing: Routing, lang: 'en' | 'vi') {
+async function storeFields(sb: SupabaseClient, version: VersionRow, blocks: Block[], routing: Routing, lang: 'en' | 'vi', sourcePdf: Uint8Array | null) {
   let detected = detectFields(blocks);
+  // A fillable PDF's own form fields replace the text-pattern inputs.
+  const acro = sourcePdf ? await acroFields(sourcePdf, blocks) : [];
+  if (acro.length) detected = [...acro, ...detected.filter((d) => d.type === 'paragraph')];
   if (version.parent_id) {
     const { data: prev } = await sb.from('annotations').select('field_id, label, type, source_block_idx').eq('version_id', version.parent_id);
     const { data: prevBlocks } = await sb.from('source_blocks').select('idx, text').eq('version_id', version.parent_id);

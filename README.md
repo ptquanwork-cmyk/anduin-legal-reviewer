@@ -30,6 +30,17 @@ One page: a 3D workflow hub (stations modelled in Blender, rendered live with th
 
 Templates (approved field structure, no answers) and Feedback (decision history; selected decisions guide later semantic reviews in the workspace) are management pages.
 
+## Project map
+
+```mermaid
+flowchart LR
+    I[01 Intake] --> S[02 Source quality] --> M[03 Document map] --> R[04 Legal review] --> D[05 Decision / report]
+    D -- ready --> A[06 Annotation] --> F[07 Form preview] --> P[08 Responses] --> X[09 PDF QA / export]
+    D -- revision needed --> I
+```
+
+The [architecture and workflow map](docs/architecture/overview.md) explains each step, the system behind it, the processing pipeline and which folder holds what. Synthetic fund documents for trying every step are in [`data/demo-contracts/`](data/demo-contracts/README.md).
+
 ## How findings are produced
 
 1. **Deterministic rules** (`src/review/checks.ts`): numeric contradictions between near-identical obligations, references to sections/exhibits/annexes that do not exist (incl. *Điều/Khoản/Phụ lục*), vague obligation terms, capitalised terms without definitions, spelling (Hunspell dictionaries plus a high-precision list).
@@ -123,7 +134,9 @@ anduin-legal-reviewer/
 ├── design/           # Approved designs, Blender build script and .blend, prompts, manifests
 ├── public/3d/        # Station GLB models and PNG fallbacks
 ├── tests/            # Deterministic tests
-├── data/ evals/      # Synthetic documents, schema, evaluation cases
+├── data/demo-contracts/ # Synthetic fund subscription documents for demos and end-to-end runs
+├── data/ evals/      # Synthetic text samples, schema, evaluation cases
+├── scripts/          # Demo builders, end-to-end contract run, screenshot and PDF helpers
 ├── docs/ context/ prompts/ progress/ references/ openai/
 ```
 

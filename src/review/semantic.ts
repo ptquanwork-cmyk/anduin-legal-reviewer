@@ -49,7 +49,11 @@ function chunks(blocks: Block[], maxChars = 24000) {
   return out;
 }
 
-export async function semanticReview(blocks: Block[], defs: Definition[], examples: Example[]) {
+/** The detected language is stated explicitly; left to itself the CLI engine sometimes answers in its user's language. */
+export const languageLine = (lang: 'en' | 'vi') =>
+  `The document is written in ${lang === 'vi' ? 'Vietnamese' : 'English'}. Write title, rationale, question and suggestion in ${lang === 'vi' ? 'Vietnamese' : 'English'}.`;
+
+export async function semanticReview(blocks: Block[], defs: Definition[], examples: Example[], lang: 'en' | 'vi') {
   let engine = semanticEngine();
   const index = {
     definitions: defs.map((d) => d.term),
@@ -76,7 +80,7 @@ export async function semanticReview(blocks: Block[], defs: Definition[], exampl
         const res = await new OpenAI().responses.create({
           model,
           input: [
-            { role: 'developer', content: guidance ? `${DEVELOPER_PROMPT}\n\n${guidance}` : DEVELOPER_PROMPT },
+            { role: 'developer', content: `${DEVELOPER_PROMPT}\n\n${languageLine(lang)}${guidance ? `\n\n${guidance}` : ''}` },
             { role: 'user', content: `Index of the whole document (for cross-references):\n${JSON.stringify(index)}\n\n<document>\n${JSON.stringify(doc)}\n</document>` },
           ],
           text: { format: { type: 'json_schema', name: 'review_findings', schema: PROMPT.schema as Record<string, unknown>, strict: true } },
@@ -90,7 +94,7 @@ export async function semanticReview(blocks: Block[], defs: Definition[], exampl
     }
     if (engine === 'codex') {
       // The worker owns the instructions and schema; only data (document, index, workspace examples) is sent.
-      const res = await semanticViaWorker({ document: doc, index, guidance });
+      const res = await semanticViaWorker({ document: doc, index, guidance, language: lang });
       model = res.engine;
       found = (res.result as { findings: RawFinding[] }).findings;
     }

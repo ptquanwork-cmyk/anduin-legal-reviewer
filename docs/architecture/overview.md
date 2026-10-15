@@ -1,37 +1,99 @@
-# Architecture proposal
+# Architecture and workflow map
 
-Status: proposed; no hackathon application implementation in `src/` yet.
+Status: implemented and deployed (see the [build log](../../progress/build-log/2026-10-15.md) for verified runs). This page is the map: what a reviewer does, which code does it, and where everything lives.
+
+## 1. The reviewer's workflow
+
+A fund sends investors a subscription booklet to fill in. Before the booklet is digitised into an online form, a reviewer checks the source, decides on every flagged issue, and only then builds and verifies the fillable version. Each step is one station on the hub and one workspace in the app.
 
 ```mermaid
-flowchart TD
-    A[Document or synthetic sample] --> B[Extract text and locations]
-    B --> C[Deterministic checks]
-    B --> D[OpenAI semantic review]
-    C --> E[Validate schema and source evidence]
-    D --> E
-    E --> F[Reviewer inspects findings]
-    F --> G[Record decision and export summary]
+flowchart LR
+    subgraph Review["Review the source (stations 01–05)"]
+      I[01 Intake<br/>upload, hash, duplicates] --> S[02 Source quality<br/>Word vs PDF, fonts, coverage]
+      S --> M[03 Document map<br/>sections, references, conflicts]
+      M --> R[04 Legal review<br/>findings with quotes]
+      R --> D[05 Decision / report<br/>outcome, questions, report PDF]
+    end
+    subgraph Digitize["Digitise (stations 06–09)"]
+      A[06 Annotation<br/>paragraph, text box, radio, checkbox] --> F[07 Form preview<br/>full text + controls]
+      F --> P[08 Responses<br/>validated answers]
+      P --> X[09 PDF QA / export<br/>fill, re-read, confirm]
+    end
+    D -- "ready or approved with exceptions" --> A
+    D -- "revision needed" --> V[New version v2] --> I
+    X --> O[(Verified final PDF)]
 ```
 
-## Proposed responsibilities
+Gates that stop the flow: source issues must be resolved or manually confirmed (02); every finding needs a decision (05); uncertain annotations must be confirmed (06); every source block must be represented (07); required answers must be present (08); final export needs QA to pass and the reviewer's confirmation (09).
 
-| Location | Responsibility |
+## 2. System architecture
+
+```mermaid
+flowchart TB
+    B["Browser — Next.js single page<br/>three.js stations · pdf.js viewer"]
+    subgraph Vercel
+      API["API routes (src/app/api)<br/>versions · process · report · help · fill"]
+      PIPE["Pipeline (src/review/pipeline.ts)<br/>runs after the response"]
+    end
+    subgraph Supabase
+      AUTH[Anonymous auth]
+      DB[(Postgres + RLS<br/>owner = auth.uid())]
+      ST[(Private storage<br/>sources · exports)]
+      RT[Realtime job steps]
+    end
+    subgraph Worker["Worker (owner's machine, Cloudflare tunnel)"]
+      CONV["/convert<br/>sanitise + Word → PDF"]
+      DEC["/decide<br/>Laya decision agent"]
+      SEM["/semantic<br/>Codex CLI reviewer"]
+    end
+    B -- session --> AUTH
+    B -- direct upload --> ST
+    B -- register / actions --> API --> PIPE
+    PIPE --> DB
+    PIPE --> ST
+    DB --> RT --> B
+    PIPE -- caller's session --> CONV & DEC & SEM
+    PIPE -. optional .-> OAI[OpenAI Responses API]
+```
+
+## 3. Processing pipeline (one job per uploaded version)
+
+```mermaid
+flowchart LR
+    R[Received<br/>stored unchanged] --> U[Duplicate lookup<br/>SHA-256 + similarity]
+    U --> S[Source checks<br/>convert, extract, fonts, coverage]
+    S --> G[Decision-agent routing<br/>type, fillable, semantic?]
+    G --> L["Legal review<br/>rules + semantic → evidence validator"]
+    L --> F["Field detection<br/>AcroForm fields or layout cues → agent check"]
+```
+
+| Step | Code | Output |
+| --- | --- | --- |
+| Received, duplicates | `src/app/api/versions/route.ts`, `pipeline.ts` | Immutable version, exact duplicate reopened, related versions |
+| Source checks | `src/review/extract.ts`, `source.ts`, worker `/convert` | Blocks with page geometry, font substitution, text loss, coverage |
+| Routing | `src/integrations/worker.ts` → `/decide` | Document type, fillable regions, need for semantic review |
+| Legal review | `src/review/checks.ts`, `semantic.ts`, `validate.ts` | Findings with matched quotes; rejected candidates listed |
+| Field detection | `src/digitize/fields.ts` | Four annotation types; AcroForm widgets used directly when present |
+| Report, fill, QA | `src/app/api/versions/[id]/report`, `src/digitize/fill.ts` | Review report PDF; filled PDF re-read and checked |
+
+## 4. Trust boundaries
+
+- Contract text is untrusted data: it is sent to reviewers as data in a separate field, never as instructions; uploads are sanitised before Word opens them (macros, DTDs, external links and remote fields are refused).
+- Every finding needs a source quote that matches the extracted text; contradictions need two.
+- Scores (rules, semantic reviewer, decision agent) are shown as uncalibrated; only the reviewer's decisions change the outcome.
+- Every table is protected by row-level security; storage paths are per user; the worker accepts only verified sessions and caps semantic calls.
+
+## 5. Where things live
+
+| Category | Folders |
 | --- | --- |
-| `src/app/` | Upload flow, finding list, review actions, export |
-| `src/review/` | Text extraction, reference/term checks, evidence validation |
-| `src/integrations/` | OpenAI client and optional external services |
-| `data/schemas/` | Versioned finding output contract |
-| `tests/` | Deterministic behavior and integration error handling |
-| `evals/` | Accuracy, grounding, false positives, and instruction isolation |
+| Application | `src/app/` (page, API routes) · `src/components/` (shell, hub, nine workspaces, PDF viewer, 3D) · `src/review/` · `src/digitize/` · `src/integrations/` · `src/lib/` · `public/` |
+| Worker | `worker/` (FastAPI service, tunnel runner, sanitiser and quota tests, Dockerfile) |
+| Backend | `supabase/migrations/` |
+| Design and 3D | `design/` (approved screens, dark mode, 3D references, Blender scene and build script) · `public/3d/` |
+| Demo and test data | `data/demo-contracts/` (synthetic fund documents) · `public/demo/` (built-in demo) · `data/synthetic/` · `evals/datasets/` |
+| Quality | `tests/` · `worker/test_*.py` · `evals/` · `scripts/e2e-contracts.mjs` |
+| Instructions and prompts | `prompts/` · `context/briefs/` · `AGENTS.md` |
+| Documentation and evidence | `docs/` · `progress/` (build logs, changelog, roadmap) · `references/` · `demo/` |
 
-## Candidate implementation
-
-The local Contract Reader reference uses Streamlit and has local PDF extraction and feedback code. These can inform implementation after reuse review. A lightweight PDF extraction layer and local review storage are candidates, not committed dependencies. Optional OCR is needed for scans; optional Laya experiments must demonstrate value before becoming part of the critical path.
-
-## Trust boundaries
-
-The application instruction and the contract text must travel in distinct fields. Contract text is untrusted data. The model proposes findings; schema validation, quote matching, and reviewer decisions determine whether they are usable. Do not infer missing content from a partial extraction.
-
-## Implementation sequence
-
-First establish extraction and locations, then deterministic checks, then semantic review and validation, then review/export. Record exact dependencies, model configuration, deployment instructions, and data handling when those choices are implemented.
+The complete folder list is in the [repository map](../repository-map.md).

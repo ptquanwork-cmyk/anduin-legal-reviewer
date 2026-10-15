@@ -54,9 +54,10 @@ export interface Reference {
   quote: string;
 }
 
+const EXTERNAL = /^\s+(?:of|to|under|in)\s+(?:the\s+)?(?!this\b|these\b)\p{Lu}|^\s+(?:của|tại)\s+(?!thỏa thuận này|hợp đồng này)\p{Lu}/u;
 const REF_PATTERNS = [
   /\b(sections?|clauses?|articles?)\s+(\d+(?:\.\d+)*)/giu,
-  /\b(exhibit|schedule|appendix|annex)\s+([A-Z0-9]+)\b/gu,
+  /\b([Ee]xhibit|[Ss]chedule|[Aa]ppendix|[Aa]nnex|EXHIBIT|SCHEDULE|APPENDIX|ANNEX)\s+([A-Z]|\d+|[A-Z]-\d+)\b/gu,
   /(?<![\p{L}])(điều|khoản|mục)\s+(\d+(?:\.\d+)*)/giu,
   /(?<![\p{L}])(phụ lục)\s+([\dA-Z]+)/giu,
 ];
@@ -68,6 +69,8 @@ export function findReferences(blocks: Block[]): Reference[] {
     for (const re of REF_PATTERNS) {
       re.lastIndex = 0;
       for (let m = re.exec(b.text); m; m = re.exec(b.text)) {
+        // "Section 9 of the Partnership Agreement" points into another document, not this one.
+        if (EXTERNAL.test(b.text.slice(m.index + m[0].length))) continue;
         const kind = m[1].replace(/s$/i, '');
         out.push({ key: refKey(kind, m[2]), label: `${cap(kind)} ${m[2]}`, block_idx: b.idx, quote: sentenceAround(b.text, m.index) });
       }

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-15 — Demo contracts, full check, project map
+
+- `data/demo-contracts/`: synthetic fund subscription documents (Word, PDF, scrambled scan, 38-page booklet, Vietnamese, fillable AcroForm) with planted problems; `scripts/build-demo-contracts.mjs` rebuilds them and `scripts/e2e-contracts.mjs` runs each through the whole workflow, including fill, PDF QA and final export.
+- Fillable PDFs: AcroForm fields become annotations with exact widget geometry and nearby labels; filling flattens the form first.
+- Review precision: contradictions compare only periods, percentages and amounts in obligations (no clause numbers or worked examples); one vague-wording finding per phrase; capitalised Annex/Schedule references and references into other documents handled; British spellings accepted; place names not treated as undefined terms; the semantic reviewer is told the document language.
+- Worker: conversion and semantic review run as background jobs, so work longer than the tunnel's 100-second request limit completes.
+- Documentation: architecture and workflow map with categorised folders; README, docs index and repository map updated.
+
 ## 2026-10-15 — Form preview and responses stations closer to their stills
 
 - Form preview (07): a wide form panel on a thick blue frame with a set-back top bar, two input wells, two radios and two square buttons, turned so the frame's right side shows as in the still. Hovering lifts one input well.

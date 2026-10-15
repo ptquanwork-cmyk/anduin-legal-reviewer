@@ -182,3 +182,85 @@ export function annotationQa(
   }
   return problems;
 }
+
+/**
+ * The text a form widget belongs to: for a tick box the nearest text on its right (its caption), otherwise the nearest
+ * text on its left on the same line, else the nearest text above.
+ */
+function labelFor(blocks: Block[], page: number, box: BBox, tickBox = false) {
+  const onPage = blocks.filter((b) => b.page === page && b.bbox);
+  const right = onPage
+    .filter((b) => b.bbox!.y < box.y + box.h && b.bbox!.y + b.bbox!.h > box.y && b.bbox!.x >= box.x + box.w - 2)
+    .sort((a, b) => a.bbox!.x - b.bbox!.x)[0];
+  if (tickBox && right) return right;
+  const left = onPage
+    .filter((b) => b.bbox!.y < box.y + box.h && b.bbox!.y + b.bbox!.h > box.y && b.bbox!.x < box.x)
+    .sort((a, b) => b.bbox!.x + b.bbox!.w - (a.bbox!.x + a.bbox!.w))[0];
+  const above = onPage
+    .filter((b) => b.bbox!.y + b.bbox!.h <= box.y + 2 && box.y - (b.bbox!.y + b.bbox!.h) < 30 && b.bbox!.x < box.x + box.w && b.bbox!.x + b.bbox!.w > box.x)
+    .sort((a, b) => b.bbox!.y - a.bbox!.y)[0];
+  return left ?? above;
+}
+
+/**
+ * Fillable PDFs: real form fields (AcroForm) are the authoritative inputs, with exact widget geometry. Text-pattern
+ * inputs are then dropped; paragraph regions still come from detectFields.
+ */
+export async function acroFields(pdf: Uint8Array, blocks: Block[]): Promise<DetectedAnnotation[]> {
+  const { PDFDocument, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown, PDFOptionList } = await import('pdf-lib');
+  let doc: Awaited<ReturnType<typeof PDFDocument.load>>;
+  try {
+    doc = await PDFDocument.load(pdf, { ignoreEncryption: true });
+  } catch {
+    return [];
+  }
+  const fields = doc.getForm().getFields();
+  if (!fields.length) return [];
+  const pages = doc.getPages();
+  type Widget = ReturnType<(typeof fields)[number]['acroField']['getWidgets']>[number];
+  const pageOf = (w: Widget) => {
+    const p = w.P();
+    const byP = p ? pages.findIndex((pg) => pg.ref === p) : -1;
+    if (byP >= 0) return byP;
+    const ref = doc.context.getObjectRef(w.dict);
+    return pages.findIndex((pg) => pg.node.Annots()?.asArray().some((a) => a === ref));
+  };
+  const box = (w: Widget, page: number): BBox => {
+    const r = w.getRectangle();
+    const H = pages[page].getHeight();
+    return { x: round(r.x), y: round(H - r.y - r.height), w: round(r.width), h: round(r.height) };
+  };
+  const out: DetectedAnnotation[] = [];
+  const used = new Set<string>();
+  const uniqueId = (base: string) => {
+    let id = base;
+    for (let i = 2; used.has(id); i++) id = `${base}_${i}`;
+    used.add(id);
+    return id;
+  };
+  for (const f of fields) {
+    const widgets = f.acroField.getWidgets();
+    if (!widgets.length) continue;
+    const pageIdx = pageOf(widgets[0]);
+    if (pageIdx < 0) continue;
+    const first = box(widgets[0], pageIdx);
+    const near = labelFor(blocks, pageIdx + 1, first, f instanceof PDFCheckBox);
+    const named = f.getName().split('.').pop()!.replace(/[_-]+/g, ' ').trim();
+    const label = norm(near ? near.text.split(':')[0] : named).slice(0, 60) || named || 'Field';
+    const id = uniqueId(`${slug(near?.section_title ?? 'document')}.${slug(f.getName())}`);
+    const base = { field_id: id, label, page: pageIdx + 1, source_block_idx: near?.idx ?? 0, transfer_state: 'new' as const, origin: 'detected' as const, confirmed: false };
+    if (f instanceof PDFRadioGroup || f instanceof PDFDropdown || f instanceof PDFOptionList) {
+      const options: AnnotationOption[] = f.getOptions().map((v, i) => ({ value: slug(v), label: v, bbox: widgets[i] ? box(widgets[i], pageIdx) : first }));
+      const xs = options.map((o) => o.bbox);
+      const x = Math.min(...xs.map((o) => o.x));
+      const y = Math.min(...xs.map((o) => o.y));
+      const bbox = { x, y, w: round(Math.max(...xs.map((o) => o.x + o.w)) - x), h: round(Math.max(...xs.map((o) => o.y + o.h)) - y) };
+      out.push({ ...base, type: 'radio', options, bbox, required: f.isRequired() });
+    } else if (f instanceof PDFCheckBox) {
+      out.push({ ...base, type: 'checkbox', options: [{ value: 'yes', label: near ? norm(near.text).slice(0, 80) : named, bbox: first }], bbox: first, required: f.isRequired() });
+    } else if (f instanceof PDFTextField) {
+      out.push({ ...base, type: 'text_box', options: [], bbox: first, required: true });
+    }
+  }
+  return out;
+}

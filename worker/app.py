@@ -9,6 +9,7 @@ import json
 import os
 import posixpath
 import re
+import secrets
 import shutil
 import subprocess
 import tempfile
@@ -362,9 +363,7 @@ def _word_to_pdf(src: Path, out: Path):
         return subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script], capture_output=True, text=True, timeout=180, env=env)
 
 
-@app.post("/convert", dependencies=[Depends(auth)])
-async def convert(file: UploadFile = File(...)):
-    data = await file.read()
+def _check_docx(data: bytes) -> bytes:
     if len(data) > MAX_BYTES:
         raise HTTPException(status_code=413, detail="file too large")
     if not data.startswith(b"PK"):
@@ -373,11 +372,17 @@ async def convert(file: UploadFile = File(...)):
     if not engine:
         raise HTTPException(status_code=503, detail="converter not installed")
     try:
-        clean = sanitize_docx(data)
+        return sanitize_docx(data)
     except HTTPException:
         raise
     except Exception:
         raise HTTPException(status_code=415, detail="not a valid .docx package")
+
+
+def _convert_bytes(clean: bytes) -> tuple[bytes, str, int]:
+    engine = _converter()
+    if not engine:
+        raise HTTPException(status_code=503, detail="converter not installed")
     with tempfile.TemporaryDirectory() as tmp:
         src = Path(tmp) / "source.docx"
         out = Path(tmp) / "source.pdf"
@@ -392,7 +397,64 @@ async def convert(file: UploadFile = File(...)):
             proc = _word_to_pdf(src, out)
         if proc.returncode != 0 or not out.exists():
             raise HTTPException(status_code=422, detail=f"conversion failed: {(proc.stderr or proc.stdout)[-400:]}")
-        return Response(out.read_bytes(), media_type="application/pdf", headers={"x-converter": engine, "x-elapsed-ms": str(int((time.time() - started) * 1000))})
+        return out.read_bytes(), engine, int((time.time() - started) * 1000)
+
+
+def _pdf_response(pdf: bytes, engine: str, ms: int) -> Response:
+    return Response(pdf, media_type="application/pdf", headers={"x-converter": engine, "x-elapsed-ms": str(ms)})
+
+
+@app.post("/convert", dependencies=[Depends(auth)])
+async def convert(file: UploadFile = File(...)):
+    return _pdf_response(*_convert_bytes(_check_docx(await file.read())))
+
+
+# Background jobs: a Cloudflare quick tunnel ends any request after about 100 seconds, while Word conversion of a long
+# booklet or a semantic review can take longer. Callers start a job and poll it; results are kept for 15 minutes.
+_jobs: dict[str, dict] = {}
+jobs_lock = threading.Lock()
+
+
+def _start_job(user: str, work) -> dict:
+    job_id = secrets.token_urlsafe(16)
+    with jobs_lock:
+        now = time.time()
+        for key in [k for k, v in _jobs.items() if now - v["at"] > 900]:
+            del _jobs[key]
+        _jobs[job_id] = {"user": user, "status": "running", "at": now}
+
+    def run():
+        try:
+            update = {"status": "done", "out": work()}
+        except HTTPException as exc:
+            update = {"status": "failed", "code": exc.status_code, "detail": exc.detail}
+        except Exception as exc:  # reported to the caller, never swallowed
+            update = {"status": "failed", "code": 500, "detail": repr(exc)[:300]}
+        with jobs_lock:
+            _jobs[job_id].update(update)
+
+    threading.Thread(target=run, daemon=True).start()
+    return {"job": job_id}
+
+
+@app.post("/jobs/convert", status_code=202)
+async def convert_job(file: UploadFile = File(...), user: str = Depends(auth)):
+    clean = _check_docx(await file.read())  # validation errors are returned immediately
+    return _start_job(user, lambda: ("pdf", _convert_bytes(clean)))
+
+
+@app.get("/jobs/{job_id}")
+def job_status(job_id: str, user: str = Depends(auth)):
+    with jobs_lock:
+        job = dict(_jobs.get(job_id) or {})
+    if not job or job["user"] != user:
+        raise HTTPException(status_code=404, detail="job not found")
+    if job["status"] == "running":
+        return Response('{"status":"running"}', status_code=202, media_type="application/json")
+    if job["status"] == "failed":
+        raise HTTPException(status_code=job["code"], detail=job["detail"])
+    kind, out = job["out"]
+    return _pdf_response(*out) if kind == "pdf" else out
 
 
 PROMPT_FILE = Path(__file__).resolve().parent.parent / "src" / "review" / "contract-review-v2.json"
@@ -410,6 +472,7 @@ class SemanticRequest(BaseModel):
     document: list[dict] = Field(max_length=2000)
     index: dict
     guidance: str = Field(default="", max_length=4000)
+    language: str = Field(default="en", pattern="^(en|vi)$")
 
 
 # Any visitor can hold an anonymous session, so the owner's CLI quota is capped per verified user and overall.
@@ -434,9 +497,8 @@ def take_semantic_quota(user: str):
         _global_calls.append(now)
 
 
-@app.post("/semantic")
-def semantic(req: SemanticRequest, user: str = Depends(auth)):
-    """Semantic review with the owner's Codex CLI. Instructions and schema are fixed here; callers send data only."""
+def _semantic_prepare(req: SemanticRequest, user: str):
+    """Validates the request, takes the caller's quota and returns the work to run (fixed instructions, data only)."""
     codex = shutil.which("codex.cmd") or shutil.which("codex")
     if not codex or not PROMPT_FILE.exists():
         raise HTTPException(status_code=503, detail="semantic engine unavailable")
@@ -449,9 +511,18 @@ def semantic(req: SemanticRequest, user: str = Depends(auth)):
     # Everything after the fixed instructions is caller-supplied data in delimited sections.
     text = (
         f"{prompt['instructions']}\n\n"
+        # The detected language is stated explicitly; otherwise the CLI sometimes answers in its user's language.
+        + ("The document is written in Vietnamese. Write title, rationale, question and suggestion in Vietnamese.\n\n" if req.language == "vi" else "The document is written in English. Write title, rationale, question and suggestion in English.\n\n")
         + (f"<workspace_feedback>\n{req.guidance}\n</workspace_feedback>\n\n" if req.guidance else "")
         + f"<document_index>\n{index}\n</document_index>\n\n<document>\n{document}\n</document>"
     )
+    def work():
+        return _semantic_run(codex, prompt, text)
+
+    return work
+
+
+def _semantic_run(codex: str, prompt: dict, text: str) -> dict:
     started = time.time()
     with codex_lock, tempfile.TemporaryDirectory() as tmp:
         schema = Path(tmp) / "schema.json"
@@ -470,6 +541,18 @@ def semantic(req: SemanticRequest, user: str = Depends(auth)):
     return {"result": result, "engine": "codex-cli", "elapsed_ms": int((time.time() - started) * 1000)}
 
 
+@app.post("/semantic")
+def semantic(req: SemanticRequest, user: str = Depends(auth)):
+    """Semantic review with the owner's Codex CLI. Instructions and schema are fixed here; callers send data only."""
+    return _semantic_prepare(req, user)()
+
+
+@app.post("/jobs/semantic", status_code=202)
+def semantic_job(req: SemanticRequest, user: str = Depends(auth)):
+    work = _semantic_prepare(req, user)
+    return _start_job(user, lambda: ("json", work()))
+
+
 @app.get("/semantic/health")
 def semantic_health():
     return {"codex": bool(shutil.which("codex.cmd") or shutil.which("codex")), "prompt": PROMPT_FILE.exists()}
@@ -483,13 +566,15 @@ class DecideRequest(BaseModel):
     max_len: int = Field(default=1024, ge=128, le=8192)
 
 
-@app.post("/decide", dependencies=[Depends(auth)])
-def decide(req: DecideRequest):
-    """One state, or a batch of states sharing one fixed question set (one batched forward pass)."""
+def _decide_check(req: DecideRequest):
     if state["status"] != "ready":
         raise HTTPException(status_code=503, detail=f"decision agent {state['status']}")
     if (req.state is None) == (req.states is None):
         raise HTTPException(status_code=422, detail="send either state or states")
+
+
+def _decide_run(req: DecideRequest):
+    """One state, or a batch of states sharing one fixed question set (one batched forward pass)."""
     started = time.time()
     extra = {"max_len": req.max_len}
     if req.model:
@@ -501,3 +586,15 @@ def decide(req: DecideRequest):
     result = router.predict(req.state, req.questions, **extra)
     result["elapsed_ms"] = int((time.time() - started) * 1000)
     return result
+
+
+@app.post("/decide", dependencies=[Depends(auth)])
+def decide(req: DecideRequest):
+    _decide_check(req)
+    return _decide_run(req)
+
+
+@app.post("/jobs/decide", status_code=202)
+def decide_job(req: DecideRequest, user: str = Depends(auth)):
+    _decide_check(req)
+    return _start_job(user, lambda: ("json", _decide_run(req)))

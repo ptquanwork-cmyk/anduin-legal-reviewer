@@ -22,6 +22,8 @@ function fit(text: string, font: PDFFont, max: number, h: number) {
  */
 export async function fillAndCheck(source: Uint8Array, anns: AnnotationRow[], blocks: BlockRow[], answers: Record<string, string | string[]>, final: boolean) {
   const doc = await PDFDocument.load(source, { ignoreEncryption: false });
+  // Fillable source PDFs: their widgets would sit on top of the drawn answers, so they are flattened first.
+  if (doc.getForm().getFields().length) doc.getForm().flatten();
   const fonts = await embedFonts(doc);
   const pages = doc.getPages();
   const issues: QaIssue[] = [];

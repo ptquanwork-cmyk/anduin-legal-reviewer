@@ -51,6 +51,28 @@ async function call(path: string, init: RequestInit, timeoutMs: number) {
   }
 }
 
+/**
+ * Long work runs as a worker job: the Cloudflare quick tunnel ends any request after about 100 seconds, so the call
+ * only starts the job and the result is fetched by polling.
+ */
+async function runJob(path: string, init: RequestInit, timeoutMs: number) {
+  const started = Date.now();
+  const { job } = (await (await call(path, init, 60000)).json()) as { job: string };
+  let misses = 0;
+  while (Date.now() - started < timeoutMs) {
+    await new Promise((r) => setTimeout(r, 2500));
+    try {
+      const res = await call(`/jobs/${job}`, { method: 'GET' }, 30000);
+      if (res.status !== 202) return res;
+      misses = 0;
+    } catch (e) {
+      // Quick tunnels drop the odd request (502/530, reset); the job keeps running, so a few misses are retried.
+      if (!(e instanceof WorkerUnavailable) || ++misses > 4) throw e;
+    }
+  }
+  throw new WorkerUnavailable(`Worker ${path} did not finish within ${Math.round(timeoutMs / 1000)} s.`);
+}
+
 export async function workerHealth() {
   const res = await call('/health', { method: 'GET' }, 8000);
   return (await res.json()) as { decision_agent: string; converter: string; error: string | null };
@@ -60,13 +82,13 @@ export async function workerHealth() {
 export async function convertDocx(data: Uint8Array, name: string) {
   const form = new FormData();
   form.append('file', new Blob([data as BlobPart]), name);
-  const res = await call('/convert', { method: 'POST', body: form }, 150000);
+  const res = await runJob('/jobs/convert', { method: 'POST', body: form }, 200000);
   return { pdf: new Uint8Array(await res.arrayBuffer()), converter: res.headers.get('x-converter') ?? 'libreoffice', elapsedMs: Number(res.headers.get('x-elapsed-ms') ?? 0) };
 }
 
 /** Semantic review by the owner's Codex CLI in the worker. Only data is sent; instructions and schema are fixed there. */
-export async function semanticViaWorker(body: { document: { id: number; section: string | null; text: string }[]; index: unknown; guidance: string }) {
-  const res = await call('/semantic', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }, 240000);
+export async function semanticViaWorker(body: { document: { id: number; section: string | null; text: string }[]; index: unknown; guidance: string; language: 'en' | 'vi' }) {
+  const res = await runJob('/jobs/semantic', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }, 240000);
   return (await res.json()) as { result: unknown; engine: string; elapsed_ms: number };
 }
 
@@ -110,10 +132,10 @@ function normalize(json: LayaResult, model: string) {
 /** Typed decisions from the Laya decision agent. Text is passed as state only; the question set is fixed by the caller. */
 export async function decide(state: string, questions: Record<string, Question>, lang: 'en' | 'vi') {
   const model = lang === 'vi' ? 'multilingual' : 'english';
-  const res = await call(
-    '/decide',
+  const res = await runJob(
+    '/jobs/decide',
     { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ state: state.slice(0, 30000), questions, model, max_len: state.length > 3500 ? 4096 : 1024 }) },
-    60000,
+    150000,
   );
   const json = (await res.json()) as LayaResult & { elapsed_ms?: number };
   return { answers: normalize(json, model), elapsedMs: json.elapsed_ms ?? null };
@@ -123,7 +145,7 @@ export async function decide(state: string, questions: Record<string, Question>,
 export async function decideBatch(states: string[], questions: Record<string, Question>, lang: 'en' | 'vi') {
   if (!states.length) return { answers: [] as Record<string, DecisionAgentAnswer>[], elapsedMs: 0 };
   const model = lang === 'vi' ? 'multilingual' : 'english';
-  const res = await call('/decide', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ states: states.map((s) => s.slice(0, 4000)), questions, model }) }, 120000);
+  const res = await runJob('/jobs/decide', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ states: states.map((s) => s.slice(0, 4000)), questions, model }) }, 180000);
   const json = (await res.json()) as { results: LayaResult[]; elapsed_ms?: number };
   return { answers: json.results.map((r) => normalize(r, model)), elapsedMs: json.elapsed_ms ?? null };
 }
