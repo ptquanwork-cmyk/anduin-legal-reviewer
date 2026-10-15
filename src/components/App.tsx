@@ -14,8 +14,10 @@ const StationsCanvas = dynamic(() => import('./three/Stations'), { ssr: false })
 
 function webgl() {
   try {
-    const c = document.createElement('canvas');
-    return !!(c.getContext('webgl2') || c.getContext('webgl'));
+    const gl = document.createElement('canvas').getContext('webgl2') ?? document.createElement('canvas').getContext('webgl');
+    // Release the probe context at once; browsers cap live WebGL contexts per page.
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    return !!gl;
   } catch {
     return false;
   }
@@ -58,7 +60,7 @@ export default function App() {
   const [fly, setFly] = useState<Fly | null>(null);
   const flyEl = useRef<HTMLDivElement>(null);
   // Real-time 3D when WebGL is available; the approved PNG stills stay for reduced motion and ?static.
-  const [three] = useState(() => {
+  const [three, setThree] = useState(() => {
     const q = new URLSearchParams(window.location.search);
     if (q.has('static')) return false;
     if (q.has('three')) return webgl();
@@ -171,7 +173,7 @@ export default function App() {
       <WorkspaceProvider versionId={versionId} setVersionId={setVersionId}>
         <ThreeCtx.Provider value={three}>
         <FlyingCtx.Provider value={fly?.id ?? null}>
-          {three && <StationsCanvas />}
+          {three && <StationsCanvas onLost={() => setThree(false)} />}
           <div className="flex h-screen w-full items-center justify-center">
             <div className="stage" style={stageStyle}>
               <ShellFrame />

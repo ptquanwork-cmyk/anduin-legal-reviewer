@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-16: Page freeze and crash on long documents
+
+- Worker: model work runs on one thread. Before this, every job left a PyTorch thread pool behind, and the worker grew to 17.7 GB, which starved the browser on the same laptop.
+- App: progress updates no longer re-read the whole version, reads never overlap, and the decisions query no longer lists every finding id in the URL.
+- 3D:
+  - No transmission pass.
+  - Device pixel ratio capped at 1.5.
+  - The page falls back to stills when the GPU drops the context.
+  - Stills stay visible until the model has drawn.
+  - Materials are freed on unmount.
+
 ## 2026-10-15 — Full re-check and decision memory
 
 - Decisions keep a snapshot of their finding and are no longer deleted when checks are re-run (`20261015030000_decision_memory.sql`); the history is append-only except for the example flag; the next review notes how many workspace examples it received, including the reviewer's note.

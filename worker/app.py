@@ -5,6 +5,7 @@ Access: requests must carry a valid Supabase session token of a signed-in app us
 project's Auth API), or the WORKER_TOKEN shared secret when one is configured. Contract text is treated as
 data: the caller chooses the fixed question set; nothing in the text can select a command, model or path.
 """
+import concurrent.futures
 import json
 import os
 import posixpath
@@ -35,7 +36,9 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], a
 
 state = {"router": None, "status": "loading", "error": None, "loaded_at": None}
 word_lock = threading.Lock()
-laya_lock = threading.Lock()
+# All model work runs on this one thread. Torch keeps a native thread pool per calling thread, so a new thread per job
+# left about 1,200 idle threads and 17 GB of committed memory behind, until the laptop (and the browser) ran out.
+laya_thread = concurrent.futures.ThreadPoolExecutor(max_workers=1, thread_name_prefix="laya")
 _verified: dict[str, tuple[float, str]] = {}
 
 
@@ -52,7 +55,7 @@ def _load():
         state.update(status="failed", error=repr(exc))
 
 
-threading.Thread(target=_load, daemon=True).start()
+laya_thread.submit(_load)
 
 
 def _session_user(token: str) -> str | None:
@@ -605,9 +608,8 @@ def _decide_run(req: DecideRequest):
     extra = {"max_len": req.max_len}
     if req.model:
         extra["model"] = req.model
-    router = state["router"]
-    with laya_lock:  # one model instance: parallel pipeline steps queue here instead of contending for the CPU
-        return _predict(router, req, extra, started)
+    # One model instance on one thread: parallel pipeline steps queue here instead of contending for the CPU.
+    return laya_thread.submit(_predict, state["router"], req, extra, started).result()
 
 
 def _predict(router, req: DecideRequest, extra: dict, started: float):

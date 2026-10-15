@@ -22,13 +22,15 @@ const MODULE: Record<string, string> = {
 export const modelUrl = (id: string) => `/3d/module-${MODULE[id]}.glb`;
 
 /** One shared WebGL canvas behind the UI; each station renders into its own tracked DOM rectangle. */
-export default function StationsCanvas() {
+export default function StationsCanvas({ onLost }: { onLost?: () => void }) {
   return (
     <Canvas
       style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 5 }}
       eventSource={typeof document !== 'undefined' ? document.body : undefined}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance', toneMapping: THREE.NeutralToneMapping, toneMappingExposure: 1 }}
-      dpr={[1, 2]}
+      dpr={[1, 1.5]}
+      // If the GPU drops the context (driver reset, memory pressure), the page falls back to the stills instead of blinking.
+      onCreated={({ gl }) => gl.domElement.addEventListener('webglcontextlost', () => onLost?.(), { once: true })}
     >
       <View.Port />
     </Canvas>
@@ -68,7 +70,7 @@ function material(name: string): THREE.Material | null {
   const phys = (p: THREE.MeshPhysicalMaterialParameters) => new THREE.MeshPhysicalMaterial(p);
   switch (base) {
     case 'blue_resin':
-      // No transmission on resin: nine views share one canvas, so the extra transmission pass is reserved for lens glass.
+      // No transmission anywhere: nine views share one canvas and each transmission pass re-renders it.
       return phys({ color: '#2a7bff', emissive: new THREE.Color('#0a46e0'), emissiveIntensity: 0.06, roughness: 0.18, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.06, envMapIntensity: 0.9 });
     case 'blue_deep':
       return phys({ color: '#1456e6', roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.06 });
@@ -94,7 +96,9 @@ function material(name: string): THREE.Material | null {
     case 'screen':
       return phys({ color: '#0b1220', roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.03 });
     case 'glass':
-      return phys({ color: '#e6f3ff', roughness: 0.02, transmission: 1, thickness: 0.2, ior: 1.5, transparent: true, opacity: 0.6 });
+      // Plain transparent glass: a transmission pass re-renders the full canvas with mipmaps every frame per lens, which
+      // was enough GPU load on laptops to reset the driver (the page blinked, then crashed).
+      return phys({ color: '#e6f3ff', roughness: 0.04, clearcoat: 1, clearcoatRoughness: 0.03, transparent: true, opacity: 0.38, depthWrite: false });
     case 'red':
       return phys({ color: '#ef3b3f', roughness: 0.25, clearcoat: 0.6 });
     case 'navy':
@@ -116,11 +120,21 @@ function Model({ id, lifted, onReady }: { id: string; lifted: boolean; onReady?:
       if (mesh.isMesh) {
         // Each instance gets its own materials so a hover cue on one station never leaks to another.
         const src = mesh.material as THREE.Material;
-        mesh.material = material(src.name) ?? src.clone();
+        const m = (mesh.material = material(src.name) ?? src.clone()) as THREE.MeshPhysicalMaterial;
+        if (m.transmission > 0) Object.assign(m, { transmission: 0, transparent: true, opacity: Math.min(m.opacity, 0.45), depthWrite: false });
       }
     });
     return s;
   }, [scene]);
+  // Materials are per instance; free them when the station unmounts (geometry stays shared with the cached model).
+  useEffect(
+    () => () =>
+      root.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (mesh.isMesh) (mesh.material as THREE.Material).dispose();
+      }),
+    [root],
+  );
   const prop = useMemo(() => {
     let found: THREE.Object3D | undefined;
     root.traverse((o) => {
@@ -176,9 +190,10 @@ function Model({ id, lifted, onReady }: { id: string; lifted: boolean; onReady?:
     cam.updateProjectionMatrix();
   }, [pose, camera, size.width, size.height]);
 
-  useEffect(() => onReady?.(), [onReady]);
-
+  // Report ready only after the model has been drawn a couple of times, so the still never hides over an empty slot.
+  const frames = useRef(0);
   useFrame((_, dt) => {
+    if (frames.current < 3 && ++frames.current === 3) onReady?.();
     // ~220 ms ease towards the hover pose: lift about 2% of height, rotate under 3 degrees.
     const target = lifted ? 1 : 0;
     t.current += (target - t.current) * Math.min(1, dt * 11);

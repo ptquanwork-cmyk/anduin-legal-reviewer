@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import type { Stage } from '../../lib/stages';
 
@@ -27,6 +27,10 @@ export function StationArt({
   const three = useContext(ThreeCtx);
   const [ready, setReady] = useState(false);
   const hidden = role !== 'fly' && flying === stage.id;
+  // The 3D view unmounts while its copy flies; show the still again until the remounted view has drawn.
+  useEffect(() => {
+    if (hidden) setReady(false);
+  }, [hidden]);
   return (
     <div data-art={role === 'fly' ? undefined : stage.id} data-art-role={role} className={`pointer-events-none ${className}`} style={{ ...style, opacity: hidden ? 0 : 1 }} aria-hidden>
       {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ensureSession, supabase } from './supabase';
 import type {
   AnnotationRow,
@@ -77,7 +77,7 @@ export function WorkspaceProvider({
     setRecent((rows ?? []) as RecentVersion[]);
   }, []);
 
-  const reload = useCallback(async () => {
+  const load = useCallback(async () => {
     if (!versionId) {
       setData(empty());
       return;
@@ -88,7 +88,7 @@ export function WorkspaceProvider({
       setData(empty());
       return;
     }
-    const [doc, siblings, blocks, edges, findings, annotations, submission, exports, job] = await Promise.all([
+    const [doc, siblings, blocks, edges, findings, annotations, submission, exports, job, decisions] = await Promise.all([
       sb.from('documents').select('*').eq('id', version.document_id).maybeSingle(),
       sb.from('document_versions').select('*').eq('document_id', version.document_id).order('version_no'),
       sb.from('source_blocks').select('*').eq('version_id', versionId).order('idx'),
@@ -98,11 +98,9 @@ export function WorkspaceProvider({
       sb.from('submissions').select('*').eq('version_id', versionId).maybeSingle(),
       sb.from('exports').select('*').eq('version_id', versionId).order('created_at', { ascending: false }),
       sb.from('jobs').select('*').eq('version_id', versionId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+      // Joined by version instead of listing every finding id (long documents made that URL huge).
+      sb.from('decision_events').select('*, findings!inner(version_id)').eq('findings.version_id', versionId).order('created_at'),
     ]);
-    const findingIds = (findings.data ?? []).map((f) => f.id);
-    const decisions = findingIds.length
-      ? await sb.from('decision_events').select('*').in('finding_id', findingIds).order('created_at')
-      : { data: [] };
     setData({
       version: version as VersionRow,
       document: (doc.data as DocumentRow) ?? null,
@@ -118,6 +116,28 @@ export function WorkspaceProvider({
     });
   }, [versionId]);
 
+  // One full read at a time; calls made during a read run once more afterwards instead of overlapping.
+  // The loop always runs the latest load, so switching versions mid-read ends on the new version.
+  const latest = useRef(load);
+  useEffect(() => {
+    latest.current = load;
+  }, [load]);
+  const busy = useRef<Promise<void> | null>(null);
+  const again = useRef(false);
+  const reload = useCallback(() => {
+    if (busy.current) {
+      again.current = true;
+      return busy.current;
+    }
+    busy.current = (async () => {
+      do {
+        again.current = false;
+        await latest.current();
+      } while (again.current);
+    })().finally(() => (busy.current = null));
+    return busy.current;
+  }, [load]);
+
   useEffect(() => {
     ensureSession()
       .then(() => setReady(true))
@@ -130,22 +150,31 @@ export function WorkspaceProvider({
     reload();
   }, [ready, reload, reloadRecent]);
 
-  // Live job state: refresh whenever a job row for this workspace changes.
+  // Live job state. Progress updates only replace the job row; the version's data is re-read when a step finishes or
+  // the job ends, and the recent list at most every few seconds (long documents send many progress updates).
   useEffect(() => {
     if (!ready) return;
+    let doneSteps = -1;
+    let recentTimer: ReturnType<typeof setTimeout> | null = null;
     const channel = supabase()
-      .channel('jobs')
+      .channel(`jobs-${versionId ?? 'none'}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, (payload) => {
         const row = payload.new as JobRow;
-        if (row?.version_id === versionId) {
+        if (row?.version_id && row.version_id === versionId) {
           setData((d) => ({ ...d, job: row }));
+          const done = (row.steps ?? []).filter((s) => s.status === 'done').length;
           if (row.status !== 'running' && row.status !== 'queued') reload();
-          else if (row.steps.some((s) => s.status === 'done')) reload();
+          else if (done !== doneSteps && done > 0) reload();
+          doneSteps = done;
         }
-        reloadRecent();
+        recentTimer ??= setTimeout(() => {
+          recentTimer = null;
+          reloadRecent();
+        }, 3000);
       })
       .subscribe();
     return () => {
+      if (recentTimer) clearTimeout(recentTimer);
       supabase().removeChannel(channel);
     };
   }, [ready, versionId, reload, reloadRecent]);
