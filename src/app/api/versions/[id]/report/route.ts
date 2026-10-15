@@ -51,7 +51,7 @@ export const POST = handle(async (req, ctx) => {
   }
   w.rule();
   w.text('Questions for counsel', { size: 15, bold: true, gap: 6 });
-  w.text(body.questions?.trim() || 'No open questions.', { gap: 8 });
+  w.text(body.questions?.trim().slice(0, 4000) || 'No open questions.', { gap: 8 });
   w.text('Prepared for confirmation by the responsible reviewer or counsel. This report does not give legal advice and was not sent to anyone by the application.', { size: 9, color: [0.33, 0.38, 0.48] });
 
   const bytes = await doc.save();

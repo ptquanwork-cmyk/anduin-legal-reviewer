@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { themeColor: '#c9ddf2' };
 
 // Applies the saved or system theme before first paint to avoid a light/dark flash.
-const themeScript = `try{var t=new URLSearchParams(location.search).get('theme')||localStorage.getItem('theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){}`;
+const themeScript = `try{var t=new URLSearchParams(location.search).get('theme')||localStorage.getItem('theme');if(t!=='dark'&&t!=='light')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

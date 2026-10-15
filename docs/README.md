@@ -4,7 +4,7 @@ Start with the [architecture and workflow map](architecture/overview.md): the re
 
 [Repository map](repository-map.md) lists every public folder. Separate the organizer's challenge from this project's interpretation and implementation status.
 
-[Deployment setup](deployment/setup.md) records the verified Vercel and Supabase projects.
+[Deployment setup](deployment/setup.md) records the verified Vercel and Supabase projects. [Security review](security.md) lists the controls, the findings of the 15 October review and the accepted limitations.
 
 [Overall design](../design/design.md) describes the 3D workflow hub, now implemented with Blender stations rendered live. [UI 2 JSON](../design/references/ui-2.json) records the web layout reference; [UI 3 JSON](../design/references/ui-3.json) records the 3D reference and module specification.
 

@@ -35,6 +35,7 @@ function fitFrame(overlay: boolean) {
   if (overlay) return { zoom: 1, frameWidth: 1536 };
   const vw = window.innerWidth;
   const vh = window.innerHeight;
+  if (!vw || !vh) return { zoom: 1, frameWidth: 1536 }; // hidden or not yet laid out (0×0)
   const wide = vw / (vh / 1024);
   if (wide < 1536) return { zoom: Math.min(vw / 1536, vh / 1024), frameWidth: 1536 };
   return { zoom: vh / 1024, frameWidth: wide };

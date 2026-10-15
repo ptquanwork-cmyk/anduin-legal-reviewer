@@ -14,6 +14,20 @@ const env = Object.fromEntries((await readFile('.env.supabase.local', 'utf8')).s
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 // The worker caps semantic review per user, so files are spread over a few anonymous workspaces.
 const PER_WORKSPACE = 3;
+// Planted problems (data/demo-contracts/expected.json): recall of what must be found, and false alarms to avoid.
+const EXPECTED = JSON.parse(await readFile(path.join(DIR, 'expected.json'), 'utf8'));
+
+function score(name, findings, anns) {
+  let exp = EXPECTED[name];
+  if (exp?.same_as) exp = EXPECTED[exp.same_as];
+  if (!exp) return null;
+  const text = (f) => [f.title, f.rationale, ...(f.evidence ?? []).map((e) => e.quote)].join(' ');
+  const hits = (item) => findings.some((f) => f.category === item.category && new RegExp(item.pattern, 'iu').test(text(f)));
+  const missed = exp.find.filter((i) => !hits(i)).map((i) => `${i.category}: ${i.pattern}${i.semantic ? ' (semantic)' : ''}`);
+  const falseAlarms = (exp.avoid ?? []).filter(hits).map((i) => `${i.category}: ${i.pattern}`);
+  const fieldsWrong = exp.fields ? Object.entries(exp.fields).filter(([t, n]) => (anns ?? []).filter((a) => a.type === t).length !== n).map(([t, n]) => `${t} expected ${n}`) : [];
+  return { found: exp.find.length - missed.length, of: exp.find.length, missed, falseAlarms, fieldsWrong };
+}
 
 async function workspace() {
   const sb = createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY, { auth: { persistSession: false } });
@@ -77,7 +91,7 @@ async function run(ws, name) {
     await new Promise((r) => setTimeout(r, 3000));
   }
   const { data: v } = await ws.sb.from('document_versions').select('source_status, routing, source_report, language').eq('id', reg.versionId).single();
-  const { data: findings } = await ws.sb.from('findings').select('category, title, provenance, evidence_status').eq('version_id', reg.versionId).order('seq');
+  const { data: findings } = await ws.sb.from('findings').select('category, title, rationale, evidence, provenance, evidence_status').eq('version_id', reg.versionId).order('seq');
   const { data: anns } = await ws.sb.from('annotations').select('type, transfer_state').eq('version_id', reg.versionId);
   let report = 'not run';
   try {
@@ -99,11 +113,13 @@ async function run(ws, name) {
     coverage: cov ? `${cov.read_pages}/${cov.total_pages} pages read${cov.unread_pages?.length ? `, unread ${cov.unread_pages.join(',')}` : ''}` : 'n/a',
     issues: (v.source_report?.issues ?? []).map((i) => `${i.page ? `p${i.page} ` : ''}${i.title}`),
     semantic: v.routing?.semantic_review ?? 'n/a',
+    semanticNote: (v.source_report?.limitations ?? []).find((l) => l.startsWith('Semantic review did not complete')) ?? null,
     agent: v.routing?.agent ?? 'n/a',
     findings: (findings ?? []).map((f) => `${f.category}: ${f.title} [${f.provenance?.source}${f.provenance?.model ? `/${f.provenance.model}` : ''}, ${f.evidence_status}]`),
     fields: `${count('text_box')} text, ${count('radio')} radio, ${count('checkbox')} checkbox, ${count('paragraph')} paragraph; ${(anns ?? []).filter((a) => a.transfer_state === 'uncertain').length} uncertain`,
     report,
     digitise,
+    accuracy: score(name, findings ?? [], anns),
     versionId: reg.versionId,
   };
 }
@@ -123,4 +139,11 @@ for (const [i, name] of files.entries()) {
   }
 }
 console.log('SUMMARY');
-for (const r of results) console.log(`${r.file}: job ${r.job}${r.error ? ` (${r.error})` : ''}, ${r.findings?.length ?? 0} findings, fields ${r.fields ?? '-'}, report ${r.report ?? '-'}, ${r.seconds ?? '?'} s`);
+for (const r of results) {
+  const a = r.accuracy;
+  console.log(`${r.file}: job ${r.job}${r.error ? ` (${r.error})` : ''}, ${r.seconds ?? '?'} s, ${r.findings?.length ?? 0} findings, planted ${a ? `${a.found}/${a.of}` : '-'}${a?.missed.length ? ` missed [${a.missed.join('; ')}]` : ''}${a?.falseAlarms.length ? ` FALSE ALARMS [${a.falseAlarms.join('; ')}]` : ''}${a?.fieldsWrong.length ? ` FIELDS [${a.fieldsWrong.join('; ')}]` : ''}, report ${r.report ?? '-'}, ${r.digitise ?? '-'}`);
+}
+const all = results.map((r) => r.accuracy).filter(Boolean);
+const found = all.reduce((n, a) => n + a.found, 0);
+const of = all.reduce((n, a) => n + a.of, 0);
+console.log(`TOTAL planted problems found ${found}/${of} (${Math.round((100 * found) / Math.max(1, of))}%), false alarms ${all.reduce((n, a) => n + a.falseAlarms.length, 0)}, total time ${results.reduce((n, r) => n + (r.seconds ?? 0), 0)} s`);

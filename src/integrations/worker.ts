@@ -57,7 +57,16 @@ async function call(path: string, init: RequestInit, timeoutMs: number) {
  */
 async function runJob(path: string, init: RequestInit, timeoutMs: number) {
   const started = Date.now();
-  const { job } = (await (await call(path, init, 60000)).json()) as { job: string };
+  let first: Response | null = null;
+  for (let tries = 0; !first; tries++) {
+    try {
+      first = await call(path, init, 60000);
+    } catch (e) {
+      if (!(e instanceof Error && e.message.includes('(429)')) || tries >= 20) throw e;
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+  }
+  const { job } = (await first.json()) as { job: string };
   let misses = 0;
   while (Date.now() - started < timeoutMs) {
     await new Promise((r) => setTimeout(r, 2500));

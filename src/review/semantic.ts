@@ -68,11 +68,33 @@ export async function semanticReview(blocks: Block[], defs: Definition[], exampl
   const candidates: Candidate[] = [];
   let model = '';
   let reviewed = 0;
+  const toDoc = (part: Block[]) => part.map((b) => ({ id: b.idx, section: b.section_title, text: b.text }));
+  const add = (found: RawFinding[], by: string) => {
+    for (const f of found) {
+      candidates.push({
+        category: f.category,
+        title: f.title,
+        rationale: f.rationale,
+        question: f.question,
+        suggestion: f.suggestion || null,
+        severity: f.severity,
+        evidence: f.evidence.map((e) => ({ quote: e.quote, block_idx: e.block_id })),
+        provenance: { source: 'semantic', model: by, prompt_version: PROMPT_VERSION, model_score: Math.max(0, Math.min(1, f.model_score)) },
+      });
+    }
+  };
+  if (engine === 'codex') {
+    // The worker reviews up to two chunks at once, so a long document costs about one chunk's time.
+    const chosen = parts.slice(0, 2);
+    const results = await Promise.all(chosen.map((part) => semanticViaWorker({ document: toDoc(part), index, guidance, language: lang })));
+    for (const res of results) add((res.result as { findings: RawFinding[] }).findings, (model = res.engine));
+    return { candidates, model, truncated: parts.length > chosen.length };
+  }
   for (const part of parts) {
     // The CLI path is slower per call, so it reviews fewer chunks within the function time limit.
     if (reviewed >= (engine === 'openai' ? 6 : 2)) break;
     reviewed++;
-    const doc = part.map((b) => ({ id: b.idx, section: b.section_title, text: b.text }));
+    const doc = toDoc(part);
     let found: RawFinding[] = [];
     if (engine === 'openai') {
       model = process.env.OPENAI_MODEL || 'gpt-5-mini';
@@ -98,18 +120,7 @@ export async function semanticReview(blocks: Block[], defs: Definition[], exampl
       model = res.engine;
       found = (res.result as { findings: RawFinding[] }).findings;
     }
-    for (const f of found) {
-      candidates.push({
-        category: f.category,
-        title: f.title,
-        rationale: f.rationale,
-        question: f.question,
-        suggestion: f.suggestion || null,
-        severity: f.severity,
-        evidence: f.evidence.map((e) => ({ quote: e.quote, block_idx: e.block_id })),
-        provenance: { source: 'semantic', model, prompt_version: PROMPT_VERSION, model_score: Math.max(0, Math.min(1, f.model_score)) },
-      });
-    }
+    add(found, model);
   }
   return { candidates, model, truncated: parts.length > reviewed };
 }

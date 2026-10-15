@@ -76,6 +76,14 @@ flowchart LR
 | Field detection | `src/digitize/fields.ts` | Four annotation types; AcroForm widgets used directly when present |
 | Report, fill, QA | `src/app/api/versions/[id]/report`, `src/digitize/fill.ts` | Review report PDF; filled PDF re-read and checked |
 
+### Speed
+
+Rules and the semantic reviewer start as soon as text is extracted, in parallel with the decision agent's routing; the review chain (rules, semantic reviewer, evidence gate, ordering) and field detection then run side by side. The worker reviews up to two chunks of a long document at once and queues decision-agent calls on its single model. Long worker calls run as background jobs, because the tunnel ends requests after about 100 seconds.
+
+### Accuracy
+
+`node scripts/e2e-contracts.mjs` scores every run against the planted problems in `data/demo-contracts/expected.json` (problems found, false alarms to avoid, expected form fields); the latest numbers are in the build log.
+
 ## 4. Trust boundaries
 
 - Contract text is untrusted data: it is sent to reviewers as data in a separate field, never as instructions; uploads are sanitised before Word opens them (macros, DTDs, external links and remote fields are refused).

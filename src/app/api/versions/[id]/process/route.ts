@@ -1,5 +1,5 @@
 import { after } from 'next/server';
-import { handle, HttpError, requireUser } from '../../../../../integrations/supabase-server';
+import { handle, HttpError, limitProcessing, requireUser } from '../../../../../integrations/supabase-server';
 import { initialSteps, runPipeline } from '../../../../../review/pipeline';
 import { withWorkerSession } from '../../../../../integrations/worker';
 
@@ -11,6 +11,7 @@ export const POST = handle(async (req, ctx) => {
   const { id } = await ctx.params;
   const { data: v } = await sb.from('document_versions').select('id').eq('id', id).maybeSingle();
   if (!v) throw new HttpError(404, 'Version not found.');
+  await limitProcessing(sb);
   // Derived records are regenerated; decisions on old findings are removed with them.
   for (const t of ['findings', 'graph_edges', 'source_blocks', 'annotations'] as const) {
     const del = await sb.from(t).delete().eq('version_id', id);

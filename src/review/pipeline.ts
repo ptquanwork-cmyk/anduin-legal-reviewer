@@ -125,6 +125,15 @@ export async function runPipeline(sb: SupabaseClient, userId: string, versionId:
       return;
     }
 
+    // Speed: rules and the semantic reviewer start now, in parallel with the decision agent's routing; the result of
+    // the semantic reviewer is only used if routing (when online) says a deep review is worth it.
+    const rulesP = speller(lang).then((sp) => runRules(blocks, lang, sp));
+    const semanticP: Promise<{ skipped: true } | { sem: Awaited<ReturnType<typeof semanticReview>> } | { error: unknown }> = (async () => {
+      if (await overHourlyLimit(sb)) return { skipped: true as const };
+      const [rules, examples] = await Promise.all([rulesP, feedbackExamples(sb)]);
+      return { sem: await semanticReview(blocks, rules.definitions, examples, lang) };
+    })().catch((error) => ({ error }));
+
     // 3. Decision agent routes the remaining steps.
     await set('routing', 'running');
     const head = blocks.map((b) => b.text).join('\n').slice(0, 3500);
@@ -146,48 +155,45 @@ export async function runPipeline(sb: SupabaseClient, userId: string, versionId:
       await set('routing', 'offline', 'Decision agent offline; all checks run.');
     }
 
-    // 4. Review: deterministic rules + semantic adapter, then the evidence gate.
-    await set('review', 'running');
-    const rules = runRules(blocks, lang, await speller(lang));
-    const candidates = [...rules.findings];
-    const wantSemantic = routing.agent !== 'online' || Number(routing.needs_semantic?.value ?? 1) >= 0.25 || head.length >= 3000;
-    if (semanticEngine() === 'codex' && routing.agent === 'offline') {
-      // The CLI engine runs in the same worker; when it is offline the rules still run.
-      routing.semantic_review = 'unconfigured';
-      (routing.notes ??= []).push('Semantic reviewer offline (runs on the owner’s worker); deterministic checks still ran.');
-    } else if (!wantSemantic) {
-      routing.semantic_review = 'skipped';
-      (routing.notes ??= []).push('Decision agent judged deep semantic review unnecessary for this document.');
-    } else if (await overHourlyLimit(sb)) {
-      routing.semantic_review = 'skipped';
-      (routing.notes ??= []).push('Hourly semantic review limit reached for this workspace; rules still ran.');
-    } else {
-      try {
-        const examples = await feedbackExamples(sb);
-        const sem = await semanticReview(blocks, rules.definitions, examples, lang);
-        candidates.push(...sem.candidates);
+    // 4 and 5 run side by side: the review (rules + semantic reviewer, then the evidence gate) and field detection do
+    // not depend on each other.
+    const review = async () => {
+      await set('review', 'running');
+      const rules = await rulesP;
+      const candidates = [...rules.findings];
+      const wantSemantic = routing.agent !== 'online' || Number(routing.needs_semantic?.value ?? 1) >= 0.25 || head.length >= 3000;
+      const s = await semanticP;
+      if ('skipped' in s) {
+        routing.semantic_review = 'skipped';
+        (routing.notes ??= []).push('Hourly semantic review limit reached for this workspace; rules still ran.');
+      } else if ('error' in s) {
+        const offline = s.error instanceof WorkerUnavailable && semanticEngine() === 'codex';
+        if (!offline) console.error('semantic review failed', s.error);
+        routing.semantic_review = offline ? 'unconfigured' : 'failed';
+        if (offline) (routing.notes ??= []).push('Semantic reviewer offline (runs on the owner’s worker); deterministic checks still ran.');
+        else report.limitations!.push(`Semantic review did not complete: ${s.error instanceof Error ? s.error.message.slice(0, 160) : 'error'}`);
+      } else if (!wantSemantic) {
+        routing.semantic_review = 'skipped';
+        (routing.notes ??= []).push('Decision agent judged deep semantic review unnecessary for this document.');
+      } else {
+        candidates.push(...s.sem.candidates);
         routing.semantic_review = 'run';
-        if (sem.truncated) report.limitations!.push('Semantic review covered the first sections only (document too long).');
-      } catch (e) {
-        console.error('semantic review failed', e);
-        routing.semantic_review = 'failed';
-        report.limitations!.push(`Semantic review did not complete: ${e instanceof Error ? e.message.slice(0, 160) : 'error'}`);
+        if (s.sem.truncated) report.limitations!.push('Semantic review covered the first sections only (document too long).');
       }
-    }
-    const { findings, rejected } = validate(candidates, blocks);
-    if (rejected.length) report.limitations!.push(...rejected.map((r) => `Rejected "${r.title}": ${r.reason}`));
-    await agentAnnotateFindings(findings, routing, lang);
-    await storeFindings(sb, versionId, findings, [...rules.edges, ...conflictEdges(findings, blocks)]);
-    await sb.from('document_versions').update({ source_report: report, routing, status: 'reviewed' }).eq('id', versionId);
-    await set('review', 'done', `${findings.length} finding(s) · ${rejected.length} unsupported candidate(s) rejected`);
-
-    // 5. Field detection for annotation (needs page geometry).
-    await set('fields', 'running');
-    if (!pdfPath) await set('fields', 'skipped', 'Needs a PDF with page geometry.');
-    else {
+      const { findings, rejected } = validate(candidates, blocks);
+      if (rejected.length) report.limitations!.push(...rejected.map((r) => `Rejected "${r.title}": ${r.reason}`));
+      await agentAnnotateFindings(findings, routing, lang);
+      await storeFindings(sb, versionId, findings, [...rules.edges, ...conflictEdges(findings, blocks)]);
+      await sb.from('document_versions').update({ source_report: report, routing, status: 'reviewed' }).eq('id', versionId);
+      await set('review', 'done', `${findings.length} finding(s) · ${rejected.length} unsupported candidate(s) rejected`);
+    };
+    const fields = async () => {
+      await set('fields', 'running');
+      if (!pdfPath) return set('fields', 'skipped', 'Needs a PDF with page geometry.');
       const n = await storeFields(sb, version, blocks, routing, lang, version.mime === 'application/pdf' ? original : null);
       await set('fields', 'done', `${n.inputs} input field(s), ${n.paragraphs} paragraph region(s), ${n.uncertain} uncertain`);
-    }
+    };
+    await Promise.all([review(), fields()]);
     await finish(sb, jobId, steps, 'done', versionId, routing, 'reviewed');
   } catch (e) {
     console.error('pipeline failed', e);

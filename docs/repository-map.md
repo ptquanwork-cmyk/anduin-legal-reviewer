@@ -65,7 +65,7 @@ anduin-legal-reviewer/
 | --- | --- |
 | `.github/` | Pull-request review template |
 | `.github/ISSUE_TEMPLATE/` | Task intake template |
-| `docs/` | Project documentation index and this complete map |
+| `docs/` | Project documentation index, this complete map and the [security review](security.md) |
 | `docs/challenge/` | Source-backed organizer challenge and event constraints |
 | `docs/product/` | User problem, proposed workflow, scope, acceptance criteria |
 | `docs/architecture/` | Workflow, system and pipeline maps; folder categories |

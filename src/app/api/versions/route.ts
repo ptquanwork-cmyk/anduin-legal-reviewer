@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { after } from 'next/server';
-import { download, handle, HttpError, requireUser } from '../../../integrations/supabase-server';
+import { download, handle, HttpError, limitProcessing, requireUser } from '../../../integrations/supabase-server';
 import { initialSteps, runPipeline } from '../../../review/pipeline';
 import { withWorkerSession } from '../../../integrations/worker';
 
@@ -20,6 +20,7 @@ export const POST = handle(async (req) => {
   const sha256 = createHash('sha256').update(data).digest('hex');
 
   // Exact identity: reopen the earlier record instead of processing again (its status is kept, never upgraded).
+  await limitProcessing(sb);
   const { data: same } = await sb.from('document_versions').select('id, document_id').eq('sha256', sha256).order('created_at').limit(1).maybeSingle();
   if (same) return Response.json({ versionId: same.id, documentId: same.document_id, duplicateOf: same.id });
 

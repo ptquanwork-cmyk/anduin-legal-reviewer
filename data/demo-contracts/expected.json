@@ -1,0 +1,70 @@
+{
+  "$comment": "Planted problems per demo contract, for scripts/e2e-contracts.mjs. 'find': each item must be matched by a finding of that category whose title, rationale or quotes match the pattern (case-insensitive). 'avoid': findings that would be false alarms. 'semantic': true marks items only the semantic reviewer is expected to catch.",
+  "01-subscription-agreement.docx": {
+    "find": [
+      { "category": "contradiction", "pattern": "10 Business Days|15 Business Days|capital call" },
+      { "category": "missing_reference", "pattern": "Section 14" },
+      { "category": "typo", "pattern": "recieve" },
+      { "category": "typo", "pattern": "comittment" },
+      { "category": "ambiguity", "pattern": "promptly|reasonable efforts" },
+      { "category": "undefined_term", "pattern": "Management Fee Offset" }
+    ],
+    "avoid": [{ "category": "typo", "pattern": "authoris|favour|enquir" }]
+  },
+  "02-investor-questionnaire.pdf": {
+    "find": [
+      { "category": "contradiction", "pattern": "30 days|45 days|distribution" },
+      { "category": "missing_reference", "pattern": "Annex C" },
+      { "category": "typo", "pattern": "beneficary" },
+      { "category": "ambiguity", "pattern": "as soon as practicable" }
+    ],
+    "avoid": [{ "category": "missing_reference", "pattern": "Annex A|Annex B" }]
+  },
+  "03-side-letter.docx": {
+    "find": [{ "category": "ambiguity", "pattern": "reasonable access", "semantic": true }],
+    "avoid": [{ "category": "typo", "pattern": "favour|authoris" }, { "category": "missing_reference", "pattern": "Section 5" }]
+  },
+  "04-subscription-booklet-scrambled.pdf": {
+    "find": [
+      { "category": "ambiguity", "pattern": "promptly" },
+      { "category": "contradiction", "pattern": "30 June|31 July|closing date", "semantic": true }
+    ],
+    "avoid": [{ "category": "missing_reference", "pattern": "Section 9" }]
+  },
+  "05-subscription-booklet-long.docx": {
+    "find": [
+      { "category": "contradiction", "pattern": "capital call|10 Business Days|12 Business Days" },
+      { "category": "contradiction", "pattern": "transfer|30 days|60 days" },
+      { "category": "missing_reference", "pattern": "Section 52" },
+      { "category": "missing_reference", "pattern": "Schedule F" },
+      { "category": "typo", "pattern": "recieve" },
+      { "category": "ambiguity", "pattern": "\\bsoon\\b" },
+      { "category": "ambiguity", "pattern": "promptly" },
+      { "category": "undefined_term", "pattern": "Carried Interest Clawback" }
+    ],
+    "avoid": [
+      { "category": "typo", "pattern": "authoris|favour|enquir" },
+      { "category": "undefined_term", "pattern": "United States" },
+      { "category": "contradiction", "pattern": "Example \\d" }
+    ]
+  },
+  "05-subscription-booklet-long.pdf": { "same_as": "05-subscription-booklet-long.docx" },
+  "06-thoa-thuan-dang-ky-gop-von.docx": {
+    "find": [
+      { "category": "contradiction", "pattern": "10 ngày|15 ngày|góp vốn" },
+      { "category": "missing_reference", "pattern": "Điều 12" },
+      { "category": "ambiguity", "pattern": "sớm" },
+      { "category": "ambiguity", "pattern": "hợp lý" }
+    ],
+    "avoid": []
+  },
+  "07-subscription-form-fillable.pdf": {
+    "find": [
+      { "category": "contradiction", "pattern": "10 Business Days|20 Business Days|capital call" },
+      { "category": "typo", "pattern": "recieve" },
+      { "category": "ambiguity", "pattern": "reasonable" }
+    ],
+    "avoid": [],
+    "fields": { "text_box": 8, "radio": 2, "checkbox": 3 }
+  }
+}

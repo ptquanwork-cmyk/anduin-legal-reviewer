@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-15 — Security review, speed and accuracy
+
+- Security: generic server-error messages, 30 processing runs per workspace per hour, bounded report text, production Content-Security-Policy and Permissions-Policy, theme parameter whitelist; review and accepted limitations in `docs/security.md`.
+- Speed: semantic review starts in parallel with routing; review and field detection run side by side; two Codex chunks at once; decision-agent calls queued on one model; failed worker jobs reported with their real reason instead of being retried as tunnel errors.
+- Accuracy: planted problems are machine-readable (`data/demo-contracts/expected.json`) and every end-to-end run reports recall and false alarms.
+- Fix: no NaN frame width when the window is momentarily 0×0.
+
 ## 2026-10-15 — Demo contracts, full check, project map
 
 - `data/demo-contracts/`: synthetic fund subscription documents (Word, PDF, scrambled scan, 38-page booklet, Vietnamese, fillable AcroForm) with planted problems; `scripts/build-demo-contracts.mjs` rebuilds them and `scripts/e2e-contracts.mjs` runs each through the whole workflow, including fill, PDF QA and final export.

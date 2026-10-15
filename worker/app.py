@@ -35,6 +35,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], a
 
 state = {"router": None, "status": "loading", "error": None, "loaded_at": None}
 word_lock = threading.Lock()
+laya_lock = threading.Lock()
 _verified: dict[str, tuple[float, str]] = {}
 
 
@@ -471,13 +472,14 @@ def job_status(job_id: str, user: str = Depends(auth)):
     if job["status"] == "running":
         return Response('{"status":"running"}', status_code=202, media_type="application/json")
     if job["status"] == "failed":
-        raise HTTPException(status_code=job["code"], detail=job["detail"])
+        # 409, not the job's own code: a 502/503 here would look like a dropped tunnel request and be retried.
+        raise HTTPException(status_code=409, detail=f"job failed ({job['code']}): {job['detail']}")
     kind, out = job["out"]
     return _pdf_response(*out) if kind == "pdf" else out
 
 
 PROMPT_FILE = Path(__file__).resolve().parent.parent / "src" / "review" / "contract-review-v2.json"
-codex_lock = threading.Lock()
+codex_lock = threading.BoundedSemaphore(2)  # two document chunks may be reviewed at once
 # Codex runs with every tool surface disabled and without the user's config/MCP servers: it can only write text.
 CODEX_LOCKDOWN = [
     "--skip-git-repo-check", "--ephemeral", "--ignore-user-config", "--ignore-rules", "-s", "read-only", "--color", "never",
@@ -604,6 +606,11 @@ def _decide_run(req: DecideRequest):
     if req.model:
         extra["model"] = req.model
     router = state["router"]
+    with laya_lock:  # one model instance: parallel pipeline steps queue here instead of contending for the CPU
+        return _predict(router, req, extra, started)
+
+
+def _predict(router, req: DecideRequest, extra: dict, started: float):
     if req.states is not None:
         results = router.predict_batch([{"state": s[:20000], "questions": req.questions, **extra} for s in req.states])
         return {"results": results, "elapsed_ms": int((time.time() - started) * 1000)}

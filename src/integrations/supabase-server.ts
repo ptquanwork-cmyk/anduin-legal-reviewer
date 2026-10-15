@@ -33,9 +33,21 @@ export function handle(fn: (req: Request, ctx: { params: Promise<Record<string, 
     } catch (e) {
       const status = e instanceof HttpError ? e.status : 500;
       if (status === 500) console.error(e);
-      return Response.json({ error: e instanceof Error ? e.message : 'Unexpected error' }, { status });
+      // Only deliberate HttpError messages reach the browser; anything unexpected stays in the server log.
+      return Response.json({ error: e instanceof HttpError ? e.message : 'Unexpected server error. Please try again.' }, { status });
     }
   };
+}
+
+/**
+ * Each upload or re-run spends conversion, decision-agent and review time on the owner's worker, and every visitor is an
+ * anonymous workspace, so processing is capped per workspace and hour (RLS makes the count per user).
+ */
+export async function limitProcessing(sb: SupabaseClient, perHour = 30) {
+  const since = new Date(Date.now() - 3600_000).toISOString();
+  const { count, error } = await sb.from('jobs').select('id', { count: 'exact', head: true }).gte('created_at', since);
+  if (error) throw new HttpError(500, error.message);
+  if ((count ?? 0) >= perHour) throw new HttpError(429, 'Processing limit reached for this workspace; please try again later.');
 }
 
 export async function download(sb: SupabaseClient, bucket: string, path: string) {
