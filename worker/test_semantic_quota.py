@@ -57,3 +57,23 @@ try:
 except _H as e:
     assert e.status_code == 404
 print("job limits ok")
+
+# Running jobs are never evicted, a refused job spends no semantic quota, and the service caller is not capped.
+app._jobs["old"] = {"user": "u9", "status": "running", "at": _t.time() - 10_000}
+app._reserve_job("u8")
+assert "old" in app._jobs, "running jobs stay counted"
+app._jobs.clear(); app._user_calls.clear(); app._global_calls.clear()
+for _ in range(app.MAX_RUNNING_PER_USER):
+    app._reserve_job("u7")
+req = app.SemanticRequest(document=[{"id": 1, "section": None, "text": "x"}], index={}, guidance="")
+try:
+    app.semantic_job(req, "u7")
+    raise AssertionError("job cap")
+except _H as e:
+    assert e.status_code == 429
+assert not app._user_calls.get("u7"), "no quota spent on a refused job"
+app._jobs.clear()
+for _ in range(app.MAX_RUNNING + 2):
+    app._reserve_job("service")
+print("job accounting ok")
+

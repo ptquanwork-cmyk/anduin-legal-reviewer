@@ -416,17 +416,29 @@ jobs_lock = threading.Lock()
 MAX_RUNNING, MAX_RUNNING_PER_USER = 8, 3  # one thread per running job; Word and Codex are serialised behind locks anyway
 
 
-def _start_job(user: str, work) -> dict:
+def _reserve_job(user: str) -> str:
+    """Claims a job slot (or 429) before any work or quota is spent. Every visitor is an anonymous user, so the caps are
+    per user and overall; the shared-secret service caller is not capped."""
     job_id = secrets.token_urlsafe(16)
     with jobs_lock:
         now = time.time()
-        # Results are kept 15 minutes, or one minute after they were fetched (room for a retried poll).
-        for key in [k for k, v in _jobs.items() if now - v["at"] > 900 or now - v.get("fetched", now) > 60]:
+        # Finished results are kept 15 minutes, or one minute after they were fetched; running jobs are never evicted.
+        for key in [k for k, v in _jobs.items() if v["status"] != "running" and (now - v["at"] > 900 or now - v.get("fetched", now) > 60)]:
             del _jobs[key]
-        running = [v for v in _jobs.values() if v["status"] == "running"]
-        if len(running) >= MAX_RUNNING or sum(v["user"] == user for v in running) >= MAX_RUNNING_PER_USER:
+        running = [v for v in _jobs.values() if v["status"] == "running" and v["user"] != "service"]
+        if user != "service" and (len(running) >= MAX_RUNNING or sum(v["user"] == user for v in running) >= MAX_RUNNING_PER_USER):
             raise HTTPException(status_code=429, detail="too many jobs in progress; try again shortly")
         _jobs[job_id] = {"user": user, "status": "running", "at": now}
+    return job_id
+
+
+def _release_job(job_id: str):
+    with jobs_lock:
+        _jobs.pop(job_id, None)
+
+
+def _start_job(user: str, work, job_id: str | None = None) -> dict:
+    job_id = job_id or _reserve_job(user)
 
     def run():
         try:
@@ -556,8 +568,13 @@ def semantic(req: SemanticRequest, user: str = Depends(auth)):
 
 @app.post("/jobs/semantic", status_code=202)
 def semantic_job(req: SemanticRequest, user: str = Depends(auth)):
-    work = _semantic_prepare(req, user)
-    return _start_job(user, lambda: ("json", work()))
+    job_id = _reserve_job(user)  # capacity first, so a refused job never spends semantic quota
+    try:
+        work = _semantic_prepare(req, user)
+    except Exception:
+        _release_job(job_id)
+        raise
+    return _start_job(user, lambda: ("json", work()), job_id)
 
 
 @app.get("/semantic/health")
