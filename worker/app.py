@@ -7,12 +7,14 @@ data: the caller chooses the fixed question set; nothing in the text can select 
 """
 import json
 import os
+import posixpath
 import re
 import shutil
 import subprocess
 import tempfile
 import threading
 import time
+import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -99,6 +101,10 @@ def health():
 HYPERLINK = "hyperlink"
 SAFE_LINK = re.compile(r"^(https?://|mailto:)", re.I)
 ABSOLUTE = re.compile(r"^([a-z][a-z0-9+.-]*:|\\\\|//)", re.I)  # any scheme, UNC (\\host) or network path
+LINKISH = re.compile(r"^\s*(file:|\\\\|//)", re.I)  # attribute values Word could resolve to a local or network file
+CT_NS = "http://schemas.openxmlformats.org/package/2006/content-types"
+REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
+W_SPACES = ("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "http://purl.oclc.org/ooxml/wordprocessingml/main")
 # Relationship types Word may follow inside an accepted package (last segment of the Type URI, so Transitional,
 # Strict and Microsoft-extension namespaces all match). Anything else — altChunk imports, OLE objects, embedded
 # packages, sub-documents, charts, templates, add-ins, customisations — rejects the package.
@@ -122,19 +128,22 @@ SAFE_FIELDS = {
     "FORMTEXT", "FORMCHECKBOX", "FORMDROPDOWN", "SYMBOL", "EQ", "ADVANCE", "IF", "COMPARE", "BIDIOUTLINE",
     "GREETINGLINE", "ADDRESSBLOCK", "BARCODE", "DISPLAYBARCODE", "CITATION", "BIBLIOGRAPHY",
 }
+FIELD_TAGS = {"fldChar", "instrText", "delInstrText", "fldSimple"}
+BLOCKED_TAGS = {"fldData", "mailMerge", "altChunk", "subDoc", "object", "control"}
 UNSUPPORTED = "documents with embedded objects, imported content or linked data are not accepted"
 
 
-def _reject(detail: str):
+def _reject(detail: str = UNSUPPORTED):
     raise HTTPException(status_code=415, detail=detail)
 
 
-def _local(name: str) -> str:
-    return name.rsplit("}", 1)[-1]
+def _split(tag: str) -> tuple[str, str]:
+    return tuple(tag[1:].split("}", 1)) if tag.startswith("{") else ("", tag)
 
 
-def _attr(el, name: str):
-    return next((v for k, v in el.attrib.items() if _local(k) == name), None)
+def _wattr(el, name: str):
+    # Exact qualified names, as Word reads them; a look-alike attribute in another namespace is not consulted.
+    return next((v for v in (el.get(f"{{{ns}}}{name}") for ns in W_SPACES) if v is not None), None)
 
 
 def _parse(name: str, body: bytes):
@@ -154,78 +163,121 @@ def _parse(name: str, body: bytes):
     return ET.fromstring(body)
 
 
+def _looks_xml(body: bytes) -> bool:
+    return body.lstrip(b"\xef\xbb\xbf\xff\xfe\x00 \t\r\n")[:1] == b"<"
+
+
 def _content_types(src) -> tuple[dict, dict]:
     if "[Content_Types].xml" not in src.namelist():
         _reject("not a valid .docx package")
     defaults, overrides = {}, {}
     for el in _parse("[Content_Types].xml", src.read("[Content_Types].xml")):
-        kind, ctype = _local(el.tag), (_attr(el, "ContentType") or "").strip()
-        if kind == "Default":
-            defaults[(_attr(el, "Extension") or "").lower()] = ctype
-        elif kind == "Override":
-            overrides[(_attr(el, "PartName") or "").lstrip("/").lower()] = ctype
+        if el.tag == f"{{{CT_NS}}}Default":
+            defaults[(el.get("Extension") or "").lower()] = (el.get("ContentType") or "").strip()
+        elif el.tag == f"{{{CT_NS}}}Override":
+            overrides[(el.get("PartName") or "").lstrip("/").lower()] = (el.get("ContentType") or "").strip()
+    if any("macroenabled" in v.lower() for v in [*defaults.values(), *overrides.values()]):
+        _reject("macro-enabled documents are not accepted")
     return defaults, overrides
 
 
-def _local_ns(tag: str) -> str:
-    return tag[1:].split("}", 1)[0] if tag.startswith("{") else ""
+def _resolve(rels_name: str, target: str) -> str:
+    """Part name a relationship target points to (relative to the source part's folder, or absolute)."""
+    target = urllib.parse.unquote(target.split("#", 1)[0])
+    if target.startswith("/"):
+        return target.lstrip("/").lower()
+    base = posixpath.dirname(posixpath.dirname(rels_name))  # word/_rels/document.xml.rels -> word
+    return posixpath.normpath(posixpath.join(base, target)).lstrip("/").lower()
 
 
-def _clean_rels(name: str, root) -> bytes:
+def _fits(kind: str, ctype: str) -> bool:
+    """The target part's declared content type must match what the relationship makes Word load."""
+    c = ctype.lower()
+    if kind in ("image", "thumbnail"):
+        return c.startswith("image/") and "svg" not in c
+    if kind in ("font", "printerSettings"):
+        return bool(SAFE_BINARY.match(ctype))
+    return c.endswith(("+xml", "/xml"))
+
+
+def _clean_rels(name: str, root, ctype_of, parts: set) -> bytes:
     """Drops every external or absolute target (remote templates, OLE links, frames, linked images, file: and UNC
-    paths) except http(s)/mailto hyperlinks, however the attributes are written; rejects non-allowlisted types."""
+    paths) except http(s)/mailto hyperlinks, however they are written; internal targets need an allowlisted type and a
+    content type that fits it. Attributes are read by their exact (unqualified) names, as Word reads them."""
+    if root.tag != f"{{{REL_NS}}}Relationships":
+        _reject()
     for rel in list(root):
-        target = (_attr(rel, "Target") or "").strip()
-        kind = (_attr(rel, "Type") or "").strip().rsplit("/", 1)[-1]
-        external = (_attr(rel, "TargetMode") or "").strip().lower() == "external" or bool(ABSOLUTE.match(target))
+        if rel.tag != f"{{{REL_NS}}}Relationship":
+            root.remove(rel)
+            continue
+        target = (rel.get("Target") or "").strip()
+        kind = (rel.get("Type") or "").strip().rsplit("/", 1)[-1]
+        external = (rel.get("TargetMode") or "").strip().lower() == "external" or bool(ABSOLUTE.match(target))
         if external:
             if not (kind == HYPERLINK and SAFE_LINK.match(target)):
                 root.remove(rel)
         elif kind not in SAFE_RELS:
-            _reject(UNSUPPORTED)
-    ET.register_namespace("", _local_ns(root.tag))
+            _reject()
+        elif kind != HYPERLINK:
+            part = _resolve(name, target)
+            if part in parts and not _fits(kind, ctype_of(part)):
+                _reject()
+    ET.register_namespace("", REL_NS)
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
 
-def _check_fields(root):
-    """Every field instruction (simple or complex, nested, any namespace) must start with an allowlisted keyword."""
+def _check_part(root):
+    """Rejects blocked WordprocessingML elements, attribute values pointing at files or network paths, and any field
+    whose instruction does not start with an allowlisted keyword (simple, complex or nested, Transitional or Strict)."""
 
     def check(instr: str):
         word = (instr.strip().split() or [""])[0].upper()
-        if word and not word.startswith("=") and word not in SAFE_FIELDS:
-            _reject(UNSUPPORTED)
+        if not word or not (word.startswith("=") or word in SAFE_FIELDS):
+            _reject()
 
-    stack: list = []  # one instruction buffer per open complex field; None once its instruction has ended
+    stack: list[dict] = []  # open complex fields: instruction pieces and whether the instruction has ended
     for el in root.iter():
-        tag = _local(el.tag)
-        if tag in ("fldData", "mailMerge", "altChunk", "subDoc", "object"):
-            _reject(UNSUPPORTED)
-        elif tag == "fldSimple":
-            check(_attr(el, "instr") or "")
+        ns, tag = _split(el.tag)
+        if any(LINKISH.match(v) for v in el.attrib.values()):
+            _reject()
+        if ns in W_SPACES and tag in BLOCKED_TAGS:
+            _reject()
+        if tag not in FIELD_TAGS:
+            continue
+        if ns not in W_SPACES:
+            _reject()  # look-alike field markup in another namespace
+        if tag == "fldSimple":
+            check(_wattr(el, "instr") or "")
         elif tag == "fldChar":
-            kind = _attr(el, "fldCharType")
+            kind = _wattr(el, "fldCharType")
             if kind == "begin":
-                stack.append([])
+                # A field whose keyword would come from a nested field's result cannot be checked.
+                if stack and not stack[-1]["done"] and not "".join(stack[-1]["text"]).strip():
+                    _reject()
+                stack.append({"text": [], "done": False})
             elif kind in ("separate", "end") and stack:
-                if stack[-1] is not None:
-                    check("".join(stack[-1]))
-                    stack[-1] = None
+                if not stack[-1]["done"]:
+                    check("".join(stack[-1]["text"]))
+                    stack[-1]["done"] = True
                 if kind == "end":
                     stack.pop()
-        elif tag == "instrText":
-            if not stack:
-                check(el.text or "")
-            elif stack[-1] is not None:
-                stack[-1].append(el.text or "")
-    for buf in stack:
-        if buf is not None:
-            check("".join(buf))
+            else:
+                _reject()
+        elif not stack:
+            check(el.text or "")
+        elif stack[-1]["done"]:
+            _reject()  # instruction text after the field's separator
+        else:
+            stack[-1]["text"].append(el.text or "")
+    for field in stack:
+        if not field["done"]:
+            check("".join(field["text"]))
 
 
 def sanitize_docx(data: bytes) -> bytes:
-    """Uploaded documents are untrusted. Content types (not file names) decide how each part is checked: XML parts are
-    parsed without DTDs, relationship parts lose external targets and must use allowlisted types, every XML part's
-    fields must be allowlisted, and only image/font binaries are kept. Anything else rejects the package."""
+    """Uploaded documents are untrusted. Content types (not file names) decide how each part is checked; any part that
+    is or looks like XML is parsed without DTDs and checked; relationship parts lose external targets and must use
+    allowlisted, type-consistent targets; only image/font binaries are kept. Anything else rejects the package."""
     import io
     import zipfile
 
@@ -234,24 +286,30 @@ def sanitize_docx(data: bytes) -> bytes:
     except zipfile.BadZipFile:
         _reject("not a valid .docx package")
     defaults, overrides = _content_types(src)
+    names = [n for n in src.namelist() if not n.endswith("/")]
+    parts = {n.lower() for n in names}
+
+    def ctype_of(name: str) -> str:
+        leaf = name.rsplit("/", 1)[-1]
+        return overrides.get(name.lower()) or defaults.get(leaf.rsplit(".", 1)[-1].lower() if "." in leaf else "", "")
+
     out = io.BytesIO()
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as dst:
-        for name in src.namelist():
-            if name.endswith("/"):
-                continue
+        for name in names:
             body = src.read(name)
-            if name == "[Content_Types].xml":
-                if "macroenabled" in body.decode("utf-8", "replace").lower():
-                    _reject("macro-enabled documents are not accepted")
-            else:
-                ext = name.rsplit(".", 1)[-1].lower() if "." in name.rsplit("/", 1)[-1] else ""
-                ctype = overrides.get(name.lower()) or defaults.get(ext, "")
-                if ctype.endswith("relationships+xml") or ext == "rels":
-                    body = _clean_rels(name, _parse(name, body))
-                elif ctype.endswith(("+xml", "/xml")):
-                    _check_fields(_parse(name, body))
-                elif not SAFE_BINARY.match(ctype):
-                    _reject(UNSUPPORTED)
+            if name != "[Content_Types].xml":
+                ctype = ctype_of(name)
+                if ctype.endswith("relationships+xml") or name.lower().endswith(".rels"):
+                    body = _clean_rels(name, _parse(name, body), ctype_of, parts)
+                elif "svg" in ctype.lower():
+                    _reject("documents with SVG images are not accepted")
+                elif not (ctype.endswith(("+xml", "/xml")) or SAFE_BINARY.match(ctype)):
+                    _reject()
+                elif ctype.endswith(("+xml", "/xml")) or _looks_xml(body):  # allowlisted binaries that hold XML too
+                    root = _parse(name, body)
+                    if _split(root.tag)[1].lower() == "svg":
+                        _reject("documents with SVG images are not accepted")
+                    _check_part(root)
             dst.writestr(name, body)
     return out.getvalue()
 

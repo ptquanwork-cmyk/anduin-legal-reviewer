@@ -87,6 +87,28 @@ assert rejected({"word/import.html": "<html></html>"}, '<Default Extension="html
 assert rejected({"word/_rels/document.xml.rels": rels(("aFChunk", "import.xml"))}), "altChunk relationship"
 assert rejected({"word/_rels/document.xml.rels": rels(("oleObject", "embeddings/x.bin"))}), "embedded object"
 
+# Parser differentials: Word reads exact attribute names and WordprocessingML elements only.
+shadow = (
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships" xmlns:x="urn:x">'
+    f'<Relationship Id="rId1" x:Type="{R}/styles" Type="{R}/oleObject" Target="embeddings/x.bin"/></Relationships>'
+)
+assert rejected({"word/_rels/document.xml.rels": shadow}), "foreign-namespace Type cannot hide the real one"
+shadow_ext = shadow.replace('Target="embeddings/x.bin"', 'Target="https://evil.example/t" TargetMode="External" x:TargetMode="Internal"')
+assert "evil" not in zipfile.ZipFile(io.BytesIO(sanitize_docx(pkg({"word/_rels/document.xml.rels": shadow_ext})))).read("word/_rels/document.xml.rels").decode()
+assert rejected({"word/document.xml": doc('<w:r><x:instrText xmlns:x="urn:x">PAGE</x:instrText></w:r>')}), "look-alike field markup"
+assert rejected({"word/document.xml": doc(field())}), "empty field instruction"
+after_sep = field(" PAGE ").replace('<w:r><w:t>1</w:t></w:r>', '<w:r><w:instrText> INCLUDETEXT x</w:instrText></w:r>')
+assert rejected({"word/document.xml": doc(after_sep)}), "instruction text after the separator"
+from_nested = '<w:r><w:fldChar w:fldCharType="begin"/></w:r>' + field(" REF bm ") + '<w:r><w:instrText> PAGE</w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r>'
+assert rejected({"word/document.xml": doc(from_nested)}), "keyword produced by a nested field"
+ok_nested = '<w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> IF 1 = 1 "</w:instrText></w:r>' + field(" PAGE ") + '<w:r><w:instrText>"</w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r>'
+assert not rejected({"word/document.xml": doc(ok_nested)}), "nested allowlisted fields pass"
+assert rejected({"word/media/x.png": doc(field(" INCLUDETEXT x "))}), "XML declared as an image is still checked"
+assert rejected({"word/_rels/document.xml.rels": rels(("header", "media/x.png")), "word/media/x.png": b"\x89PNG"}), "header must be XML"
+assert rejected({"word/media/x.svg": "<svg/>"}, '<Default Extension="svg" ContentType="image/svg+xml"/>'), "SVG"
+pict = '<w:r><w:pict xmlns:o="urn:schemas-microsoft-com:office:office"><o:x o:href="file:///C:/secret.png"/></w:pict></w:r>'
+assert rejected({"word/document.xml": doc(pict)}), "file: attribute"
+
 # Parser and package checks.
 dtd = '<?xml version="1.0"?><!DOCTYPE r [<!ENTITY a "aaaa">]><r>&a;</r>'
 assert rejected({"word/document.xml": dtd}), "DTD in UTF-8"
