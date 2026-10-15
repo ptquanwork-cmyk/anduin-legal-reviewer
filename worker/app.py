@@ -185,7 +185,27 @@ class SemanticRequest(BaseModel):
     guidance: str = Field(default="", max_length=4000)
 
 
-@app.post("/semantic", dependencies=[Depends(auth)])
+# Any visitor can hold an anonymous session, so the owner's CLI quota is capped per session and overall.
+# ponytail: in-memory sliding windows, reset on restart; enough for one local worker.
+SEMANTIC_PER_SESSION, SEMANTIC_GLOBAL = 12, 60  # calls per hour (a document uses up to 2)
+_semantic_calls: dict[str, list[float]] = {}
+
+
+def _semantic_quota(authorization: str = Header(default="")):
+    now = time.time()
+    token = authorization.removeprefix("Bearer ").strip()
+    for key, cap in ((token, SEMANTIC_PER_SESSION), ("*", SEMANTIC_GLOBAL)):
+        recent = [t for t in _semantic_calls.get(key, []) if now - t < 3600]
+        if len(recent) >= cap:
+            raise HTTPException(status_code=429, detail="semantic review limit reached; try again later")
+        _semantic_calls[key] = recent
+    for key in (token, "*"):
+        _semantic_calls[key].append(now)
+    if len(_semantic_calls) > 5000:
+        _semantic_calls.clear()
+
+
+@app.post("/semantic", dependencies=[Depends(auth), Depends(_semantic_quota)])
 def semantic(req: SemanticRequest):
     """Semantic review with the owner's Codex CLI. Instructions and schema are fixed here; callers send data only."""
     codex = shutil.which("codex.cmd") or shutil.which("codex")
@@ -193,12 +213,14 @@ def semantic(req: SemanticRequest):
         raise HTTPException(status_code=503, detail="semantic engine unavailable")
     prompt = json.loads(PROMPT_FILE.read_text(encoding="utf-8"))
     document = json.dumps(req.document, ensure_ascii=False)
-    if len(document) > 60000:
+    index = json.dumps(req.index, ensure_ascii=False)
+    if len(document) > 60000 or len(index) > 20000:
         raise HTTPException(status_code=413, detail="document chunk too large")
+    # Everything after the fixed instructions is caller-supplied data in delimited sections.
     text = (
         f"{prompt['instructions']}\n\n"
-        + (f"{req.guidance}\n\n" if req.guidance else "")
-        + f"Index of the whole document (for cross-references):\n{json.dumps(req.index, ensure_ascii=False)}\n\n<document>\n{document}\n</document>"
+        + (f"<workspace_feedback>\n{req.guidance}\n</workspace_feedback>\n\n" if req.guidance else "")
+        + f"<document_index>\n{index}\n</document_index>\n\n<document>\n{document}\n</document>"
     )
     started = time.time()
     with codex_lock, tempfile.TemporaryDirectory() as tmp:
