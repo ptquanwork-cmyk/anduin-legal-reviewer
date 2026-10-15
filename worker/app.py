@@ -100,8 +100,10 @@ def health():
 
 HYPERLINK = "hyperlink"
 SAFE_LINK = re.compile(r"^(https?://|mailto:)", re.I)
-ABSOLUTE = re.compile(r"^([a-z][a-z0-9+.-]*:|\\\\|//)", re.I)  # any scheme, UNC (\\host) or network path
-LINKISH = re.compile(r"^\s*(file:|\\\\|//)", re.I)  # attribute values Word could resolve to a local or network file
+# Matched against values with whitespace/control characters removed and percent-encoding decoded (see _norm).
+ABSOLUTE = re.compile(r"^([a-z][a-z0-9+.-]*:|[\\/]{2})", re.I)  # any scheme or drive letter, UNC or network path
+LINKISH = re.compile(r"^(file:|[a-z]:[\\/]|[\\/]{2})", re.I)  # values Word could resolve to a local or network file
+BAD_PART_CHARS = set("%\\?#")  # characters OPC part names and internal targets must not contain
 CT_NS = "http://schemas.openxmlformats.org/package/2006/content-types"
 REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
 W_SPACES = ("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "http://purl.oclc.org/ooxml/wordprocessingml/main")
@@ -181,9 +183,14 @@ def _content_types(src) -> tuple[dict, dict]:
     return defaults, overrides
 
 
+def _norm(value: str) -> str:
+    strip = re.compile(r"[\s\x00-\x1f]+")
+    return strip.sub("", urllib.parse.unquote(strip.sub("", value)))
+
+
 def _resolve(rels_name: str, target: str) -> str:
-    """Part name a relationship target points to (relative to the source part's folder, or absolute)."""
-    target = urllib.parse.unquote(target.split("#", 1)[0])
+    """Part name a relationship target points to (relative to the source part's folder, or absolute). Callers reject
+    targets with %, ?, # or backslashes first, so no decoding is needed and Word resolves the same name."""
     if target.startswith("/"):
         return target.lstrip("/").lower()
     base = posixpath.dirname(posixpath.dirname(rels_name))  # word/_rels/document.xml.rels -> word
@@ -210,7 +217,8 @@ def _clean_rels(name: str, root, ctype_of, parts: set) -> bytes:
         if rel.tag != f"{{{REL_NS}}}Relationship":
             root.remove(rel)
             continue
-        target = (rel.get("Target") or "").strip()
+        raw = rel.get("Target") or ""
+        target = _norm(raw)
         kind = (rel.get("Type") or "").strip().rsplit("/", 1)[-1]
         external = (rel.get("TargetMode") or "").strip().lower() == "external" or bool(ABSOLUTE.match(target))
         if external:
@@ -219,8 +227,11 @@ def _clean_rels(name: str, root, ctype_of, parts: set) -> bytes:
         elif kind not in SAFE_RELS:
             _reject()
         elif kind != HYPERLINK:
-            part = _resolve(name, target)
-            if part in parts and not _fits(kind, ctype_of(part)):
+            # Fail closed: an internal target must name an existing part, written plainly, of a fitting type.
+            if raw != raw.strip() or any(c in BAD_PART_CHARS for c in raw):
+                _reject()
+            part = _resolve(name, raw)
+            if part not in parts or not _fits(kind, ctype_of(part)):
                 _reject()
     ET.register_namespace("", REL_NS)
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
@@ -238,8 +249,11 @@ def _check_part(root):
     stack: list[dict] = []  # open complex fields: instruction pieces and whether the instruction has ended
     for el in root.iter():
         ns, tag = _split(el.tag)
-        if any(LINKISH.match(v) for v in el.attrib.values()):
-            _reject()
+        for key, value in el.attrib.items():
+            # Linked-picture paths and URLs (o:href, v:imagedata src, ...) are refused outright; any other value that
+            # resolves to a drive, file: or network path too.
+            if LINKISH.match(_norm(value)) or (_split(key)[1].lower() in ("href", "src") and value.strip()):
+                _reject()
         if ns in W_SPACES and tag in BLOCKED_TAGS:
             _reject()
         if tag not in FIELD_TAGS:
@@ -288,6 +302,13 @@ def sanitize_docx(data: bytes) -> bytes:
     defaults, overrides = _content_types(src)
     names = [n for n in src.namelist() if not n.endswith("/")]
     parts = {n.lower() for n in names}
+    # Part names Word and this check could read differently: duplicates (OPC names are case-insensitive), encoded or
+    # backslashed names, and empty, "." or ".." segments.
+    if len(parts) != len(names) or any(
+        n != "[Content_Types].xml" and (any(c in BAD_PART_CHARS for c in n) or any(seg in ("", ".", "..") for seg in n.split("/")))
+        for n in names
+    ):
+        _reject("not a valid .docx package")
 
     def ctype_of(name: str) -> str:
         leaf = name.rsplit("/", 1)[-1]

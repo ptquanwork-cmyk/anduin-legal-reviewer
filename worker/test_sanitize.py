@@ -60,7 +60,8 @@ def rels(*entries):
 
 
 # Relationship cleaning keeps internal parts and web/mail hyperlinks only.
-clean = zipfile.ZipFile(io.BytesIO(sanitize_docx(pkg({"word/_rels/settings.xml.rels": RELS}))))
+STYLES = {"word/styles.xml": f"<w:styles {W}/>"}
+clean = zipfile.ZipFile(io.BytesIO(sanitize_docx(pkg({"word/_rels/settings.xml.rels": RELS, **STYLES}))))
 out = clean.read("word/_rels/settings.xml.rels").decode()
 assert "evil.example" not in out, "external, file: and UNC targets are removed however they are written"
 assert "https://example.com" in out and 'Target="styles.xml"' in out, "hyperlinks and internal parts are kept"
@@ -106,8 +107,25 @@ assert not rejected({"word/document.xml": doc(ok_nested)}), "nested allowlisted 
 assert rejected({"word/media/x.png": doc(field(" INCLUDETEXT x "))}), "XML declared as an image is still checked"
 assert rejected({"word/_rels/document.xml.rels": rels(("header", "media/x.png")), "word/media/x.png": b"\x89PNG"}), "header must be XML"
 assert rejected({"word/media/x.svg": "<svg/>"}, '<Default Extension="svg" ContentType="image/svg+xml"/>'), "SVG"
-pict = '<w:r><w:pict xmlns:o="urn:schemas-microsoft-com:office:office"><o:x o:href="file:///C:/secret.png"/></w:pict></w:r>'
-assert rejected({"word/document.xml": doc(pict)}), "file: attribute"
+pict = '<w:r><w:pict xmlns:o="urn:schemas-microsoft-com:office:office"><o:x o:val="{}"/></w:pict></w:r>'
+for path in ["file:///C:/secret.png", "C:\\secret.png", " \\\\evil\\x", "/\\evil\\x", "%5C%5Cevil%5Cx", "fi le:///x"]:
+    assert rejected({"word/document.xml": doc(pict.format(path))}), f"path attribute {path!r}"
+assert not rejected({"word/document.xml": doc(pict.format("12:30"))}), "ordinary values pass"
+href = '<w:r><w:pict xmlns:o="urn:schemas-microsoft-com:office:office"><o:x o:href="https://evil.example/x.png"/></w:pict></w:r>'
+assert rejected({"word/document.xml": doc(href)}), "linked-picture URL attribute"
+
+# Relationship targets fail closed and must be written plainly.
+assert rejected({"word/_rels/document.xml.rels": rels(("styles", "missing.xml"))}), "missing target part"
+assert rejected({"word/_rels/document.xml.rels": rels(("styles", "style%73.xml")), **STYLES}), "encoded target"
+assert rejected({"word/_rels/document.xml.rels": rels(("styles", "..\\word\\styles.xml")), **STYLES}), "backslashed target"
+assert not rejected({"word/_rels/document.xml.rels": rels(("styles", "styles.xml")), **STYLES}), "plain target passes"
+mixed = rels(("attachedTemplate", "/\\evil\\t.dotm"))
+assert "evil" not in zipfile.ZipFile(io.BytesIO(sanitize_docx(pkg({"word/_rels/settings.xml.rels": mixed})))).read("word/_rels/settings.xml.rels").decode()
+
+# Part names Word and the check could read differently.
+assert rejected({"word/doc%75ment.xml": doc("")}), "encoded part name"
+assert rejected({"word/document.xml": doc(""), "WORD/DOCUMENT.XML": doc("")}), "case-insensitive duplicate"
+assert rejected({"word/../document.xml": doc("")}), "dot-dot segment"
 
 # Parser and package checks.
 dtd = '<?xml version="1.0"?><!DOCTYPE r [<!ENTITY a "aaaa">]><r>&a;</r>'
