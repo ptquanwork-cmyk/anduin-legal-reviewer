@@ -82,14 +82,30 @@ export async function runPipeline(sb: SupabaseClient, userId: string, versionId:
     if (version.mime === DOCX) {
       const docx = await inspectDocx(original);
       try {
-        const conv = await convertDocx(original, version.file_name);
+        // Word renders the PDF. A failed conversion or any text difference triggers one automatic re-conversion; the
+        // better attempt is kept and both are noted, so a transient Word hiccup never reaches the reviewer.
+        let best: { conv: Awaited<ReturnType<typeof convertDocx>>; pdf: Awaited<ReturnType<typeof extractPdf>>; cmp: ReturnType<typeof compareConversion> } | null = null;
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            const conv = await convertDocx(original, version.file_name);
+            const pdf = await extractPdf(conv.pdf);
+            const cmp = compareConversion(docx, pdf);
+            const diff = (c: typeof cmp) => (c.text_diff?.missing.length ?? 0) + (c.text_diff?.extra.length ?? 0);
+            if (!best || diff(cmp) < diff(best.cmp)) best = { conv, pdf, cmp };
+            if (!diff(cmp)) break;
+          } catch (e) {
+            if (e instanceof WorkerUnavailable && !best) throw e;
+            if (attempt === 2 && !best) throw e;
+          }
+          if (attempt === 1) report.limitations!.push('Word to PDF conversion was retried automatically once.');
+        }
+        const { conv, pdf, cmp } = best!;
         pdfPath = `${userId}/${versionId}/converted.pdf`;
         const up = await sb.storage.from('sources').upload(pdfPath, conv.pdf, { contentType: 'application/pdf', upsert: true });
         if (up.error) throw new Error(`Could not store converted PDF: ${up.error.message}`);
-        const pdf = await extractPdf(conv.pdf);
         blocks = pdf.blocks;
         pageSizes = pdf.pages;
-        Object.assign(report, compareConversion(docx, pdf), { pages: pdf.pages.length, coverage: coverage(pdf.pages), converted_by: `${conv.converter} (${conv.elapsedMs} ms)` });
+        Object.assign(report, cmp, { pages: pdf.pages.length, coverage: coverage(pdf.pages), converted_by: `${conv.converter} (${conv.elapsedMs} ms)` });
         report.issues = [...(report.issues ?? [])];
       } catch (e) {
         if (!(e instanceof WorkerUnavailable)) throw e;

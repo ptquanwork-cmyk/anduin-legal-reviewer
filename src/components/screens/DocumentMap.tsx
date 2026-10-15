@@ -1,9 +1,10 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { ReactFlow, Handle, Position, BaseEdge, EdgeLabelRenderer, getBezierPath, type Edge as RFEdge, type Node as RFNode, type NodeProps, type EdgeProps } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { ArrowUpRight, ChevronRight, FileText, ListFilter, ShieldCheck, TriangleAlert, Wallet, Clock3, Users, X, ExternalLink } from 'lucide-react';
 import { useNav } from '../../lib/nav';
+import { PanelScale } from '../../lib/panel';
 import type { BlockRow } from '../../lib/types';
 import { useWorkspace } from '../../lib/workspace';
 import { PdfPage, usePdf } from '../pdf/PdfViewer';
@@ -387,10 +388,12 @@ function Graph({ sections, findingsBySection, selected, onSelect }: { sections: 
     return { nodes, edges };
   }, [sections, findingsBySection, selected, ws.edges, ws.findings, ws.blocks]);
 
+  const scale = useContext(PanelScale);
   if (!sections.length) return <Empty title="No relationships yet" detail="Relationships appear after extraction." />;
   return (
     <div className="mt-2 min-h-0 flex-1">
       <ReactFlow
+        key={scale} // re-fit the graph when its panel opens full screen
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}

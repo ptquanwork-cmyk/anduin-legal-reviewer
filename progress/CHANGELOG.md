@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-16: Full screen, guides, form export, faithful conversion
+
+- Word to PDF: Word export with print quality and bitmapped missing fonts; automatic retry on failure or text difference; identical text with a substituted font is verified with a note.
+- Every large panel opens full screen (PDFs, Word view and graph re-render larger).
+- How-to guides on every screen.
+- Decision buttons and a Next step line on Decision / report.
+- Export HTML form (fill in any browser, answers file) and Import answers in Responses.
+
 ## 2026-10-16: GitHub About section and judge contents
 
 - README reorganised for judges:

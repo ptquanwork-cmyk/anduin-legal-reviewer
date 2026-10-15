@@ -25,6 +25,7 @@ export const modelUrl = (id: string) => `/3d/module-${MODULE[id]}.glb`;
 export default function StationsCanvas({ onLost }: { onLost?: () => void }) {
   return (
     <Canvas
+      className="stations-canvas"
       style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 5 }}
       eventSource={typeof document !== 'undefined' ? document.body : undefined}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance', toneMapping: THREE.NeutralToneMapping, toneMappingExposure: 1 }}

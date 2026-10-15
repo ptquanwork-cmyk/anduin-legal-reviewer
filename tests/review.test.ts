@@ -6,6 +6,9 @@ import { assignSections } from '../src/review/sections';
 import { validate } from '../src/review/validate';
 import { acroFields, annotationQa, detectFields } from '../src/digitize/fields';
 import { PDFDocument } from 'pdf-lib';
+import { ANSWERS_FORMAT, formHtml, parseAnswersFile } from '../src/digitize/htmlForm';
+import type { AnnotationRow, BlockRow } from '../src/lib/types';
+import { compareConversion, sourceStatus } from '../src/review/source';
 
 /** Converts the synthetic sample format ("Page 1, Section 2 — Payment") into source blocks. */
 function sampleBlocks(file: string): Block[] {
@@ -158,5 +161,45 @@ describe('fillable PDFs', () => {
     expect(fields[1].options.map((o) => o.label)).toEqual(['Individual', 'Entity']);
     expect(fields[2].options[0].label).toBe('Income over USD 200,000');
     expect(await acroFields(await (await PDFDocument.create()).save(), blocks)).toEqual([]);
+  });
+});
+
+describe('exported HTML form', () => {
+  const ann = (field_id: string, type: 'text_box' | 'radio', label: string, required = true) =>
+    ({ id: field_id, field_id, type, label, required, options: type === 'radio' ? [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }] : [] }) as unknown as AnnotationRow;
+  const block = { idx: 0, text: 'Clause <script>alert(1)</script> & "quotes"' } as unknown as BlockRow;
+  const form = { title: 'T', sections: [{ ref: 's', title: 'Part <A>', page: 1, items: [{ kind: 'paragraph' as const, block, mapped: true }, { kind: 'field' as const, block, ann: ann('investor.name', 'text_box', 'Name') }] }] };
+
+  it('escapes contract text and keeps only the fixed script', () => {
+    const html = formHtml(form, { documentTitle: 'Doc <b>', versionNo: 2, versionId: '11111111-2222-3333-4444-555555555555' });
+    expect(html).toContain('Clause &lt;script&gt;alert(1)&lt;/script&gt; &amp; &quot;quotes&quot;');
+    expect(html).toContain('Part &lt;A&gt;');
+    expect(html.match(/<script>/g)).toHaveLength(1);
+    expect(html).toContain('name="investor.name"');
+  });
+
+  it('imports answers only for the same version and known fields', () => {
+    const fields = [ann('investor.name', 'text_box', 'Name'), ann('investor.us', 'radio', 'US person')];
+    const file = JSON.stringify({ format: ANSWERS_FORMAT, version_id: 'v1', answers: { 'investor.name': 'Jane', 'investor.us': 'no', other: 'x' } });
+    expect(parseAnswersFile(file, 'v1', fields)).toEqual({ answers: { 'investor.name': 'Jane', 'investor.us': 'no' }, skipped: 1 });
+    expect(() => parseAnswersFile(file, 'v2', fields)).toThrow(/different form version/);
+    expect(() => parseAnswersFile('{"answers":{}}', 'v1', fields)).toThrow(/not an answers file/);
+  });
+});
+
+describe('Word to PDF source check', () => {
+  const pdfBlock = (text: string) => ({ idx: 0, page: 1, kind: 'paragraph', text, fonts: ['ArialMT'], bbox: null }) as unknown as Block;
+  const docx = (text: string) => ({ text, declared: ['Helvetica Neue'], paragraphs: [{ text, fonts: ['Helvetica Neue'] }] });
+
+  it('treats a substituted font with identical text as a note, not a blocker', () => {
+    const r = compareConversion(docx('The Client shall pay within 30 days.'), { blocks: [pdfBlock('The Client shall pay within 30 days.')], fonts: ['ArialMT'] });
+    expect(r.issues!.map((i) => [i.kind, i.severity])).toEqual([['font_substitution', 'warning']]);
+    expect(sourceStatus(r.issues!)).toBe('verified');
+  });
+
+  it('still blocks when text is lost in conversion', () => {
+    const r = compareConversion(docx('The Client shall pay within 30 days.'), { blocks: [pdfBlock('The Client shall pay.')], fonts: ['ArialMT'] });
+    expect(r.issues!.every((i) => i.severity === 'blocking')).toBe(true);
+    expect(sourceStatus(r.issues!)).toBe('needs_review');
   });
 });

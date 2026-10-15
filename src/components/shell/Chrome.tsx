@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import {
+  CircleHelp,
   ArrowLeft,
   Box,
   ChevronDown,
@@ -21,6 +22,8 @@ import {
 import { box, useNav } from '../../lib/nav';
 import { RAIL_TARGET, railFor, STAGES, type RailId, type ScreenId } from '../../lib/stages';
 import { useWorkspace } from '../../lib/workspace';
+import { GUIDES } from '../../lib/guides';
+import { Modal } from '../ui';
 
 export function Brand() {
   const { version } = useWorkspace();
@@ -67,8 +70,53 @@ export function TopBar({ onSearch }: { onSearch: () => void }) {
           ⌘ K
         </kbd>
       </button>
+      <GuideButton />
       <VersionControl />
       <AvatarMenu />
+    </>
+  );
+}
+
+/** "How to use" for the current screen: purpose, numbered steps (what to click, in order), when to move on, tips. */
+function GuideButton() {
+  const nav = useNav();
+  const [open, setOpen] = useState(false);
+  const g = GUIDES[nav.screen];
+  const home = nav.screen === 'home';
+  return (
+    <>
+      <button className="abs pill flex items-center justify-center gap-2 text-[15px] font-semibold" style={{ ...box(home ? 400 : 302, home ? 84 : 83, 168, 48, 'left'), color: 'var(--primary)' }} onClick={() => setOpen(true)}>
+        <CircleHelp size={20} /> How to use
+      </button>
+      <Modal open={open} onClose={() => setOpen(false)} title={g.title} width={720}>
+        <div className="scroll-thin max-h-[70vh] overflow-auto pr-1 text-[14.5px] leading-[21px]" style={{ color: 'var(--ink)' }}>
+          <p style={{ color: 'var(--muted)' }}>{g.purpose}</p>
+          <ol className="mt-4 space-y-3">
+            {g.steps.map((st, i) => (
+              <li key={i} className="flex gap-3">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-[13px] font-bold" style={{ background: 'var(--primary)', color: 'var(--primary-ink)' }}>
+                  {i + 1}
+                </span>
+                <div>
+                  <div className="font-semibold">{st.do}</div>
+                  {st.detail && <div style={{ color: 'var(--muted)' }}>{st.detail}</div>}
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-4 rounded-2xl px-4 py-3" style={{ background: 'var(--selected)' }}>
+            <span className="font-semibold">Move on when: </span>
+            {g.next}
+          </div>
+          {g.tips?.length ? (
+            <ul className="mt-3 list-disc space-y-1 pl-5" style={{ color: 'var(--muted)' }}>
+              {g.tips.map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </Modal>
     </>
   );
 }

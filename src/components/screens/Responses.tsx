@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CalendarDays, ChevronDown, ChevronUp, CircleAlert, CircleCheck, ExternalLink, FileText, Info, Loader2 } from 'lucide-react';
+import { CalendarDays, ChevronDown, ChevronUp, CircleAlert, CircleCheck, ExternalLink, FileText, Info, Loader2, Upload } from 'lucide-react';
 import { buildForm, validateAnswers } from '../../digitize/form';
+import { parseAnswersFile } from '../../digitize/htmlForm';
 import { useNav } from '../../lib/nav';
 import { api, supabase } from '../../lib/supabase';
 import { useWorkspace } from '../../lib/workspace';
@@ -27,6 +28,22 @@ export function Responses() {
   const [creating, setCreating] = useState(false);
   const [missingOpen, setMissingOpen] = useState(true);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const importInput = useRef<HTMLInputElement>(null);
+
+  // Answers file from the exported HTML form: only fields of this exact form version are taken.
+  const importAnswers = async (file: File) => {
+    if (!ws.version) return;
+    try {
+      const { answers: got, skipped } = parseAnswersFile(await file.text(), ws.version.id, form.fields);
+      const next = { ...answers, ...got };
+      setAnswers(next);
+      setTouched(true);
+      await save(next);
+      nav.notify(`${Object.keys(got).length} answer(s) imported${skipped ? `, ${skipped} ignored (not in this form)` : ''}. Review them before creating the draft PDF.`);
+    } catch (e) {
+      nav.notify(e instanceof Error ? e.message : String(e), 'error');
+    }
+  };
 
   useEffect(() => {
     setAnswers((ws.submission?.answers as Answers) ?? {});
@@ -94,9 +111,15 @@ export function Responses() {
           <h2 className="text-[26px] font-semibold" style={{ color: 'var(--ink)' }}>
             Fill and review
           </h2>
-          <button className="pill flex h-[44px] items-center gap-2 px-5 text-[16px] font-medium" onClick={() => nav.go('form')}>
-            Show full contract <ExternalLink size={18} />
-          </button>
+          <div className="flex gap-2">
+            <button className="pill flex h-[44px] items-center gap-2 px-5 text-[16px] font-medium" disabled={!enabled} onClick={() => importInput.current?.click()} title="Load the answers file saved by the exported HTML form">
+              <Upload size={18} /> Import answers
+            </button>
+            <input ref={importInput} type="file" accept="application/json,.json" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) importAnswers(f); }} />
+            <button className="pill flex h-[44px] items-center gap-2 px-5 text-[16px] font-medium" onClick={() => nav.go('form')}>
+              Show full contract <ExternalLink size={18} />
+            </button>
+          </div>
         </div>
         {!enabled ? (
           <Empty title="Responses are not enabled yet" detail="Approve annotations and complete source mapping in Form preview first." action={<button className="btn-primary mt-3 h-10 px-5" onClick={() => nav.go('form')}>Open form preview</button>} />

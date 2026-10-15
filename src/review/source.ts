@@ -56,6 +56,16 @@ export function compareConversion(
       severity: 'blocking',
     });
   }
+  // The PDF is Word's own rendering. When the text matches word for word, a font that is not installed on the
+  // conversion machine is the only difference: Word shows the same substitute when it opens the file there.
+  if (!missing.length && !extra.length)
+    for (const i of issues)
+      if (i.kind === 'font_substitution') {
+        i.severity = 'warning';
+        i.title = 'Font substituted, text identical';
+        i.detail = `${i.detail.replace(/ Verify that.*$/, '')} The text was checked word for word and is identical; only the typeface differs, as it would when Word opens this file on a machine without that font. For an exact typeface, embed fonts in the Word file (File › Options › Save › Embed fonts in the file).`;
+      }
+
   return {
     issues,
     declared_fonts: docx.declared,
@@ -76,5 +86,5 @@ export function coverage(pages: { n: number; chars: number }[]) {
 
 export function sourceStatus(issues: SourceIssue[]): 'verified' | 'needs_review' | 'blocked' {
   if (issues.some((i) => i.kind === 'conversion_failed' || i.kind === 'unreadable' || i.kind === 'password')) return 'blocked';
-  return issues.length ? 'needs_review' : 'verified';
+  return issues.some((i) => i.severity === 'blocking') ? 'needs_review' : 'verified';
 }

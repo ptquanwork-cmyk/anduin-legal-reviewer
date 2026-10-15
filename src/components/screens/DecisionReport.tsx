@@ -4,11 +4,12 @@ import { ArrowRight, ChevronDown, ChevronRight, CircleAlert, CircleCheck, Copy, 
 import { useNav } from '../../lib/nav';
 import { reviewOutcome } from '../../lib/outcome';
 import { api, signedUrl, supabase } from '../../lib/supabase';
-import type { FindingRow, VersionRow } from '../../lib/types';
+import type { DecisionAction, FindingRow, VersionRow } from '../../lib/types';
 import { ACCEPT, uploadSource } from '../../lib/upload';
 import { useWorkspace } from '../../lib/workspace';
 import { StageStrip } from '../shell/Chrome';
 import { fmtTime, Modal, reviewState, STATE, StateChip, type ReviewState } from '../ui';
+import { ClarifyModal, DismissModal } from './LegalReview';
 import { Empty, Fade, HeaderArt, Panel, Title } from './Screen';
 
 const TONE = {
@@ -30,6 +31,7 @@ export function DecisionReport() {
   const [exporting, setExporting] = useState(false);
   const [compare, setCompare] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [modal, setModal] = useState<'dismiss' | 'clarify' | null>(null);
 
   const rows = ws.findings.filter((f) => stateFilter === 'all' || reviewState(f, ws.decisions) === stateFilter);
   const sel = ws.findings.find((f) => f.id === selId) ?? ws.findings.find((f) => ['confirmed', 'clarify', 'open'].includes(reviewState(f, ws.decisions))) ?? ws.findings[0];
@@ -73,6 +75,27 @@ export function DecisionReport() {
       setExporting(false);
     }
   };
+
+  // Decisions can be made here as well as in Legal review; both append to the same history.
+  const decide = async (action: DecisionAction, reason?: string | null, note?: string | null, useAsExample = false) => {
+    if (!sel) return;
+    const { error } = await supabase().from('decision_events').insert({ finding_id: sel.id, action, reason: reason ?? null, note: note ?? null, use_as_example: useAsExample });
+    if (error) return nav.notify(error.message, 'error');
+    await ws.reload();
+    nav.notify(reason === 'exception' ? 'Approved as a recorded exception.' : action === 'confirm' ? 'Issue confirmed. It blocks digitization until a revision resolves it or you approve it as an exception.' : action === 'dismiss' ? 'Finding dismissed with reason.' : action === 'clarify' ? 'Clarification requested; the question is in the counsel list.' : 'Finding reopened.');
+  };
+  const selState = sel ? reviewState(sel, ws.decisions) : 'open';
+  const count = (s: ReviewState) => ws.findings.filter((f) => reviewState(f, ws.decisions) === s).length;
+  const nextStep =
+    outcome.key === 'blocked'
+      ? 'Open Source quality and confirm the manual comparison (or fix the source) first.'
+      : count('open')
+        ? `${count('open')} finding(s) still need a decision: select one on the left and choose Confirm, Dismiss or Needs clarification under the preview.`
+        : count('clarify')
+          ? `${count('clarify')} finding(s) wait for counsel. Send the question list; when answered, Dismiss, Approve as exception, or upload the revised version.`
+          : count('confirmed')
+            ? `${count('confirmed')} confirmed issue(s) block digitization: upload the revised document (Compare, top right) or Approve as exception to accept the wording.`
+            : 'Every finding has a final decision. Export the report if needed, then continue to annotation.';
 
   const tone = TONE[outcome.key];
   const newer = ws.siblings.filter((s) => ws.version && s.version_no > ws.version.version_no);
@@ -162,7 +185,42 @@ export function DecisionReport() {
         {!sel ? (
           <Empty title="Nothing selected" detail="Select a finding to preview its report entry." />
         ) : (
-          <ReportEntry f={sel} timeline={timeline} />
+          <>
+            <ReportEntry f={sel} timeline={timeline} />
+            {/* Pinned to the bottom of the scrolling preview so the decision buttons are always in view. */}
+            <div className="sticky -bottom-5 -mx-5 -mb-5 mt-auto border-t px-5 pb-4 pt-3" style={{ background: 'var(--panel)', borderColor: 'var(--panel-border)' }}>
+              <div className="mb-2 text-[14px] font-semibold" style={{ color: 'var(--ink)' }}>
+                Decide on this finding
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selState !== 'confirmed' && selState !== 'exception' && (
+                  <button className="btn-primary h-9 px-4 text-[14px]" onClick={() => decide('confirm')}>
+                    Confirm issue
+                  </button>
+                )}
+                {(selState === 'confirmed' || selState === 'clarify') && (
+                  <button className="btn-primary h-9 px-4 text-[14px]" onClick={() => decide('confirm', 'exception', 'Accepted as a recorded exception')}>
+                    Approve as exception
+                  </button>
+                )}
+                {selState !== 'dismissed' && (
+                  <button className="btn-outline h-9 px-4 text-[14px]" onClick={() => setModal('dismiss')}>
+                    Dismiss…
+                  </button>
+                )}
+                {selState !== 'clarify' && selState !== 'exception' && selState !== 'dismissed' && (
+                  <button className="btn-outline h-9 px-4 text-[14px]" onClick={() => setModal('clarify')}>
+                    Needs clarification…
+                  </button>
+                )}
+                {selState !== 'open' && (
+                  <button className="btn-outline h-9 px-4 text-[14px]" onClick={() => decide('reopen')}>
+                    Reopen
+                  </button>
+                )}
+              </div>
+            </div>
+          </>
         )}
       </Panel>
 
@@ -208,12 +266,17 @@ export function DecisionReport() {
         <button className="btn-primary mt-3 flex h-[40px] items-center justify-center gap-2 text-[15px]" disabled={!outcome.canDigitize} onClick={() => nav.go('annotation')}>
           <ArrowRight size={17} /> Continue to annotation
         </button>
-        <p className="mt-auto flex items-center gap-2 pt-2 text-[13.5px]" style={{ color: 'var(--ink)' }}>
-          <Info size={17} fill="var(--primary)" color="var(--panel)" /> Confirming an issue does not resolve it.
+        <p className="mt-auto flex items-start gap-2 pt-2 text-[13.5px] leading-[18px]" style={{ color: 'var(--ink)' }}>
+          <Info size={17} className="mt-px shrink-0" fill="var(--primary)" color="var(--panel)" />
+          <span>
+            <b>Next step:</b> {nextStep}
+          </span>
         </p>
       </Panel>
 
       <CompareModal open={compare} onClose={() => setCompare(false)} newer={newer} />
+      {sel && <DismissModal open={modal === 'dismiss'} onClose={() => setModal(null)} onSubmit={(r, n, ex) => { setModal(null); decide('dismiss', r, n, ex); }} />}
+      {sel && <ClarifyModal open={modal === 'clarify'} question={sel.question} onClose={() => setModal(null)} onSubmit={(q) => { setModal(null); decide('clarify', null, q); }} />}
     </>
   );
 }

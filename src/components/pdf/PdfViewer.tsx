@@ -1,9 +1,10 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 import { signedUrl } from '../../lib/supabase';
 import { useNav } from '../../lib/nav';
 import type { BBox } from '../../lib/types';
+import { PanelScale } from '../../lib/panel';
 
 const docs = new Map<string, Promise<PDFDocumentProxy>>();
 
@@ -59,7 +60,7 @@ const TONE: Record<Highlight['tone'], { fill: string; line: string }> = {
 export function PdfPage({
   doc,
   page,
-  width,
+  width: baseWidth,
   highlights = [],
   overlay,
   className = '',
@@ -73,6 +74,8 @@ export function PdfPage({
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const { zoom } = useNav();
+  // Inside a panel opened full screen, pages render larger (re-rasterised, not stretched).
+  const width = baseWidth * useContext(PanelScale);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
 
   useEffect(() => {
@@ -132,7 +135,8 @@ export function scrollWithin(box: HTMLElement | null, el: HTMLElement | null) {
 }
 
 /** Placeholder paper when no PDF exists yet (e.g. converter offline): shows the extracted text. */
-export function TextPaper({ blocks, width, highlightIdx = [] }: { blocks: { idx: number; kind: string; text: string }[]; width: number; highlightIdx?: number[] }) {
+export function TextPaper({ blocks, width: baseWidth, highlightIdx = [] }: { blocks: { idx: number; kind: string; text: string }[]; width: number; highlightIdx?: number[] }) {
+  const width = baseWidth * useContext(PanelScale);
   return (
     <div className="paper px-10 py-8 font-[family-name:var(--font-paper)] text-[15px] leading-relaxed" style={{ width }}>
       {blocks.map((b) => (

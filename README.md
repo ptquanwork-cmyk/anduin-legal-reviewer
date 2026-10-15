@@ -95,14 +95,16 @@ One page: a 3D workflow hub, with stations modelled in Blender and rendered live
 | # | Workspace | What actually happens |
 | --- | --- | --- |
 | 01 | Intake | Upload to private storage, SHA-256 identity (exact duplicates reopen the earlier record), live job steps, related-version candidates by content similarity, block diff and "treat as new version" |
-| 02 | Source quality | Word original rendered beside the converted PDF; real font-substitution and text-loss detection (declared Word fonts vs fonts embedded in the PDF); page coverage; manual-comparison confirmation gate |
+| 02 | Source quality | Word original rendered beside the PDF that Microsoft Word itself produced; text compared word for word, automatic re-conversion if Word fails or text differs; font-substitution detection (declared Word fonts vs fonts embedded in the PDF); page coverage; manual-comparison gate only when text really differs |
 | 03 | Document map | Outline from numbered headings (English and Vietnamese), parsed references/definitions, proposed conflicts as dashed edges, page map, source drawer |
 | 04 | Legal review | Typos, missing references, contradictions, ambiguities and undefined terms with exact quotes and page anchors; confirm / dismiss with reason / request clarification; separated confidence signals |
 | 05 | Decision / report | Outcome (ready, needs clarification, revision needed, approved with exceptions, blocked by source quality), questions for counsel, review report PDF, v1→v2 comparison where a missing finding is only *proposed* resolved until the reviewer confirms |
 | 06 | Annotation | Exactly four types (paragraph, text box, radio box, checkbox); detection from layout and AcroForm fields, double-checked by the decision agent; drag/resize/draw editor; content-based transfer between versions; QA gate |
-| 07 | Form preview | Full original text in order with controls; unmapped blocks block responses; plain-language help kept separate from contract text |
-| 08 | Responses | Version-bound answers with autosave and validation; draft PDF only when required answers are present |
+| 07 | Form preview | Full original text in order with controls; unmapped blocks block responses; plain-language help kept separate from contract text; **Export HTML form**: a self-contained page anyone can fill in a browser |
+| 08 | Responses | Version-bound answers with autosave and validation; **Import answers** from the exported form; draft PDF only when required answers are present |
 | 09 | PDF QA / export | Answers written into the PDF at annotation geometry, then the output is re-read: content coverage, field mapping, answer values, page render (e.g. *answer clipped*). Final export only after QA passes and the reviewer confirms |
+
+Every screen has a **How to use** guide in the top bar (numbered steps naming the buttons to click), and every large panel opens **full screen** from its corner button. Decisions can also be made on the Decision / report screen, which states the next step that blocks digitization.
 
 **Templates** (approved field structure, no answers) and **Feedback** (decision history; selected decisions guide later semantic reviews in the workspace) are management pages.
 
@@ -171,7 +173,7 @@ Details: [architecture and workflow map](docs/architecture/overview.md) (each st
 
 | Check | What it covers | Latest recorded result |
 | --- | --- | --- |
-| `npm test` (Vitest, `tests/review.test.ts`) | Rules on long boilerplate, all four challenge categories, a clean sample with zero findings, Vietnamese references, quote validation, single-passage contradictions rejected, embedded instructions treated as text, the four annotation types, annotation QA, AcroForm import | 11 passed, 1 manual test skipped (16 Oct 2026) |
+| `npm test` (Vitest, `tests/review.test.ts`) | Rules on long boilerplate, all four challenge categories, a clean sample with zero findings, Vietnamese references, quote validation, single-passage contradictions rejected, embedded instructions treated as text, the four annotation types, annotation QA, AcroForm import, exported HTML form escaping and answer import, Word-to-PDF source-check severity | 15 passed, 1 manual test skipped (16 Oct 2026) |
 | `npx tsc --noEmit`, `next build` | Types and production build | Clean (16 Oct 2026) |
 | `worker/test_sanitize.py` | Word sanitiser: macros, DTDs, external links, remote fields, embedded objects, altChunk, SVG and more refused | Passed (16 Oct 2026) |
 | `worker/test_semantic_quota.py` | Semantic quotas, job caps, job privacy and accounting | Passed (16 Oct 2026) |

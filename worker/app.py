@@ -359,7 +359,9 @@ def _word_to_pdf(src: Path, out: Path):
         "$o=$w.Options;$keep=@($o.UpdateLinksAtOpen,$o.UpdateFieldsAtPrint,$o.UpdateLinksAtPrint);"
         "$o.UpdateLinksAtOpen=$false;$o.UpdateFieldsAtPrint=$false;$o.UpdateLinksAtPrint=$false;"
         "try{$d=$w.Documents.Open($env:SRC,$false,$true,$false,'','',$true,'','',0,0,$false,$false,0,$true);"
-        "$d.SaveAs2($env:OUT,17);$d.Close(0)}"
+        # Export for print quality, all pages, with heading bookmarks and structure tags; glyphs of fonts that cannot be
+        # embedded are drawn as images (BitmapMissingFonts) so the PDF looks exactly as Word renders the document.
+        "$d.ExportAsFixedFormat($env:OUT,17,$false,0,0,1,1,0,$true,$true,1,$true,$true,$false);$d.Close(0)}"
         "finally{$o.UpdateLinksAtOpen=$keep[0];$o.UpdateFieldsAtPrint=$keep[1];$o.UpdateLinksAtPrint=$keep[2];$w.Quit()}"
     )
     env = {**os.environ, "SRC": str(src), "OUT": str(out)}

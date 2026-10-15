@@ -314,7 +314,7 @@ function Viewer({ finding, doc }: { finding: FindingRow | null; doc: ReturnType<
   );
 }
 
-function DismissModal({ open, onClose, onSubmit }: { open: boolean; onClose: () => void; onSubmit: (reason: string, note: string, example: boolean) => void }) {
+export function DismissModal({ open, onClose, onSubmit }: { open: boolean; onClose: () => void; onSubmit: (reason: string, note: string, example: boolean) => void }) {
   const [reason, setReason] = useState('');
   const [note, setNote] = useState('');
   const [example, setExample] = useState(false);
@@ -346,7 +346,7 @@ function DismissModal({ open, onClose, onSubmit }: { open: boolean; onClose: () 
   );
 }
 
-function ClarifyModal({ open, question, onClose, onSubmit }: { open: boolean; question: string; onClose: () => void; onSubmit: (q: string) => void }) {
+export function ClarifyModal({ open, question, onClose, onSubmit }: { open: boolean; question: string; onClose: () => void; onSubmit: (q: string) => void }) {
   const [q, setQ] = useState(question);
   useEffect(() => setQ(question), [question]);
   return (

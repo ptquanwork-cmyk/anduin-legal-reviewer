@@ -1,7 +1,8 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { ArrowLeftRight, ArrowRight, ChevronDown, ChevronUp, CircleAlert, CircleCheck, Eye, Info, Loader2, Maximize, Minus, Plus, RotateCw } from 'lucide-react';
 import { useNav } from '../../lib/nav';
+import { PanelScale } from '../../lib/panel';
 import { api, signedUrl, supabase } from '../../lib/supabase';
 import type { SourceIssue } from '../../lib/types';
 import { useWorkspace } from '../../lib/workspace';
@@ -118,7 +119,7 @@ export function SourceQuality() {
                   focus={{ text: focusText, key: `${v.id}:${!!word}:${!!doc}:${zoomL}` }}
                 >
                   {v.mime.includes('word') ? (
-                    word ? <div className="paper docx-html px-8 py-6" style={{ zoom: zoomL / 100 }} dangerouslySetInnerHTML={{ __html: word }} /> : <Loader2 className="m-8 animate-spin" />
+                    word ? <WordPaper html={word} zoom={zoomL} /> : <Loader2 className="m-8 animate-spin" />
                   ) : doc ? (
                     <PdfPage doc={doc} page={focusPage} width={(450 * zoomL) / 100} highlights={hl} />
                   ) : null}
@@ -373,4 +374,10 @@ function useDocxHtml(path: string | null) {
     };
   }, [path]);
   return html;
+}
+
+/** Sanitised Word HTML at the pane zoom, grown with the panel when it is opened full screen (like the PDF beside it). */
+function WordPaper({ html, zoom }: { html: string; zoom: number }) {
+  const scale = useContext(PanelScale);
+  return <div className="paper docx-html px-8 py-6" style={{ zoom: (zoom / 100) * scale }} dangerouslySetInnerHTML={{ __html: html }} />;
 }

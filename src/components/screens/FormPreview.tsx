@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, CircleAlert, CircleHelp, Eye, Loader2, Lock, Search, SlidersHorizontal, ExternalLink, ZoomIn, CirclePlus } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, CircleAlert, CircleHelp, Download, Eye, Loader2, Lock, Search, SlidersHorizontal, ExternalLink, ZoomIn, CirclePlus } from 'lucide-react';
 import { buildForm, isDateField, type FormSection } from '../../digitize/form';
+import { formHtml } from '../../digitize/htmlForm';
 import { useNav } from '../../lib/nav';
 import { api } from '../../lib/supabase';
 import type { AnnotationRow } from '../../lib/types';
@@ -30,6 +31,17 @@ export function FormPreview() {
   const approved = !!ws.version?.annotations_approved_at;
   const coverageOk = form.unmapped.length === 0;
   const canEnable = approved && coverageOk;
+
+  // A single-page HTML form to share with whoever fills it in; its Submit saves an answers file for Responses → Import.
+  const exportHtml = () => {
+    if (!ws.version) return;
+    const html = formHtml(form, { documentTitle: ws.document?.title ?? ws.version.file_name, versionNo: ws.version.version_no, versionId: ws.version.id });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+    a.download = `${(ws.document?.title ?? 'form').replace(/[^\w.-]+/g, '-')}-form-v${ws.version.version_no}.html`;
+    a.click();
+    nav.notify('HTML form downloaded. Share it; the answers file it produces can be imported in Responses.');
+  };
 
   const loadHelp = async () => {
     if (!ws.version || !sel) return;
@@ -178,10 +190,13 @@ export function FormPreview() {
           </button>
           <span className="mx-1 h-10 w-px" style={{ background: 'var(--panel-border)' }} />
           <button className="pill flex h-[44px] items-center gap-2 whitespace-nowrap px-4 text-[14px] font-medium" style={{ color: 'var(--primary)' }} onClick={() => setModal('full')}>
-            <Eye size={18} /> Show full original text
+            <Eye size={18} /> Full original text
           </button>
           <button className="pill flex h-[44px] items-center gap-2 whitespace-nowrap px-4 text-[14px] font-medium" style={{ color: 'var(--primary)' }} onClick={() => setModal('conditional')}>
-            <SlidersHorizontal size={18} /> Preview conditional sections
+            <SlidersHorizontal size={18} /> Conditional sections
+          </button>
+          <button className="pill flex h-[44px] items-center gap-2 whitespace-nowrap px-4 text-[14px] font-medium" style={{ color: 'var(--primary)' }} disabled={!canEnable} title={canEnable ? 'Download a fillable HTML form' : 'Available once responses can be enabled'} onClick={exportHtml}>
+            <Download size={18} /> Export HTML form
           </button>
         </div>
       </Fade>

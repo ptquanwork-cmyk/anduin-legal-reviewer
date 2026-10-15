@@ -249,3 +249,8 @@ button:disabled {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* A panel opened full screen covers the header stations; hide the shared 3D layer meanwhile. */
+body.panel-expanded .stations-canvas {
+  visibility: hidden;
+}
