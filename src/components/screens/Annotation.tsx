@@ -192,7 +192,7 @@ export function Annotation() {
         </div>
       </Panel>
 
-      <Panel i={1} x={1075} y={358} w={420} h={320} className="flex flex-col px-5 py-4">
+      <Panel i={1} x={1075} y={358} w={420} h={320} className="flex flex-col overflow-hidden px-5 py-4">
         <div className="flex items-center justify-between">
           <h2 className="text-[17px] font-semibold" style={{ color: 'var(--ink)' }}>
             Selected field
@@ -287,7 +287,9 @@ function FieldProps({ a, onSave, sourceLabel }: { a: AnnotationRow; onSave: (p: 
   const agent = (a as AnnotationRow & { agent?: { value: string; confidence: number | null } }).agent;
   const row = 'grid grid-cols-[100px_1fr] items-center gap-2 text-[13.5px]';
   return (
-    <div className="mt-2 flex flex-1 flex-col gap-1.5">
+    <div className="mt-2 flex min-h-0 flex-1 flex-col">
+      {/* Details scroll inside the panel (long option lists); the action below always stays visible. */}
+      <div className="scroll-thin -mr-2 flex min-h-0 flex-1 flex-col gap-1.5 overflow-auto pr-2">
       <label className={row}>
         <span>Field ID</span>
         <input value={fid} onChange={(e) => setFid(e.target.value.replace(/[^\w.]/g, '_'))} onBlur={() => fid && fid !== a.field_id && onSave({ field_id: fid })} className="h-8 rounded-lg border px-2" style={{ borderColor: 'var(--panel-border)', background: 'var(--panel)' }} />
@@ -335,12 +337,13 @@ function FieldProps({ a, onSave, sourceLabel }: { a: AnnotationRow; onSave: (p: 
           Decision agent: {String(agent.value).replace('_', ' ')} · {agent.confidence != null ? `${Math.round(agent.confidence * 100)}%` : '—'} (not calibrated)
         </div>
       )}
+      </div>
       {(a.transfer_state === 'uncertain' || a.transfer_state === 'changed') && !a.confirmed ? (
-        <button className="btn-primary mt-auto h-9 text-[14px]" onClick={() => onSave({ confirmed: true })}>
+        <button className="btn-primary mt-2 h-9 shrink-0 text-[14px]" onClick={() => onSave({ confirmed: true })}>
           Confirm source correspondence
         </button>
       ) : (
-        <div className="mt-auto flex items-start gap-2 rounded-xl px-3 py-2 text-[12.5px]" style={{ background: 'var(--selected)' }}>
+        <div className="mt-2 flex shrink-0 items-start gap-2 rounded-xl px-3 py-2 text-[12.5px]" style={{ background: 'var(--selected)' }}>
           <Info size={16} className="mt-0.5 shrink-0" fill="var(--primary)" color="var(--panel)" />
           <span>
             <b>Paragraph is content, not an answer field.</b> Use Paragraph for text, and the other field types for information to capture.

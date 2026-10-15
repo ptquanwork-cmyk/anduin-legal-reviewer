@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-16: One full-screen mode and branded HTML form
+
+- One full-screen button (next to How to use) replaces the per-panel buttons: the working area fills the screen and PDFs render larger.
+- Annotation: the Selected field panel scrolls and keeps its Confirm button visible.
+- Exported HTML form:
+  - Anduin header with progress and Next field to fill.
+  - Contents sidebar with an Only sections to fill filter.
+  - New field and option styling.
+
 ## 2026-10-16: Full screen, guides, form export, faithful conversion
 
 - Word to PDF: Word export with print quality and bitmapped missing fonts; automatic retry on failure or text difference; identical text with a substituted font is verified with a note.

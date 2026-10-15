@@ -100,11 +100,11 @@ One page: a 3D workflow hub, with stations modelled in Blender and rendered live
 | 04 | Legal review | Typos, missing references, contradictions, ambiguities and undefined terms with exact quotes and page anchors; confirm / dismiss with reason / request clarification; separated confidence signals |
 | 05 | Decision / report | Outcome (ready, needs clarification, revision needed, approved with exceptions, blocked by source quality), questions for counsel, review report PDF, v1→v2 comparison where a missing finding is only *proposed* resolved until the reviewer confirms |
 | 06 | Annotation | Exactly four types (paragraph, text box, radio box, checkbox); detection from layout and AcroForm fields, double-checked by the decision agent; drag/resize/draw editor; content-based transfer between versions; QA gate |
-| 07 | Form preview | Full original text in order with controls; unmapped blocks block responses; plain-language help kept separate from contract text; **Export HTML form**: a self-contained page anyone can fill in a browser |
+| 07 | Form preview | Full original text in order with controls; unmapped blocks block responses; plain-language help kept separate from contract text; **Export HTML form**: a self-contained, branded page anyone can fill in a browser, with progress, a contents list and a jump to the next field to fill |
 | 08 | Responses | Version-bound answers with autosave and validation; **Import answers** from the exported form; draft PDF only when required answers are present |
 | 09 | PDF QA / export | Answers written into the PDF at annotation geometry, then the output is re-read: content coverage, field mapping, answer values, page render (e.g. *answer clipped*). Final export only after QA passes and the reviewer confirms |
 
-Every screen has a **How to use** guide in the top bar (numbered steps naming the buttons to click), and every large panel opens **full screen** from its corner button. Decisions can also be made on the Decision / report screen, which states the next step that blocks digitization.
+Every screen has a **How to use** guide in the top bar (numbered steps naming the buttons to click), and a **full-screen** button next to it hides the header and stretches the whole working area to fill the screen (PDF pages render larger and sharper). Decisions can also be made on the Decision / report screen, which states the next step that blocks digitization.
 
 **Templates** (approved field structure, no answers) and **Feedback** (decision history; selected decisions guide later semantic reviews in the workspace) are management pages.
 

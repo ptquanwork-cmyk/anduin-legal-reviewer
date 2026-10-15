@@ -10,6 +10,9 @@ export interface Nav {
   /** Width of the design frame in design units (1536 at the reference aspect; wider windows get more). */
   frameWidth: number;
   notify: (message: string, tone?: 'info' | 'error') => void;
+  /** Full-screen mode for the working area of a screen. */
+  focus: boolean;
+  toggleFocus: () => void;
 }
 
 export const NavCtx = createContext<Nav | null>(null);
@@ -48,8 +51,25 @@ export function box(x: number, y: number, w?: number, h?: number, anchor?: Ancho
   else if (w !== undefined && a === 'center') left = `calc(${CONTENT_LEFT}px + ${x + w / 2 - CONTENT_LEFT}px * ${K} - ${w / 2}px)`;
   return {
     ['--l' as string]: left,
-    ['--y' as string]: `${y}px`,
+    // Full-screen mode moves a screen's working area up and stretches it vertically (--vk, --vb, set on the screen).
+    ['--y' as string]: `calc(${y}px * var(--vk, 1) + var(--vb, 0px))`,
     ['--wd' as string]: width,
     ['--h' as string]: h === undefined ? 'auto' : `${h}px`,
+    ['--yn' as string]: String(y),
+    ['--hn' as string]: String(h ?? 0),
   };
+}
+
+/** Vertical fit for full-screen mode: the working area (from the first panel down) fills the frame top to bottom. */
+export function focusFit(screen: HTMLElement) {
+  const items = [...screen.children].filter((e): e is HTMLElement => e instanceof HTMLElement && e.style.getPropertyValue('--yn') !== '');
+  const num = (e: HTMLElement, v: string) => Number(e.style.getPropertyValue(v));
+  const panels = items.filter((e) => e.dataset.panel !== undefined);
+  if (!panels.length) return null;
+  const y0 = Math.min(...panels.map((e) => num(e, '--yn')));
+  const y1 = Math.max(...items.filter((e) => num(e, '--yn') >= y0).map((e) => num(e, '--yn') + Math.max(num(e, '--hn'), 40)));
+  const TOP = 76; // room for the floating "How to use" and "Exit full screen" buttons
+  const BOTTOM = 1004;
+  const vk = Math.min(2, (BOTTOM - TOP) / Math.max(1, y1 - y0));
+  return { vk, vb: TOP - y0 * vk };
 }

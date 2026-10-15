@@ -9,3 +9,10 @@ Date: 16 October 2026. Owner request after a manual walkthrough with the long su
 | Decision / report was hard to use; where are needs-confirmation items confirmed and finalised? | The decision buttons (Confirm, Approve as exception, Dismiss, Needs clarification, Reopen) are now also on the report, pinned under the preview. A "Next step" line states exactly what still blocks Continue to annotation |
 | A usage guide for every page, written as a workflow | "How to use" in the top bar on every screen: purpose, numbered steps naming the buttons to click, when to move on, and tips |
 | Form preview: export as an HTML or Google-Form-like form so people fill it quickly and the results come back | "Export HTML form" downloads one self-contained page with the full contract text and the fields. Submit checks required fields and saves an answers file, which "Import answers" in Responses loads for that exact form version. A hosted share link was not built because it would expose contract text to anyone holding the link |
+
+## Follow-up the same day
+
+| Request | Decision |
+| --- | --- |
+| Full screen should be one button for the whole working area, not one per panel; wider UI, sharper PDFs, smoother interaction; fix overlapping UI | A single full-screen button next to "How to use" replaces the per-panel buttons. It requests browser full screen, hides the header and outline, and stretches the working area to fill the screen; PDF pages render larger. The per-panel buttons and the Annotation panel overflow are removed |
+| Exported HTML form: Anduin header and title, a way to jump to or scroll to the parts to fill, and a more professional design | Sticky header with the Anduin wordmark, the document title, progress and "Next field to fill"; a contents sidebar with an "Only sections to fill" filter; restyled fields, submit bar and success card |

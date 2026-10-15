@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   CircleHelp,
+  Maximize2,
   ArrowLeft,
   Box,
   ChevronDown,
@@ -78,16 +79,27 @@ export function TopBar({ onSearch }: { onSearch: () => void }) {
 }
 
 /** "How to use" for the current screen: purpose, numbered steps (what to click, in order), when to move on, tips. */
-function GuideButton() {
+export function GuideButton({ floating = false }: { floating?: boolean }) {
   const nav = useNav();
   const [open, setOpen] = useState(false);
   const g = GUIDES[nav.screen];
   const home = nav.screen === 'home';
   return (
     <>
-      <button className="abs pill flex items-center justify-center gap-2 text-[15px] font-semibold" style={{ ...box(home ? 400 : 302, home ? 84 : 83, 168, 48, 'left'), color: 'var(--primary)' }} onClick={() => setOpen(true)}>
-        <CircleHelp size={20} /> How to use
-      </button>
+      {floating ? (
+        <button className="pill flex h-10 items-center gap-2 px-4 text-[14px] font-semibold shadow-md" style={{ color: 'var(--primary)' }} onClick={() => setOpen(true)}>
+          <CircleHelp size={17} /> How to use
+        </button>
+      ) : (
+        <button className="abs pill flex items-center justify-center gap-2 text-[15px] font-semibold" style={{ ...box(home ? 400 : 302, home ? 84 : 83, 168, 48, 'left'), color: 'var(--primary)' }} onClick={() => setOpen(true)}>
+          <CircleHelp size={20} /> How to use
+        </button>
+      )}
+      {!floating && !home && (
+        <button className="abs pill grid place-items-center" style={{ ...box(480, 83, 48, 48, 'left'), color: 'var(--primary)' }} onClick={nav.toggleFocus} title="Full screen: the working area fills the whole screen (Esc to exit)" aria-label="Full screen">
+          <Maximize2 size={20} />
+        </button>
+      )}
       <Modal open={open} onClose={() => setOpen(false)} title={g.title} width={720}>
         <div className="scroll-thin max-h-[70vh] overflow-auto pr-1 text-[14.5px] leading-[21px]" style={{ color: 'var(--ink)' }}>
           <p style={{ color: 'var(--muted)' }}>{g.purpose}</p>

@@ -1,4 +1,4 @@
 import { createContext } from 'react';
 
-/** How much larger an expanded panel is than its normal size; PDF pages and papers inside render at this factor. */
+/** How much larger PDF pages and papers render in full-screen mode (taller panels, capped by the panel width). */
 export const PanelScale = createContext(1);

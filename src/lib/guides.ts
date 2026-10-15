@@ -8,7 +8,7 @@ export interface Guide {
   tips?: string[];
 }
 
-const FULL = 'Any large panel has a round button on its top-right corner: it opens that panel over the whole window (Esc or the button closes it). PDF pages inside are re-rendered larger.';
+const FULL = 'The full-screen button (four arrows, next to How to use) hides the header and stretches the whole working area to fill your screen; PDF pages render larger and sharper. Esc or Exit full screen returns.';
 
 /** Step-by-step usage for each screen, opened from "How to use" in the top bar. */
 export const GUIDES: Record<ScreenId, Guide> = {
@@ -41,7 +41,7 @@ export const GUIDES: Record<ScreenId, Guide> = {
     purpose: 'Prove that what will be reviewed is exactly the original. For Word files, Microsoft Word itself renders the PDF and the text is compared word for word; PDFs are checked for readable pages.',
     steps: [
       { do: 'Read the status chip at the top', detail: 'Verified: text identical, nothing to do. Needs review: something differs and must be checked. Blocked: conversion or reading failed.' },
-      { do: 'Text tab: compare side by side', detail: 'Word original on the left, converted PDF on the right. Use − / + on each side to zoom, the expand icon to read a whole document, or the corner button to open the panel full screen.' },
+      { do: 'Text tab: compare side by side', detail: 'Word original on the left, converted PDF on the right. Use − / + on each side to zoom, the expand icon to read a whole document, or the full-screen button in the top bar for more room.' },
       { do: 'Layout and Fonts tabs', detail: 'Pages and coverage; fonts declared in Word vs fonts embedded in the PDF. "Font substituted, text identical" means only the typeface differs because that font is not installed on the conversion machine.' },
       { do: 'Issues list on the right: click View source region', detail: 'Shows the exact place on the page.' },
       { do: 'If the status is Needs review: compare, then click Confirm manual comparison', detail: 'If the converter failed or was offline, click Retry conversion instead.' },

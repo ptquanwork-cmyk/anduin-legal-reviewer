@@ -250,7 +250,7 @@ button:disabled {
   }
 }
 
-/* A panel opened full screen covers the header stations; hide the shared 3D layer meanwhile. */
-body.panel-expanded .stations-canvas {
+/* Full-screen mode moves the header stations off screen; hide the shared 3D layer meanwhile. */
+body.focus-mode .stations-canvas {
   visibility: hidden;
 }
