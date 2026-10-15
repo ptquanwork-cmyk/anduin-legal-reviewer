@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-16: Full-screen workspace and overlap sweep
+
+- Full screen has its own bar (exit, steps 01–09, How to use, Prev / Next); the screen header is hidden and working toolbars are kept.
+- No overlaps or spills on 11 screens × 4 screen sizes in normal and full-screen mode (Playwright check).
+- Source quality notes need no action; Form preview notice wraps; Questions for counsel box grows and its counter no longer covers text.
+
 ## 2026-10-16: One full-screen mode and branded HTML form
 
 - One full-screen button (next to How to use) replaces the per-panel buttons: the working area fills the screen and PDFs render larger.

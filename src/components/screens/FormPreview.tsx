@@ -97,8 +97,8 @@ export function FormPreview() {
           <p className="absolute left-[174px] top-[78px] text-[19px]" style={{ color: 'var(--muted)' }}>
             {ws.document?.title ?? 'No document'} · v{ws.version?.version_no ?? '–'}
           </p>
-          <div className="absolute left-[174px] top-[104px] flex h-[36px] w-[445px] items-center gap-2 whitespace-nowrap rounded-xl px-3 text-[12px]" style={{ background: 'var(--warn-bg)', color: 'var(--warn-ink)' }}>
-            <CircleAlert size={16} className="shrink-0" /> <b>Preview only</b> <span className="truncate" style={{ color: 'var(--ink)' }}>Controls are read-only here; answers are entered in Responses.</span>
+          <div className="absolute left-[174px] right-4 top-[104px] flex min-h-[36px] items-center gap-2 rounded-xl px-3 py-1 text-[12px] leading-[15px]" style={{ background: 'var(--warn-bg)', color: 'var(--warn-ink)' }}>
+            <CircleAlert size={16} className="shrink-0" /> <b className="shrink-0">Preview only</b> <span style={{ color: 'var(--ink)' }}>Controls are read-only here; answers are entered in Responses.</span>
           </div>
         </div>
         <div className="scroll-thin flex-1 overflow-auto px-7 pb-6">

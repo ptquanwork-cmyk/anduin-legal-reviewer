@@ -67,7 +67,7 @@ export function DocumentMap() {
           See how sections relate, and review exact sources.
         </p>
       </Fade>
-      <Fade x={342} y={336} w={425} h={42}>
+      <Fade x={342} y={336} w={425} h={42} keep>
         <div className="pill flex h-full items-center p-1" role="tablist">
           {(['Outline', 'Relationships', 'Page map'] as Tab[]).map((t) => (
             <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className="h-full flex-1 rounded-full text-[15.5px] font-medium transition-colors" style={tab === t ? { background: 'var(--primary)', color: 'var(--primary-ink)' } : { color: 'var(--ink)' }}>

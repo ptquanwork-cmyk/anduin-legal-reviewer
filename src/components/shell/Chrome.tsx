@@ -2,6 +2,9 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   CircleHelp,
+  ChevronRight,
+  ChevronLeft,
+  Minimize2,
   Maximize2,
   ArrowLeft,
   Box,
@@ -78,6 +81,34 @@ export function TopBar({ onSearch }: { onSearch: () => void }) {
   );
 }
 
+/** Bar of full-screen mode: exit, the nine workflow steps, the guide, and previous / next step. */
+export function FocusBar({ onExit }: { onExit: () => void }) {
+  const nav = useNav();
+  const i = STAGES.findIndex((s) => s.id === nav.screen);
+  const prev = i > 0 ? STAGES[i - 1] : null;
+  const next = i >= 0 && i < STAGES.length - 1 ? STAGES[i + 1] : null;
+  const step = 'pill flex h-full w-full items-center justify-center gap-1.5 text-[14px] font-semibold disabled:opacity-40';
+  return (
+    <>
+      <button className="abs pill flex items-center justify-center gap-2 text-[14px] font-semibold" style={{ ...box(24, 18, 160, 48, 'left'), color: 'var(--ink)' }} onClick={onExit} title="Exit full screen (Esc)">
+        <Minimize2 size={18} /> Exit full screen
+      </button>
+      <StageStrip x={196} y={18} w={1000} />
+      <div className="abs" style={box(1206, 18, 132, 48, 'right')}>
+        <GuideButton floating />
+      </div>
+      <div className="abs flex gap-2" style={box(1346, 18, 166, 48, 'right')}>
+        <button className={step} style={{ color: 'var(--ink)' }} disabled={!prev} onClick={() => prev && nav.go(prev.id)} title={prev ? `Previous step: ${prev.label}` : undefined}>
+          <ChevronLeft size={18} /> Prev
+        </button>
+        <button className={step} style={{ background: next ? 'var(--primary)' : undefined, color: next ? 'var(--primary-ink)' : 'var(--ink)' }} disabled={!next} onClick={() => next && nav.go(next.id)} title={next ? `Next step: ${next.label}` : undefined}>
+          Next <ChevronRight size={18} />
+        </button>
+      </div>
+    </>
+  );
+}
+
 /** "How to use" for the current screen: purpose, numbered steps (what to click, in order), when to move on, tips. */
 export function GuideButton({ floating = false }: { floating?: boolean }) {
   const nav = useNav();
@@ -87,8 +118,8 @@ export function GuideButton({ floating = false }: { floating?: boolean }) {
   return (
     <>
       {floating ? (
-        <button className="pill flex h-10 items-center gap-2 px-4 text-[14px] font-semibold shadow-md" style={{ color: 'var(--primary)' }} onClick={() => setOpen(true)}>
-          <CircleHelp size={17} /> How to use
+        <button className="pill flex h-full w-full items-center justify-center gap-2 text-[14px] font-semibold" style={{ color: 'var(--primary)' }} onClick={() => setOpen(true)}>
+          <CircleHelp size={18} /> How to use
         </button>
       ) : (
         <button className="abs pill flex items-center justify-center gap-2 text-[15px] font-semibold" style={{ ...box(home ? 400 : 302, home ? 84 : 83, 168, 48, 'left'), color: 'var(--primary)' }} onClick={() => setOpen(true)}>
@@ -255,7 +286,7 @@ export function StageStrip({ y = 152, x = 132, w = 1360 }: { y?: number; x?: num
   // Narrow strips wrap labels onto two lines, like the stepper labels in the approved design.
   const size = w < 1150 ? 'pr-2 text-[11.5px] leading-[13px]' : w < 1250 ? 'pr-2.5 text-[12.5px]' : 'pr-3.5 text-[13.5px]';
   return (
-    <div className="abs pill flex items-center justify-between overflow-x-auto px-3" style={box(x, y, w, 48)} role="tablist" aria-label="Workflow stages">
+    <div data-chrome className="abs pill flex items-center justify-between overflow-x-auto px-3" style={box(x, y, w, 48)} role="tablist" aria-label="Workflow stages">
       {STAGES.map((s) => {
         const on = s.id === nav.screen;
         return (

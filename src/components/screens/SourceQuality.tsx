@@ -158,18 +158,20 @@ export function SourceQuality() {
         )}
         {issues.map((i) => {
           const isOpen = open === i.id;
-          const done = checked.has(i.id) || accepted;
+          // A warning (e.g. a font substituted while the text is identical) is a note: nothing to confirm.
+          const note = i.severity === 'warning';
+          const done = checked.has(i.id) || accepted || note;
           return (
             <div key={i.id} className="rounded-2xl border p-3" style={{ borderColor: 'var(--panel-border)', background: 'var(--panel)' }}>
               <button className="flex w-full items-start gap-2 text-left" onClick={() => setOpen(isOpen ? null : i.id)} aria-expanded={isOpen}>
-                {done ? <CircleCheck size={26} className="shrink-0" style={{ color: 'var(--mint-dark)' }} /> : <CircleAlert size={26} className="shrink-0" fill="#e5383b" color="#fff" />}
+{note ? <Info size={26} className="shrink-0" fill="var(--primary)" color="var(--panel)" /> : done ? <CircleCheck size={26} className="shrink-0" style={{ color: 'var(--mint-dark)' }} /> : <CircleAlert size={26} className="shrink-0" fill="#e5383b" color="#fff" />}
                 <span className="flex-1">
                   <span className="block text-[15px] font-semibold leading-[20px]" style={{ color: 'var(--ink)' }}>
                     {i.page ? `Page ${i.page} · ` : ''}
                     {i.title}
                   </span>
                   <span className="block text-[13.5px] font-medium" style={{ color: 'var(--ink)' }}>
-                    {done ? 'Manual comparison recorded' : i.kind === 'conversion_failed' ? 'Retry required' : 'Manual comparison required'}
+                    {note ? 'Note · no action needed' : done ? 'Manual comparison recorded' : i.kind === 'conversion_failed' ? 'Retry required' : 'Manual comparison required'}
                   </span>
                 </span>
                 {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
@@ -194,9 +196,11 @@ export function SourceQuality() {
                       Confirm manual comparison
                     </button>
                   )}
-                  <button className="btn-primary mt-2 flex h-9 w-full items-center justify-center gap-2 text-[13.5px]" onClick={retry} disabled={retrying || ws.job?.status === 'running'}>
-                    {retrying ? <Loader2 size={18} className="animate-spin" /> : <RotateCw size={18} />} Retry conversion
-                  </button>
+                  {!note && (
+                    <button className="btn-primary mt-2 flex h-9 w-full items-center justify-center gap-2 text-[13.5px]" onClick={retry} disabled={retrying || ws.job?.status === 'running'}>
+                      {retrying ? <Loader2 size={18} className="animate-spin" /> : <RotateCw size={18} />} Retry conversion
+                    </button>
+                  )}
                 </div>
               )}
             </div>

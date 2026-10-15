@@ -58,7 +58,7 @@ export function LegalReview() {
           {ws.document ? `${ws.document.title} · v${ws.version?.version_no}` : 'No document open'}
         </p>
       </Fade>
-      <HeaderArt id="review" x={1010} y={196} w={392} h={165} />
+      <HeaderArt id="review" x={1010} y={206} w={392} h={150} />
 
       <Panel i={0} x={134} y={358} w={370} h={600} className="flex flex-col p-4">
         <div className="flex items-center justify-between px-2">

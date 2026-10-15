@@ -8,7 +8,7 @@ export interface Guide {
   tips?: string[];
 }
 
-const FULL = 'The full-screen button (four arrows, next to How to use) hides the header and stretches the whole working area to fill your screen; PDF pages render larger and sharper. Esc or Exit full screen returns.';
+const FULL = 'Full screen (four arrows, next to How to use) turns the screen into a focused workspace: the working area fills your screen and PDF pages render larger, with a bar of steps 01–09, Prev / Next to move through the workflow, How to use and Exit full screen (or Esc).';
 
 /** Step-by-step usage for each screen, opened from "How to use" in the top bar. */
 export const GUIDES: Record<ScreenId, Guide> = {

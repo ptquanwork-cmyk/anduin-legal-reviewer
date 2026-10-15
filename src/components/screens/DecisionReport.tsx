@@ -103,7 +103,7 @@ export function DecisionReport() {
 
   return (
     <>
-      <HeaderArt id="report" x={170} y={118} w={192} h={162} />
+      <HeaderArt id="report" x={170} y={134} w={192} h={146} />
       <Title x={388} y={146} size={52}>
         Decision / report
       </Title>
@@ -112,7 +112,7 @@ export function DecisionReport() {
           Open source-linked findings. Confirm, dismiss or request clarification.
         </p>
       </Fade>
-      <Fade i={1} x={863} y={160} w={375} h={80}>
+      <Fade i={1} x={863} y={160} w={375} h={80} keep={258}>
         <div className="flex h-full items-center gap-4 rounded-[22px] border px-5" style={{ background: tone[0], borderColor: 'var(--panel-border)' }}>
           {outcome.canDigitize ? <CircleCheck size={42} style={{ color: tone[2] }} /> : <CircleAlert size={42} fill={tone[2]} color="#fff" />}
           <div>
@@ -125,7 +125,7 @@ export function DecisionReport() {
           </div>
         </div>
       </Fade>
-      <Fade i={1} x={1265} y={170} w={218} h={58}>
+      <Fade i={1} x={1265} y={170} w={218} h={58} keep={270}>
         <button className="pill flex h-full w-full items-center justify-center gap-3 text-[18px] font-semibold" style={{ color: 'var(--ink)' }} onClick={() => setCompare(true)}>
           <Files size={24} /> Compare v{ws.version?.version_no ?? 1} → v{newer[0]?.version_no ?? (ws.version?.version_no ?? 1) + 1}
         </button>
@@ -231,9 +231,10 @@ export function DecisionReport() {
         <p className="text-[14px]" style={{ color: 'var(--muted)' }}>
           Prepare a clear list of questions based on the open findings in this document.
         </p>
-        <div className="relative mt-2">
-          <textarea value={questions} onChange={(e) => setQuestions(e.target.value.slice(0, 1000))} className="scroll-thin h-[118px] w-full resize-none rounded-xl border p-3 text-[14px] leading-[19px]" style={{ borderColor: 'var(--panel-border)', background: 'var(--panel)', color: 'var(--ink)' }} placeholder="No open questions." />
-          <span className="absolute bottom-2 right-3 text-[11px]" style={{ color: 'var(--muted)' }}>
+        {/* Grows into spare height (full-screen mode); the counter has its own strip so it never covers the text. */}
+        <div className="relative mt-2 flex min-h-[118px] flex-1 flex-col">
+          <textarea value={questions} onChange={(e) => setQuestions(e.target.value.slice(0, 1000))} className="scroll-thin min-h-0 w-full flex-1 resize-none rounded-xl border p-3 text-[14px] leading-[19px]" style={{ borderColor: 'var(--panel-border)', background: 'var(--panel)', color: 'var(--ink)' }} placeholder="No open questions." />
+          <span className="self-end pt-0.5 text-[11px]" style={{ color: 'var(--muted)' }}>
             {questions.length}/1000
           </span>
         </div>

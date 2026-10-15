@@ -52,7 +52,7 @@ export function box(x: number, y: number, w?: number, h?: number, anchor?: Ancho
   return {
     ['--l' as string]: left,
     // Full-screen mode moves a screen's working area up and stretches it vertically (--vk, --vb, set on the screen).
-    ['--y' as string]: `calc(${y}px * var(--vk, 1) + var(--vb, 0px))`,
+    ['--y' as string]: `calc(${y}px * var(--fvk, 1) + var(--fvb, 0px))`,
     ['--wd' as string]: width,
     ['--h' as string]: h === undefined ? 'auto' : `${h}px`,
     ['--yn' as string]: String(y),
@@ -60,16 +60,24 @@ export function box(x: number, y: number, w?: number, h?: number, anchor?: Ancho
   };
 }
 
-/** Vertical fit for full-screen mode: the working area (from the first panel down) fills the frame top to bottom. */
-export function focusFit(screen: HTMLElement) {
+/**
+ * Vertical fit for full-screen mode. The working area starts at the first panel or kept toolbar (Fade keep) and is
+ * stretched to fill the frame below the full-screen bar; the screen header above it (art, title, steps) is hidden.
+ * Called with on = false it restores the header.
+ */
+export function focusFit(screen: HTMLElement, on = true) {
   const items = [...screen.children].filter((e): e is HTMLElement => e instanceof HTMLElement && e.style.getPropertyValue('--yn') !== '');
+  for (const e of items) delete e.dataset.focusHidden;
   const num = (e: HTMLElement, v: string) => Number(e.style.getPropertyValue(v));
-  const panels = items.filter((e) => e.dataset.panel !== undefined);
-  if (!panels.length) return null;
-  const y0 = Math.min(...panels.map((e) => num(e, '--yn')));
-  const y1 = Math.max(...items.filter((e) => num(e, '--yn') >= y0).map((e) => num(e, '--yn') + Math.max(num(e, '--hn'), 40)));
-  const TOP = 76; // room for the floating "How to use" and "Exit full screen" buttons
-  const BOTTOM = 1004;
+  const work = items.filter((e) => e.dataset.panel !== undefined || e.dataset.keep !== undefined);
+  if (!on || !work.length) return null;
+  const y0 = Math.min(...work.map((e) => num(e, '--yn')));
+  // The screen's own step bar is replaced by the one in the full-screen bar.
+  for (const e of items) if ((num(e, '--yn') < y0 && e.dataset.keep === undefined) || e.dataset.chrome !== undefined) e.dataset.focusHidden = '';
+  const shown = items.filter((e) => e.dataset.focusHidden === undefined);
+  const y1 = Math.max(...shown.filter((e) => num(e, '--yn') >= y0).map((e) => num(e, '--yn') + Math.max(num(e, '--hn'), 40)));
+  const TOP = 84; // below the full-screen bar (steps, previous / next, guide, exit)
+  const BOTTOM = 1008;
   const vk = Math.min(2, (BOTTOM - TOP) / Math.max(1, y1 - y0));
   return { vk, vb: TOP - y0 * vk };
 }

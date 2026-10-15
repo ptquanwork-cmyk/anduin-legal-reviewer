@@ -16,3 +16,9 @@ Date: 16 October 2026. Owner request after a manual walkthrough with the long su
 | --- | --- |
 | Full screen should be one button for the whole working area, not one per panel; wider UI, sharper PDFs, smoother interaction; fix overlapping UI | A single full-screen button next to "How to use" replaces the per-panel buttons. It requests browser full screen, hides the header and outline, and stretches the working area to fill the screen; PDF pages render larger. The per-panel buttons and the Annotation panel overflow are removed |
 | Exported HTML form: Anduin header and title, a way to jump to or scroll to the parts to fill, and a more professional design | Sticky header with the Anduin wordmark, the document title, progress and "Next field to fill"; a contents sidebar with an "Only sections to fill" filter; restyled fields, submit bar and success card |
+
+## Second follow-up
+
+| Request | Decision |
+| --- | --- |
+| Full screen should look like a clear new interface with step-by-step access, and nothing should overflow or overlap on any screen | The full-screen bar holds exit, steps 01–09, How to use and Prev / Next. The screen header is hidden and working toolbars are kept. Every screen was checked at four real screen sizes in both modes |

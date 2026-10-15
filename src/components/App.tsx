@@ -3,11 +3,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, animate, motion } from 'motion/react';
 import { focusFit, NavCtx, stretchFactor, type Nav } from '../lib/nav';
 import { PanelScale } from '../lib/panel';
-import { Minimize2 } from 'lucide-react';
 import { stageOf, type ScreenId } from '../lib/stages';
 import { WorkspaceProvider } from '../lib/workspace';
 import { ShellFrame } from './shell/Frame';
-import { Brand, CommandPalette, Footer, GuideButton, IconRail, TopBar } from './shell/Chrome';
+import { Brand, CommandPalette, FocusBar, Footer, IconRail, TopBar } from './shell/Chrome';
 import { Hub } from './hub/Hub';
 import dynamic from 'next/dynamic';
 import { FlyingCtx, StationArt, ThreeCtx } from './hub/StationArt';
@@ -199,7 +198,7 @@ export default function App() {
   const focusOn = useRef(focus);
   useEffect(() => {
     focusOn.current = focus;
-    setFit(focus && screenEl.current ? focusFit(screenEl.current) : null);
+    setFit(screenEl.current ? focusFit(screenEl.current, focus) : null);
   }, [focus]);
   const screenRef = useCallback((el: HTMLDivElement | null) => {
     if (el) {
@@ -229,11 +228,12 @@ export default function App() {
               {!fitted && <TopBar onSearch={() => setSearch(true)} />}
               <IconRail />
               <AnimatePresence mode="wait">
-                <motion.div key={screen} ref={screenRef} initial={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.16 } }} style={screenStyle}>
+                <motion.div key={screen} data-screen ref={screenRef} initial={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.16 } }} style={screenStyle}>
                   <PanelScale.Provider value={viewScale}>{screen === 'home' ? <Hub /> : <Screen id={screen} />}</PanelScale.Provider>
                 </motion.div>
               </AnimatePresence>
               {!fitted && <Footer hint={screen === 'home' ? 'Hover to explore · Click to open a section' : undefined} />}
+              {fitted && <FocusBar onExit={toggleFocus} />}
               {overlay && overlay !== '0' && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={overlayUrl(overlay)} alt="" className="pointer-events-none absolute left-0 top-0 z-[90] h-[1024px] w-[1536px] opacity-50" />
@@ -243,14 +243,6 @@ export default function App() {
           {fly && (
             <div ref={flyEl} className="pointer-events-none fixed z-[80]" style={{ left: fly.from.left, top: fly.from.top, width: fly.from.width, height: fly.from.height }}>
               <StationArt stage={stageOf(fly.id as ScreenId)!} role="fly" className="absolute inset-0" />
-            </div>
-          )}
-          {fitted && (
-            <div className="fixed right-4 top-4 z-[115] flex gap-2">
-              <GuideButton floating />
-              <button className="pill flex h-10 items-center gap-2 px-4 text-[14px] font-semibold shadow-md" style={{ color: 'var(--ink)' }} onClick={toggleFocus} title="Exit full screen (Esc)">
-                <Minimize2 size={17} /> Exit full screen
-              </button>
             </div>
           )}
           <CommandPalette open={search} onClose={() => setSearch(false)} />

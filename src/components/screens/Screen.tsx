@@ -1,6 +1,6 @@
 'use client';
 import { motion } from 'motion/react';
-import { box } from '../../lib/nav';
+import { box, useNav } from '../../lib/nav';
 import { stageOf, type ScreenId, type Stage } from '../../lib/stages';
 import { StationArt } from '../hub/StationArt';
 import { Intake } from './Intake';
@@ -52,15 +52,18 @@ export const panelIn = {
  * screen stretches panel heights (--vk); data-panel marks the working area for that fit. */
 export function Panel({ i = 0, x, y, w, h, className = '', style, children }: { i?: number; x: number; y: number; w: number; h?: number; className?: string; style?: React.CSSProperties; children?: React.ReactNode }) {
   return (
-    <motion.section data-panel custom={i} variants={panelIn} initial="hidden" animate="show" className={`abs panel ${className}`} style={{ ...box(x, y, w, h), ['--h' as string]: h === undefined ? 'auto' : `calc(${h}px * var(--vk, 1))`, ...style }}>
+    <motion.section data-panel custom={i} variants={panelIn} initial="hidden" animate="show" className={`abs panel ${className}`} style={{ ...box(x, y, w, h), ['--h' as string]: h === undefined ? 'auto' : `calc(${h}px * var(--fvk, 1))`, ...style }}>
       {children}
     </motion.section>
   );
 }
 
-export function Fade({ i = 0, x, y, w, h, className = '', style, children }: { i?: number; x: number; y: number; w?: number; h?: number; className?: string; style?: React.CSSProperties; children?: React.ReactNode }) {
+/** Fade-in box. Above the panels, only boxes marked keep stay in full-screen mode (a number moves them to that y there). */
+export function Fade({ i = 0, x, y, w, h, className = '', style, children, keep }: { i?: number; x: number; y: number; w?: number; h?: number; className?: string; style?: React.CSSProperties; children?: React.ReactNode; keep?: true | number }) {
+  const { focus } = useNav();
+  const fy = focus && typeof keep === 'number' ? keep : y;
   return (
-    <motion.div custom={i} variants={panelIn} initial="hidden" animate="show" className={`abs ${className}`} style={{ ...box(x, y, w, h), ...style }}>
+    <motion.div data-keep={keep !== undefined ? '' : undefined} custom={i} variants={panelIn} initial="hidden" animate="show" className={`abs ${className}`} style={{ ...box(x, fy, w, h), ...style }}>
       {children}
     </motion.div>
   );

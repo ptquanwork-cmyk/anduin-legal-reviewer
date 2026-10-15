@@ -250,7 +250,18 @@ button:disabled {
   }
 }
 
-/* Full-screen mode moves the header stations off screen; hide the shared 3D layer meanwhile. */
-body.focus-mode .stations-canvas {
-  visibility: hidden;
+
+/* Full-screen mode: the screen header above the working area is hidden (see focusFit). */
+[data-focus-hidden] {
+  display: none !important;
+}
+
+/* Full-screen mode offsets (--vk, --vb on the screen) apply to the screen's own boxes only, not to boxes nested in panels. */
+[data-screen] > * {
+  --fvk: var(--vk, 1);
+  --fvb: var(--vb, 0px);
+}
+[data-screen] > * * {
+  --fvk: 1;
+  --fvb: 0px;
 }

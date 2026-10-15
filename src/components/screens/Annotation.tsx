@@ -102,7 +102,7 @@ export function Annotation() {
       </Fade>
       <HeaderArt id="annotation" x={795} y={196} w={290} h={140} />
 
-      <Fade x={162} y={338} w={690} h={50} className="flex gap-3">
+      <Fade x={162} y={338} w={690} h={50} className="flex gap-3" keep>
         {TYPES.map((t) => {
           const Icon = t.icon;
           const active = draw ? drawType === t.id : sel?.type === t.id;
@@ -119,7 +119,7 @@ export function Annotation() {
           );
         })}
       </Fade>
-      <Fade x={1087} y={306} w={155} h={42}>
+      <Fade x={1087} y={306} w={155} h={42} keep>
         <div className="relative h-full">
           <button className="pill flex h-full w-full items-center justify-center gap-2 text-[15px] font-medium" onClick={() => setVerOpen((o) => !o)}>
             <FileText size={18} /> Source v{ws.version?.version_no ?? '–'} <ChevronDown size={16} />
@@ -135,7 +135,7 @@ export function Annotation() {
           )}
         </div>
       </Fade>
-      <Fade x={1253} y={306} w={232} h={42}>
+      <Fade x={1253} y={306} w={232} h={42} keep>
         <button className="pill flex h-full w-full items-center justify-center gap-2 text-[14.5px] font-medium disabled:opacity-60" disabled={!ws.version?.parent_id} onClick={() => setCompare(true)}>
           <FileText size={18} /> {ws.version?.parent_id ? `Compare annotations from v${(ws.version.version_no ?? 2) - 1}` : 'No earlier version'}
         </button>
