@@ -413,14 +413,19 @@ async def convert(file: UploadFile = File(...)):
 # booklet or a semantic review can take longer. Callers start a job and poll it; results are kept for 15 minutes.
 _jobs: dict[str, dict] = {}
 jobs_lock = threading.Lock()
+MAX_RUNNING, MAX_RUNNING_PER_USER = 8, 3  # one thread per running job; Word and Codex are serialised behind locks anyway
 
 
 def _start_job(user: str, work) -> dict:
     job_id = secrets.token_urlsafe(16)
     with jobs_lock:
         now = time.time()
-        for key in [k for k, v in _jobs.items() if now - v["at"] > 900]:
+        # Results are kept 15 minutes, or one minute after they were fetched (room for a retried poll).
+        for key in [k for k, v in _jobs.items() if now - v["at"] > 900 or now - v.get("fetched", now) > 60]:
             del _jobs[key]
+        running = [v for v in _jobs.values() if v["status"] == "running"]
+        if len(running) >= MAX_RUNNING or sum(v["user"] == user for v in running) >= MAX_RUNNING_PER_USER:
+            raise HTTPException(status_code=429, detail="too many jobs in progress; try again shortly")
         _jobs[job_id] = {"user": user, "status": "running", "at": now}
 
     def run():
@@ -447,6 +452,8 @@ async def convert_job(file: UploadFile = File(...), user: str = Depends(auth)):
 def job_status(job_id: str, user: str = Depends(auth)):
     with jobs_lock:
         job = dict(_jobs.get(job_id) or {})
+        if job and job["user"] == user and job["status"] != "running":
+            _jobs[job_id].setdefault("fetched", time.time())
     if not job or job["user"] != user:
         raise HTTPException(status_code=404, detail="job not found")
     if job["status"] == "running":
