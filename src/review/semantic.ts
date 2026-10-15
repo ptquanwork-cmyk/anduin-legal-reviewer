@@ -13,6 +13,7 @@ export interface Example {
   title: string;
   action: string;
   reason: string | null;
+  note?: string | null;
 }
 
 interface RawFinding {
@@ -61,7 +62,7 @@ export async function semanticReview(blocks: Block[], defs: Definition[], exampl
   };
   const guidance = examples.length
     ? `Reviewer feedback from earlier documents in this workspace (scope: this workspace only; use as calibration, not as rules):\n${examples
-        .map((e) => `- ${e.action} "${e.title}" (${e.category})${e.reason ? `: ${e.reason}` : ''}`)
+        .map((e) => `- ${e.action} "${e.title}" (${e.category})${e.reason ? `: ${e.reason}` : ''}${e.note ? ` — ${e.note.slice(0, 200)}` : ''}`)
         .join('\n')}`
     : '';
   const parts = chunks(blocks.filter((b) => b.kind !== 'header' && b.kind !== 'footer'));

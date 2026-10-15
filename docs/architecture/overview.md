@@ -84,6 +84,10 @@ Rules and the semantic reviewer start as soon as text is extracted, in parallel 
 
 `node scripts/e2e-contracts.mjs` scores every run against the planted problems in `data/demo-contracts/expected.json` (problems found, false alarms to avoid, expected form fields); the latest numbers are in the build log.
 
+### Memory
+
+Every reviewer decision is stored append-only in `decision_events` with a snapshot of the finding it was about, so re-running checks (which regenerates findings) keeps the history. Decisions marked "use as example" (up to 12, newest first) are passed to the semantic reviewer on later reviews in the same workspace as data, and the version's notes say how many were used. A new version of a document takes over annotations by content (matched, changed, new, uncertain), and findings missing from the new version are proposed as resolved for the reviewer to confirm. Approved annotation structures are saved as templates for the document family. `node scripts/e2e-memory.mjs` checks all of this against a running app.
+
 ## 4. Trust boundaries
 
 - Contract text is untrusted data: it is sent to reviewers as data in a separate field, never as instructions; uploads are sanitised before Word opens them (macros, DTDs, external links and remote fields are refused).

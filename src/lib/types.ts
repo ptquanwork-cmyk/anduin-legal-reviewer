@@ -149,7 +149,9 @@ export interface FindingRow {
 
 export interface DecisionRow {
   id: string;
-  finding_id: string;
+  finding_id: string | null;
+  finding_title: string | null;
+  finding_category: string | null;
   action: DecisionAction;
   reason: string | null;
   note: string | null;

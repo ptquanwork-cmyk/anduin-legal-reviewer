@@ -118,6 +118,8 @@ interface FeedbackRow {
   note: string | null;
   use_as_example: boolean;
   created_at: string;
+  finding_title: string | null;
+  finding_category: string | null;
   findings: { title: string; category: string; version_id: string } | null;
 }
 
@@ -127,7 +129,7 @@ export function Feedback() {
   const load = () =>
     supabase()
       .from('decision_events')
-      .select('id, action, reason, note, use_as_example, created_at, findings(title, category, version_id)')
+      .select('id, action, reason, note, use_as_example, created_at, finding_title, finding_category, findings(title, category, version_id)')
       .order('created_at', { ascending: false })
       .limit(100)
       .then(({ data }) => setRows((data ?? []) as unknown as FeedbackRow[]));
@@ -175,9 +177,9 @@ export function Feedback() {
             {rows?.map((r) => (
               <tr key={r.id} className="border-t align-top" style={{ borderColor: 'var(--panel-border)' }}>
                 <td className="py-2.5 pr-3">
-                  <div className="font-medium">{r.findings?.title ?? 'Finding'}</div>
+                  <div className="font-medium">{r.findings?.title ?? r.finding_title ?? 'Finding'}</div>
                   <div className="text-[12.5px]" style={{ color: 'var(--muted)' }}>
-                    {r.findings?.category.replace('_', ' ')} · {fmtTime(r.created_at)}
+                    {(r.findings?.category ?? r.finding_category ?? '').replace('_', ' ')}{r.findings ? '' : ' · checks re-run since'} · {fmtTime(r.created_at)}
                   </div>
                 </td>
                 <td className="py-2.5 pr-3 capitalize">{r.reason === 'exception' ? 'exception' : r.action}</td>

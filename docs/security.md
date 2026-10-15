@@ -15,6 +15,7 @@ Status date: 15 October 2026. Covers the web application (Vercel), Supabase and 
 | Browser | Production Content-Security-Policy (scripts only from this origin, data only to this app and the project's Supabase, no plugins, no framing), `Permissions-Policy`, `X-Frame-Options: DENY`, `nosniff`, strict referrer; Word HTML preview passes an allow-list sanitiser |
 | Worker endpoint | Address published only with a secret whose hash is stored in Supabase, and only for `*.trycloudflare.com`; the app checks the same pattern before sending a session token; every worker call needs a verified Supabase session |
 | Errors | Only deliberate messages reach the browser; unexpected server errors are logged, not returned |
+| Decision history | Append-only: after insert, only the "use as example" flag can change (column-level grant); decisions keep a snapshot of their finding and survive re-running checks |
 
 ## Findings of the 15 October review and what was done
 

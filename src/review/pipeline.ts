@@ -41,6 +41,21 @@ function speller(lang: 'en' | 'vi') {
   return spellers[lang]!;
 }
 
+/**
+ * Database writes from the pipeline retry briefly on network errors ("fetch failed"), so one blip does not fail the
+ * whole job. The tables written this way have unique keys, so a retry whose first attempt already landed reports a
+ * duplicate key, which counts as success; nothing is written twice.
+ */
+async function written<T extends { error: { message: string; code?: string } | null }>(op: () => PromiseLike<T>): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    const res = await op();
+    if (!res.error) return res;
+    if (attempt > 0 && res.error.code === '23505') return { ...res, error: null };
+    if (attempt >= 3 || !/fetch failed|network|ECONNRESET|ETIMEDOUT|socket/i.test(res.error.message)) return res;
+    await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+  }
+}
+
 export async function runPipeline(sb: SupabaseClient, userId: string, versionId: string, jobId: string) {
   const steps = initialSteps();
   const set = async (key: string, status: JobStep['status'], detail?: string) => {
@@ -106,7 +121,7 @@ export async function runPipeline(sb: SupabaseClient, userId: string, versionId:
     if (blocks.length) {
       const rows = blocks.map((b) => ({ version_id: versionId, idx: b.idx, page: b.page, section_ref: b.section_ref, section_title: b.section_title, kind: b.kind, text: b.text, bbox: b.bbox }));
       for (let i = 0; i < rows.length; i += 500) {
-        const ins = await sb.from('source_blocks').insert(rows.slice(i, i + 500));
+        const ins = await written(() => sb.from('source_blocks').insert(rows.slice(i, i + 500)));
         if (ins.error) throw new Error(`Could not store source blocks: ${ins.error.message}`);
       }
     }
@@ -131,6 +146,7 @@ export async function runPipeline(sb: SupabaseClient, userId: string, versionId:
     const semanticP: Promise<{ skipped: true } | { sem: Awaited<ReturnType<typeof semanticReview>> } | { error: unknown }> = (async () => {
       if (await overHourlyLimit(sb)) return { skipped: true as const };
       const [rules, examples] = await Promise.all([rulesP, feedbackExamples(sb)]);
+      if (examples.length) (routing.notes ??= []).push(`Semantic reviewer received ${examples.length} reviewer example(s) from this workspace.`);
       return { sem: await semanticReview(blocks, rules.definitions, examples, lang) };
     })().catch((error) => ({ error }));
 
@@ -231,11 +247,9 @@ async function overHourlyLimit(sb: SupabaseClient) {
 }
 
 async function feedbackExamples(sb: SupabaseClient): Promise<Example[]> {
-  const { data } = await sb.from('decision_events').select('action, reason, findings(title, category)').eq('use_as_example', true).order('created_at', { ascending: false }).limit(12);
-  return (data ?? []).map((d) => {
-    const f = (Array.isArray(d.findings) ? d.findings[0] : d.findings) as { title: string; category: string } | null;
-    return { action: d.action, reason: d.reason, title: f?.title ?? '', category: f?.category ?? '' };
-  });
+  // Decisions keep a snapshot of their finding, so examples survive re-running checks (which regenerates findings).
+  const { data } = await sb.from('decision_events').select('action, reason, note, finding_title, finding_category').eq('use_as_example', true).order('created_at', { ascending: false }).limit(12);
+  return (data ?? []).filter((d) => d.finding_title).map((d) => ({ action: d.action, reason: d.reason, note: d.note, title: d.finding_title!, category: d.finding_category ?? '' }));
 }
 
 async function agentAnnotateFindings(findings: Finding[], routing: Routing, lang: 'en' | 'vi') {
@@ -268,7 +282,7 @@ async function storeFindings(sb: SupabaseClient, versionId: string, findings: Fi
   const order = { contradiction: 0, missing_reference: 1, ambiguity: 2, undefined_term: 3, typo: 4 } as const;
   findings.sort((a, b) => order[a.category] - order[b.category]);
   if (findings.length) {
-    const ins = await sb.from('findings').insert(findings.map((f, i) => ({ version_id: versionId, seq: i + 1, category: f.category, title: f.title, rationale: f.rationale, question: f.question, suggestion: f.suggestion, severity: f.severity, evidence: f.evidence, provenance: f.provenance, evidence_status: f.evidence_status, fingerprint: f.fingerprint })));
+    const ins = await written(() => sb.from('findings').insert(findings.map((f, i) => ({ version_id: versionId, seq: i + 1, category: f.category, title: f.title, rationale: f.rationale, question: f.question, suggestion: f.suggestion, severity: f.severity, evidence: f.evidence, provenance: f.provenance, evidence_status: f.evidence_status, fingerprint: f.fingerprint }))));
     if (ins.error) throw new Error(`Could not store findings: ${ins.error.message}`);
   }
   if (edges.length) await sb.from('graph_edges').insert(edges.map((e) => ({ ...e, version_id: versionId })));
@@ -305,7 +319,7 @@ async function storeFields(sb: SupabaseClient, version: VersionRow, blocks: Bloc
     }
   }
   if (detected.length) {
-    const ins = await sb.from('annotations').insert(detected.map((d) => ({ version_id: version.id, agent: (d as typeof d & { agent?: unknown }).agent ?? null, field_id: d.field_id, type: d.type, label: d.label, options: d.options, page: d.page, bbox: d.bbox, source_block_idx: d.source_block_idx, required: d.required, transfer_state: d.transfer_state, origin: d.origin, confirmed: d.confirmed && d.transfer_state !== 'uncertain' })));
+    const ins = await written(() => sb.from('annotations').insert(detected.map((d) => ({ version_id: version.id, agent: (d as typeof d & { agent?: unknown }).agent ?? null, field_id: d.field_id, type: d.type, label: d.label, options: d.options, page: d.page, bbox: d.bbox, source_block_idx: d.source_block_idx, required: d.required, transfer_state: d.transfer_state, origin: d.origin, confirmed: d.confirmed && d.transfer_state !== 'uncertain' }))));
     if (ins.error) throw new Error(`Could not store annotations: ${ins.error.message}`);
   }
   return { inputs: detected.filter((d) => d.type !== 'paragraph').length, paragraphs: detected.filter((d) => d.type === 'paragraph').length, uncertain: detected.filter((d) => d.transfer_state === 'uncertain').length };

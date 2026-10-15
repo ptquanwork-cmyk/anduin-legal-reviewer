@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-15 — Full re-check and decision memory
+
+- Decisions keep a snapshot of their finding and are no longer deleted when checks are re-run (`20261015030000_decision_memory.sql`); the history is append-only except for the example flag; the next review notes how many workspace examples it received, including the reviewer's note.
+- Pipeline database writes retry on transient network errors without duplicating rows.
+- `scripts/e2e-memory.mjs`: memory scenario (decisions, append-only, re-run, examples, v2 transfer); test scripts retry their own network calls.
+
 ## 2026-10-15 — Security review, speed and accuracy
 
 - Security: generic server-error messages, 30 processing runs per workspace per hour, bounded report text, production Content-Security-Policy and Permissions-Policy, theme parameter whitelist; review and accepted limitations in `docs/security.md`.

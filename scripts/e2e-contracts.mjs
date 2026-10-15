@@ -29,15 +29,31 @@ function score(name, findings, anns) {
   return { found: exp.find.length - missed.length, of: exp.find.length, missed, falseAlarms, fieldsWrong };
 }
 
+// This machine's network drops the odd request; the script retries its own calls so a blip is not reported as an app
+// failure (the app's pipeline has its own retries).
+async function retry(fn, label) {
+  for (let i = 0; ; i++) {
+    try {
+      const r = await fn();
+      if (r?.error && /fetch failed|network|ECONNRESET/i.test(r.error.message ?? '') && i < 3) throw new Error(r.error.message);
+      return r;
+    } catch (e) {
+      if (i >= 3 || !/fetch failed|network|ECONNRESET|ETIMEDOUT/i.test(String(e?.message ?? e))) throw e;
+      console.error(`retrying ${label}: ${e.message}`);
+      await new Promise((r) => setTimeout(r, 2000 * (i + 1)));
+    }
+  }
+}
+
 async function workspace() {
   const sb = createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY, { auth: { persistSession: false } });
-  const { data, error } = await sb.auth.signInAnonymously();
+  const { data, error } = await retry(() => sb.auth.signInAnonymously(), 'sign-in');
   if (error) throw error;
   return { sb, user: data.user, token: data.session.access_token };
 }
 
 async function call(ws, route, body) {
-  const res = await fetch(`${BASE}${route}`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${ws.token}` }, body: JSON.stringify(body ?? {}) });
+  const res = await retry(() => fetch(`${BASE}${route}`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${ws.token}` }, body: JSON.stringify(body ?? {}) }), route);
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(`${route} → ${res.status} ${json.error ?? ''}`);
   return json;
@@ -49,9 +65,10 @@ async function fillPdf(ws, versionId) {
   const { data: anns } = await ws.sb.from('annotations').select('id, field_id, type, label, options, required').eq('version_id', versionId);
   const fields = (anns ?? []).filter((a) => a.type !== 'paragraph');
   if (!fields.length) return 'no input fields';
-  const upd = await ws.sb.from('annotations').update({ confirmed: true, transfer_state: 'new' }).eq('version_id', versionId);
+  const upd = await retry(() => ws.sb.from('annotations').update({ confirmed: true, transfer_state: 'new' }).eq('version_id', versionId), 'confirm');
   if (upd.error) return `confirm failed: ${upd.error.message}`;
-  await ws.sb.from('document_versions').update({ annotations_approved_at: new Date().toISOString() }).eq('id', versionId);
+  const approve = await retry(() => ws.sb.from('document_versions').update({ annotations_approved_at: new Date().toISOString() }).eq('id', versionId), 'approve');
+  if (approve.error) return `approve failed: ${approve.error.message}`;
   const answers = {};
   for (const f of fields) {
     if (f.type === 'radio') answers[f.field_id] = f.options[0]?.value;
@@ -63,7 +80,7 @@ async function fillPdf(ws, versionId) {
     else if (/e-?mail/i.test(f.label)) answers[f.field_id] = 'investor@example.com';
     else answers[f.field_id] = 'Example Investor LP';
   }
-  const sub = await ws.sb.from('submissions').upsert({ version_id: versionId, answers }, { onConflict: 'owner,version_id' });
+  const sub = await retry(() => ws.sb.from('submissions').upsert({ version_id: versionId, answers }, { onConflict: 'owner,version_id' }), 'answers');
   if (sub.error) return `answers failed: ${sub.error.message}`;
   try {
     const draft = await call(ws, `/api/versions/${versionId}/fill`, { final: false });
@@ -81,7 +98,7 @@ async function run(ws, name) {
   const bytes = await readFile(path.join(DIR, name));
   const mime = name.endsWith('.pdf') ? 'application/pdf' : DOCX;
   const storagePath = `${ws.user.id}/${randomUUID()}/${name}`;
-  const up = await ws.sb.storage.from('sources').upload(storagePath, bytes, { contentType: mime });
+  const up = await retry(() => ws.sb.storage.from('sources').upload(storagePath, bytes, { contentType: mime }), 'upload');
   if (up.error) throw up.error;
   const reg = await call(ws, '/api/versions', { path: storagePath, fileName: name, mime, size: bytes.length });
   let job;
