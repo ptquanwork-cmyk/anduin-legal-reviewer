@@ -1,0 +1,182 @@
+{
+  "file": "01-subscription-agreement.docx",
+  "seconds": 246,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (50 blocks · 0 source issue(s) · verified)",
+    "routing: offline (Decision agent offline; all checks run.)",
+    "review: done (7 finding(s) · 5 unsupported candidate(s) rejected)",
+    "fields: done (13 input field(s), 18 paragraph region(s), 0 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "3/3 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "offline",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "missing_reference: Missing Section 14 [rules, matched]",
+    "ambiguity: Vague wording: “reasonable efforts” [rules, matched]",
+    "ambiguity: Unclear management-fee calculation periods and basis [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: Management Fee Offset [rules, matched]",
+    "typo: Spelling: recieve [rules, matched]",
+    "typo: Spelling: comittment [rules, matched]"
+  ],
+  "fields": "9 text, 2 radio, 2 checkbox, 18 paragraph; 0 uncertain",
+  "report": "exported",
+  "digitise": "13 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 6,
+    "of": 6,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": []
+  },
+  "versionId": "d39d995f-2d9c-4a00-b7b1-54b48ff60ca5"
+}
+{
+  "file": "05-subscription-booklet-long.docx",
+  "seconds": 317,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (723 blocks · 0 source issue(s) · verified)",
+    "routing: offline (Decision agent offline; all checks run.)",
+    "review: done (20 finding(s) · 4 unsupported candidate(s) rejected)",
+    "fields: done (66 input field(s), 555 paragraph region(s), 0 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "38/38 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "offline",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "contradiction: Conflicting transfer notice periods [rules, matched]",
+    "missing_reference: Missing Section 52 [rules, matched]",
+    "missing_reference: Missing Schedule F [rules, matched]",
+    "ambiguity: Vague wording: “soon” [rules, matched]",
+    "ambiguity: Vague wording: “from time to time” [rules, matched]",
+    "ambiguity: Vague wording: “reasonably” [rules, matched]",
+    "ambiguity: Vague wording: “promptly” [rules, matched]",
+    "ambiguity: Unclear closing-date deadline [semantic/codex-cli, matched]",
+    "ambiguity: Unclear “manifest error” standard [semantic/codex-cli, matched]",
+    "ambiguity: Unclear standard for replacement provision [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: Undefined term: General Partner [rules, matched]",
+    "undefined_term: Undefined term: Carried Interest Clawback [rules, matched]",
+    "undefined_term: Business Days is not defined [semantic/codex-cli, matched]",
+    "undefined_term: Capital Call Notice is not defined [semantic/codex-cli, matched]",
+    "undefined_term: Undefined “Interest” and “Interests” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined principal party terms [semantic/codex-cli, matched]",
+    "undefined_term: Undefined “Partnership Agreement” [semantic/codex-cli, matched]",
+    "typo: Spelling: recieve [rules, matched]"
+  ],
+  "fields": "54 text, 7 radio, 5 checkbox, 555 paragraph; 0 uncertain",
+  "report": "exported",
+  "digitise": "66 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 8,
+    "of": 8,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": []
+  },
+  "versionId": "7463c6f3-4e9a-495d-8bb1-0241068c72c1"
+}
+{
+  "file": "06-thoa-thuan-dang-ky-gop-von.docx",
+  "seconds": 309,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (34 blocks · 0 source issue(s) · verified)",
+    "routing: done (form · 101124 ms)",
+    "review: done (7 finding(s) · 4 unsupported candidate(s) rejected)",
+    "fields: done (9 input field(s), 11 paragraph region(s), 8 uncertain)"
+  ],
+  "language": "vi",
+  "source": "verified",
+  "coverage": "2/2 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "missing_reference: Missing Điều 12 [rules, matched]",
+    "ambiguity: Từ ngữ không rõ: “sớm” [rules, matched]",
+    "ambiguity: Từ ngữ không rõ: “hợp lý” [rules, matched]",
+    "ambiguity: Không rõ thời điểm được coi là đã nhận thông báo [semantic/codex-cli, matched]",
+    "undefined_term: “Công ty Quản lý Quỹ” chưa được định nghĩa [semantic/codex-cli, matched]",
+    "undefined_term: “Quỹ” chưa được định nghĩa [semantic/codex-cli, matched]"
+  ],
+  "fields": "7 text, 1 radio, 1 checkbox, 11 paragraph; 8 uncertain",
+  "report": "exported",
+  "digitise": "9 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 4,
+    "of": 4,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": []
+  },
+  "versionId": "554a00fe-c6b1-41ac-884f-20922a3da64e"
+}
+{
+  "file": "07-subscription-form-fillable.pdf",
+  "seconds": 267,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (24 blocks · 0 source issue(s) · verified)",
+    "routing: done (form · 83327 ms)",
+    "review: done (6 finding(s) · 5 unsupported candidate(s) rejected)",
+    "fields: done (13 input field(s), 17 paragraph region(s), 11 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "2/2 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "ambiguity: Vague wording: “reasonable” [rules, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: Undefined term “Business Days” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “Capital Call Notice” [semantic/codex-cli, matched]",
+    "typo: Spelling: recieve [rules, matched]"
+  ],
+  "fields": "8 text, 2 radio, 3 checkbox, 17 paragraph; 11 uncertain",
+  "report": "exported",
+  "digitise": "13 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 3,
+    "of": 3,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": []
+  },
+  "versionId": "dc360cb9-e28c-4e3c-b51e-e7360ddb9d34"
+}
+SUMMARY
+01-subscription-agreement.docx: job done, 246 s, 7 findings, planted 6/6, report exported, 13 fields filled; draft QA passed; final final
+05-subscription-booklet-long.docx: job done, 317 s, 20 findings, planted 8/8, report exported, 66 fields filled; draft QA passed; final final
+06-thoa-thuan-dang-ky-gop-von.docx: job done, 309 s, 7 findings, planted 4/4, report exported, 9 fields filled; draft QA passed; final final
+07-subscription-form-fillable.pdf: job done, 267 s, 6 findings, planted 3/3, report exported, 13 fields filled; draft QA passed; final final
+TOTAL planted problems found 21/21 (100%), false alarms 0, total time 1139 s

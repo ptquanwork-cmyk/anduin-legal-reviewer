@@ -1,0 +1,280 @@
+{
+  "run_at": "2026-10-16T14:26:14.597Z",
+  "node": "v24.15.0",
+  "runs_per_file": 5,
+  "demo_contracts": {
+    "rule_items_found": 34,
+    "rule_items": 34,
+    "false_alarms": 0,
+    "contracts": [
+      {
+        "file": "01-subscription-agreement.docx",
+        "pages": null,
+        "blocks": 47,
+        "words": 525,
+        "findings": 7,
+        "by_category": {
+          "contradiction": 1,
+          "missing_reference": 1,
+          "ambiguity": 1,
+          "undefined_term": 2,
+          "typo": 2
+        },
+        "rule_items_found": 6,
+        "rule_items": 6,
+        "semantic_only_items": 0,
+        "missed": [],
+        "false_alarms": [],
+        "median_ms": {
+          "extract": 39.1,
+          "rules": 22.4,
+          "validate": 0.6
+        }
+      },
+      {
+        "file": "02-investor-questionnaire.pdf",
+        "pages": 3,
+        "blocks": 41,
+        "words": 432,
+        "findings": 6,
+        "by_category": {
+          "contradiction": 1,
+          "missing_reference": 1,
+          "ambiguity": 1,
+          "undefined_term": 2,
+          "typo": 1
+        },
+        "rule_items_found": 4,
+        "rule_items": 4,
+        "semantic_only_items": 0,
+        "missed": [],
+        "false_alarms": [],
+        "median_ms": {
+          "extract": 175.2,
+          "rules": 16.7,
+          "validate": 0.8
+        }
+      },
+      {
+        "file": "03-side-letter.docx",
+        "pages": null,
+        "blocks": 21,
+        "words": 230,
+        "findings": 2,
+        "by_category": {
+          "undefined_term": 2
+        },
+        "rule_items_found": 0,
+        "rule_items": 0,
+        "semantic_only_items": 1,
+        "missed": [],
+        "false_alarms": [],
+        "median_ms": {
+          "extract": 21.7,
+          "rules": 1.3,
+          "validate": 0.1
+        }
+      },
+      {
+        "file": "04-subscription-booklet-scrambled.pdf",
+        "pages": 6,
+        "blocks": 31,
+        "words": 325,
+        "findings": 2,
+        "by_category": {
+          "ambiguity": 1,
+          "undefined_term": 1
+        },
+        "rule_items_found": 1,
+        "rule_items": 1,
+        "semantic_only_items": 1,
+        "missed": [],
+        "false_alarms": [],
+        "median_ms": {
+          "extract": 224.6,
+          "rules": 1.1,
+          "validate": 0.1
+        }
+      },
+      {
+        "file": "05-subscription-booklet-long.docx",
+        "pages": null,
+        "blocks": 776,
+        "words": 16766,
+        "findings": 12,
+        "by_category": {
+          "contradiction": 2,
+          "missing_reference": 2,
+          "ambiguity": 4,
+          "undefined_term": 3,
+          "typo": 1
+        },
+        "rule_items_found": 8,
+        "rule_items": 8,
+        "semantic_only_items": 0,
+        "missed": [],
+        "false_alarms": [],
+        "median_ms": {
+          "extract": 205.2,
+          "rules": 78,
+          "validate": 1.7
+        }
+      },
+      {
+        "file": "05-subscription-booklet-long.pdf",
+        "pages": 38,
+        "blocks": 723,
+        "words": 17146,
+        "findings": 12,
+        "by_category": {
+          "contradiction": 2,
+          "missing_reference": 2,
+          "ambiguity": 4,
+          "undefined_term": 3,
+          "typo": 1
+        },
+        "rule_items_found": 8,
+        "rule_items": 8,
+        "semantic_only_items": 0,
+        "missed": [],
+        "false_alarms": [],
+        "median_ms": {
+          "extract": 1267.1,
+          "rules": 71.9,
+          "validate": 1.5
+        }
+      },
+      {
+        "file": "06-thoa-thuan-dang-ky-gop-von.docx",
+        "pages": null,
+        "blocks": 32,
+        "words": 408,
+        "findings": 4,
+        "by_category": {
+          "contradiction": 1,
+          "missing_reference": 1,
+          "ambiguity": 2
+        },
+        "rule_items_found": 4,
+        "rule_items": 4,
+        "semantic_only_items": 0,
+        "missed": [],
+        "false_alarms": [],
+        "median_ms": {
+          "extract": 22.3,
+          "rules": 2.5,
+          "validate": 0.4
+        }
+      },
+      {
+        "file": "07-subscription-form-fillable.pdf",
+        "pages": 2,
+        "blocks": 24,
+        "words": 182,
+        "findings": 4,
+        "by_category": {
+          "contradiction": 1,
+          "ambiguity": 1,
+          "undefined_term": 1,
+          "typo": 1
+        },
+        "rule_items_found": 3,
+        "rule_items": 3,
+        "semantic_only_items": 0,
+        "missed": [],
+        "false_alarms": [],
+        "median_ms": {
+          "extract": 99.2,
+          "rules": 1.1,
+          "validate": 0.3
+        }
+      }
+    ]
+  },
+  "evidence_gate": {
+    "accepted_quotes": 67,
+    "grounded_verbatim": 67,
+    "fabricated_candidates": 57,
+    "fabricated_rejected": 57
+  },
+  "labeled_cases": {
+    "pass": 7,
+    "of": 8,
+    "cases": [
+      {
+        "id": "typo-001",
+        "expected": [
+          "typo"
+        ],
+        "got": [
+          "typo"
+        ],
+        "pass": true
+      },
+      {
+        "id": "reference-001",
+        "expected": [
+          "missing_reference"
+        ],
+        "got": [
+          "missing_reference"
+        ],
+        "pass": true
+      },
+      {
+        "id": "term-001",
+        "expected": [
+          "undefined_term"
+        ],
+        "got": [
+          "undefined_term"
+        ],
+        "pass": true
+      },
+      {
+        "id": "contradiction-001",
+        "expected": [
+          "contradiction"
+        ],
+        "got": [
+          "contradiction"
+        ],
+        "pass": true
+      },
+      {
+        "id": "ambiguity-001",
+        "expected": [
+          "ambiguity"
+        ],
+        "got": [
+          "ambiguity"
+        ],
+        "pass": true
+      },
+      {
+        "id": "clean-001",
+        "expected": [],
+        "got": [],
+        "pass": true
+      },
+      {
+        "id": "injection-001",
+        "expected": [
+          "missing_reference"
+        ],
+        "got": [
+          "missing_reference"
+        ],
+        "pass": true
+      },
+      {
+        "id": "incomplete-001",
+        "expected": [],
+        "got": [
+          "missing_reference"
+        ],
+        "pass": false
+      }
+    ]
+  }
+}

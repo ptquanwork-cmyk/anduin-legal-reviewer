@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-16: Test report for judges
+
+- `evals/results/2026-10-16-judge-test-report.md`: speed, accuracy and confidence measured on production and offline: 35/36 planted problems, 0/11 false-alarm traps, 80/80 findings grounded, 57/57 fabricated quotes rejected, 7/8 labeled cases.
+- `evals/rules-offline.test.ts`: offline evaluation of the deterministic layer (`npx vitest run --dir evals`).
+
 ## 2026-10-16: Introduction video
 
 - `demo/video/`: a 68-second Remotion introduction built from real app screens, with camera zooms, cursor clicks with sound, captions and original synthesised music.

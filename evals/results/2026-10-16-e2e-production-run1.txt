@@ -1,0 +1,354 @@
+{
+  "file": "01-subscription-agreement.docx",
+  "seconds": 68,
+  "job": "failed",
+  "error": "Worker /jobs/convert failed (401): {\"detail\":\"unauthorized\"}",
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: queued",
+    "source: failed (Worker /jobs/convert failed (401): {\"detail\":\"unauthorized\"})",
+    "routing: queued",
+    "review: queued",
+    "fields: queued"
+  ],
+  "language": null,
+  "source": null,
+  "coverage": "n/a",
+  "issues": [],
+  "semantic": "n/a",
+  "semanticNote": null,
+  "agent": "n/a",
+  "findings": [],
+  "fields": "0 text, 0 radio, 0 checkbox, 0 paragraph; 0 uncertain",
+  "report": "exported",
+  "digitise": "skipped",
+  "accuracy": {
+    "found": 0,
+    "of": 6,
+    "missed": [
+      "contradiction: 10 Business Days|15 Business Days|capital call",
+      "missing_reference: Section 14",
+      "typo: recieve",
+      "typo: comittment",
+      "ambiguity: promptly|reasonable efforts",
+      "undefined_term: Management Fee Offset"
+    ],
+    "falseAlarms": [],
+    "fieldsWrong": []
+  },
+  "versionId": "4b5f8a8e-8cf3-45d8-b3a1-a1ee4554fd1b"
+}
+{
+  "file": "02-investor-questionnaire.pdf",
+  "seconds": 259,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (41 blocks · 0 source issue(s) · verified)",
+    "routing: done (form · 91163 ms)",
+    "review: done (7 finding(s) · 4 unsupported candidate(s) rejected)",
+    "fields: done (15 input field(s), 12 paragraph region(s), 7 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "3/3 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting distribution timing [rules, matched]",
+    "missing_reference: Missing Annex C [rules, matched]",
+    "ambiguity: Vague wording: “as soon as practicable” [rules, matched]",
+    "undefined_term: Undefined term: General Partner [rules, matched]",
+    "undefined_term: Undefined term: Subscription Agreement [rules, matched]",
+    "undefined_term: “ERISA” is not defined [semantic/codex-cli, matched]",
+    "typo: Spelling: beneficary [rules, matched]"
+  ],
+  "fields": "9 text, 4 radio, 2 checkbox, 12 paragraph; 7 uncertain",
+  "report": "exported",
+  "digitise": "15 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 4,
+    "of": 4,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": []
+  },
+  "versionId": "89245381-56dc-4844-baff-3920446754a3"
+}
+{
+  "file": "03-side-letter.docx",
+  "seconds": 184,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (22 blocks · 0 source issue(s) · verified)",
+    "routing: done (form · 12216 ms)",
+    "review: done (7 finding(s) · 3 unsupported candidate(s) rejected)",
+    "fields: done (3 input field(s), 10 paragraph region(s), 2 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "1/1 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "ambiguity: Unclear method for calculating the fee reduction [semantic/codex-cli, matched]",
+    "ambiguity: Unclear meaning of “reasonable access” [semantic/codex-cli, matched]",
+    "ambiguity: Unclear comparison of “more favourable economic terms” [semantic/codex-cli, matched]",
+    "ambiguity: Unclear reporting periods [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: General Partner [rules, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: “Commitment” is undefined [semantic/codex-cli, matched]"
+  ],
+  "fields": "3 text, 0 radio, 0 checkbox, 10 paragraph; 2 uncertain",
+  "report": "exported",
+  "digitise": "3 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 1,
+    "of": 1,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": []
+  },
+  "versionId": "de960a8c-6c8d-4931-8746-a0850ea77523"
+}
+{
+  "file": "04-subscription-booklet-scrambled.pdf",
+  "seconds": 136,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (31 blocks · 1 source issue(s) · needs review)",
+    "routing: done (contract · 57200 ms)",
+    "review: done (6 finding(s) · 5 unsupported candidate(s) rejected)",
+    "fields: done (6 input field(s), 9 paragraph region(s), 1 uncertain)"
+  ],
+  "language": "en",
+  "source": "needs_review",
+  "coverage": "5/6 pages read, unread 3",
+  "issues": [
+    "p3 Page 3 has no extractable text"
+  ],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "ambiguity: Vague wording: “promptly” [rules, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: Undefined term “Commitment” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “General Partner” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “Investor” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “Partnership” [semantic/codex-cli, matched]"
+  ],
+  "fields": "4 text, 2 radio, 0 checkbox, 9 paragraph; 1 uncertain",
+  "report": "exported",
+  "digitise": "6 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 1,
+    "of": 2,
+    "missed": [
+      "contradiction: 30 June|31 July|closing date (semantic)"
+    ],
+    "falseAlarms": [],
+    "fieldsWrong": []
+  },
+  "versionId": "e78eec8b-22d5-4eac-9dd0-530fe0255cb0"
+}
+{
+  "file": "05-subscription-booklet-long.docx",
+  "seconds": 712,
+  "job": "running",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (723 blocks · 0 source issue(s) · verified)",
+    "routing: done (contract · 89297 ms)",
+    "review: running",
+    "fields: done (66 input field(s), 555 paragraph region(s), 18 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "38/38 pages read",
+  "issues": [],
+  "semantic": "n/a",
+  "semanticNote": null,
+  "agent": "n/a",
+  "findings": [],
+  "fields": "54 text, 7 radio, 5 checkbox, 555 paragraph; 18 uncertain",
+  "report": "exported",
+  "digitise": "skipped",
+  "accuracy": {
+    "found": 0,
+    "of": 8,
+    "missed": [
+      "contradiction: capital call|10 Business Days|12 Business Days",
+      "contradiction: transfer|30 days|60 days",
+      "missing_reference: Section 52",
+      "missing_reference: Schedule F",
+      "typo: recieve",
+      "ambiguity: \\bsoon\\b",
+      "ambiguity: promptly",
+      "undefined_term: Carried Interest Clawback"
+    ],
+    "falseAlarms": [],
+    "fieldsWrong": []
+  },
+  "versionId": "327029be-24ee-4aad-98d8-7b1a993ff88f"
+}
+retrying /api/versions/8a6eb6d9-0c87-4f98-a91b-df544a5b7fab/report: fetch failed
+{
+  "file": "05-subscription-booklet-long.pdf",
+  "seconds": 233,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (1 related candidate(s) need comparison)",
+    "source: done (723 blocks · 0 source issue(s) · verified)",
+    "routing: done (contract · 57219 ms)",
+    "review: done (19 finding(s) · 5 unsupported candidate(s) rejected)",
+    "fields: done (66 input field(s), 555 paragraph region(s), 18 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "38/38 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "contradiction: Conflicting transfer notice periods [rules, matched]",
+    "missing_reference: Missing Section 52 [rules, matched]",
+    "missing_reference: Missing Schedule F [rules, matched]",
+    "ambiguity: Vague wording: “soon” [rules, matched]",
+    "ambiguity: Vague wording: “from time to time” [rules, matched]",
+    "ambiguity: Vague wording: “reasonably” [rules, matched]",
+    "ambiguity: Vague wording: “promptly” [rules, matched]",
+    "ambiguity: Unclear receipt event for capital-call deadline [semantic/codex-cli, matched]",
+    "ambiguity: Unspecified manifest-error standard [semantic/codex-cli, matched]",
+    "ambiguity: Unclear meaning of “manifest error” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: Undefined term: General Partner [rules, matched]",
+    "undefined_term: Undefined term: Carried Interest Clawback [rules, matched]",
+    "undefined_term: Business Days is undefined [semantic/codex-cli, matched]",
+    "undefined_term: Interests is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Interest” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: Core party and document terms are undefined [semantic/codex-cli, matched]",
+    "typo: Spelling: recieve [rules, matched]"
+  ],
+  "fields": "54 text, 7 radio, 5 checkbox, 555 paragraph; 18 uncertain",
+  "report": "exported",
+  "digitise": "66 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 8,
+    "of": 8,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": []
+  },
+  "versionId": "8a6eb6d9-0c87-4f98-a91b-df544a5b7fab"
+}
+{
+  "file": "06-thoa-thuan-dang-ky-gop-von.docx",
+  "seconds": 212,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (34 blocks · 0 source issue(s) · verified)",
+    "routing: done (form · 22550 ms)",
+    "review: done (7 finding(s) · 4 unsupported candidate(s) rejected)",
+    "fields: done (9 input field(s), 11 paragraph region(s), 8 uncertain)"
+  ],
+  "language": "vi",
+  "source": "verified",
+  "coverage": "2/2 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "missing_reference: Missing Điều 12 [rules, matched]",
+    "ambiguity: Từ ngữ không rõ: “sớm” [rules, matched]",
+    "ambiguity: Từ ngữ không rõ: “hợp lý” [rules, matched]",
+    "ambiguity: Thời điểm “nhận” Thông báo gọi vốn chưa rõ [semantic/codex-cli, matched]",
+    "undefined_term: “Công ty Quản lý Quỹ” chưa được định nghĩa [semantic/codex-cli, matched]",
+    "undefined_term: “Quỹ” chưa được định nghĩa [semantic/codex-cli, matched]"
+  ],
+  "fields": "7 text, 1 radio, 1 checkbox, 11 paragraph; 8 uncertain",
+  "report": "exported",
+  "digitise": "9 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 4,
+    "of": 4,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": []
+  },
+  "versionId": "eae02de4-c44a-4288-b950-db982e5c5c9f"
+}
+{
+  "file": "07-subscription-form-fillable.pdf",
+  "seconds": 170,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (24 blocks · 0 source issue(s) · verified)",
+    "routing: offline (Decision agent offline; all checks run.)",
+    "review: done (7 finding(s) · 5 unsupported candidate(s) rejected)",
+    "fields: done (13 input field(s), 17 paragraph region(s), 0 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "2/2 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "offline",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "ambiguity: Vague wording: “reasonable” [rules, matched]",
+    "ambiguity: Unclear time of receipt for emailed notices [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: “Business Days” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Capital Call Notice” is undefined [semantic/codex-cli, matched]",
+    "typo: Spelling: recieve [rules, matched]"
+  ],
+  "fields": "8 text, 2 radio, 3 checkbox, 17 paragraph; 0 uncertain",
+  "report": "exported",
+  "digitise": "13 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 3,
+    "of": 3,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": []
+  },
+  "versionId": "3e10febd-59d3-4d0e-adff-938b1ad02629"
+}
+SUMMARY
+01-subscription-agreement.docx: job failed (Worker /jobs/convert failed (401): {"detail":"unauthorized"}), 68 s, 0 findings, planted 0/6 missed [contradiction: 10 Business Days|15 Business Days|capital call; missing_reference: Section 14; typo: recieve; typo: comittment; ambiguity: promptly|reasonable efforts; undefined_term: Management Fee Offset], report exported, skipped
+02-investor-questionnaire.pdf: job done, 259 s, 7 findings, planted 4/4, report exported, 15 fields filled; draft QA passed; final final
+03-side-letter.docx: job done, 184 s, 7 findings, planted 1/1, report exported, 3 fields filled; draft QA passed; final final
+04-subscription-booklet-scrambled.pdf: job done, 136 s, 6 findings, planted 1/2 missed [contradiction: 30 June|31 July|closing date (semantic)], report exported, 6 fields filled; draft QA passed; final final
+05-subscription-booklet-long.docx: job running, 712 s, 0 findings, planted 0/8 missed [contradiction: capital call|10 Business Days|12 Business Days; contradiction: transfer|30 days|60 days; missing_reference: Section 52; missing_reference: Schedule F; typo: recieve; ambiguity: \bsoon\b; ambiguity: promptly; undefined_term: Carried Interest Clawback], report exported, skipped
+05-subscription-booklet-long.pdf: job done, 233 s, 19 findings, planted 8/8, report exported, 66 fields filled; draft QA passed; final final
+06-thoa-thuan-dang-ky-gop-von.docx: job done, 212 s, 7 findings, planted 4/4, report exported, 9 fields filled; draft QA passed; final final
+07-subscription-form-fillable.pdf: job done, 170 s, 7 findings, planted 3/3, report exported, 13 fields filled; draft QA passed; final final
+TOTAL planted problems found 21/36 (58%), false alarms 0, total time 1974 s
