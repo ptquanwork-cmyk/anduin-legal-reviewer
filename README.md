@@ -6,13 +6,13 @@ My entry for **The Legal Reviewer** challenge (Legal track) of Anduin's Cybernet
 
 **[Live application](https://anduin-legal-reviewer.vercel.app)** · **[Introduction video (89 s)](demo/video/anduin-legal-reviewer-intro.mp4)** · **[Test reports](evals/results/)** · **[Judge reading guide](docs/judging/README.md)** · **[Build logs](progress/build-log/)**
 
-[![Introduction video: measured results first, then every step of the app (89 s). Click to play.](demo/screenshots/video-poster.jpg)](demo/video/anduin-legal-reviewer-intro.mp4)
-
-*Click the image to play the introduction video: test results first, then the workflow in six short chapters.*
-
 ---
 
 ## The app in one minute
+
+https://github.com/user-attachments/assets/48a10deb-1db1-4e8d-8055-efa1b6e6cafb
+
+*Introduction video (89 s): test results first, then the workflow in six short chapters. [Full-resolution 1080p file](demo/video/anduin-legal-reviewer-intro.mp4).*
 
 Before a fund document is turned into an online form, someone has to read it for typos, broken references, conflicting clauses and unclear terms. Found late, these cause rework and questions to outside counsel. Anduin Legal Reviewer is a **pre-digitization gate** for that review:
 

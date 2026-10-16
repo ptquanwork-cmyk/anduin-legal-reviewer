@@ -2,12 +2,12 @@
 
 ## Introduction video
 
-[`video/anduin-legal-reviewer-intro.mp4`](video/anduin-legal-reviewer-intro.mp4) is an 89-second introduction: measured results first, then six chaptered sections walking through every function. It is built with Remotion from real screens of the app (synthetic demo data). Sources and rebuild steps are in [`video/README.md`](video/README.md).
+[`video/anduin-legal-reviewer-intro.mp4`](video/anduin-legal-reviewer-intro.mp4) is an 89-second introduction: measured results first, then six chaptered sections walking through every function. It is built with Remotion from real screens of the app (synthetic demo data). Sources and rebuild steps are in [`video/README.md`](video/README.md). The README plays a 720p copy (9.6 MB) uploaded as a GitHub attachment, because GitHub only plays attached videos inline.
 
 ## Screenshots
 
 - [`screenshots/hub-light.jpg`](screenshots/hub-light.jpg) and [`screenshots/hub-dark.jpg`](screenshots/hub-dark.jpg): the workflow hub, captured from the running app.
-- [`screenshots/video-poster.jpg`](screenshots/video-poster.jpg): the video's results frame, used as the README thumbnail.
+- [`screenshots/video-poster.jpg`](screenshots/video-poster.jpg): the video's results frame, for use as a thumbnail.
 
 ## Demo script
 
