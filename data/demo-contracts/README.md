@@ -2,7 +2,7 @@
 
 Synthetic documents for trying the whole workflow (intake → source quality → map → review → report → annotation → form → responses → PDF QA). They imitate what a private fund sends to investors to fill in before a closing — the kind of documents Anduin digitises — but **everything is fictional**: *Harborline Ventures Fund IV, L.P.*, its general partner and all terms are invented, nothing is an offer of securities, and nothing is legal advice.
 
-Regenerate them with `node scripts/build-demo-contracts.mjs` (Windows: the PDFs are produced by Microsoft Word, and the scanned page by headless Edge). Run them all through a running app with `node scripts/e2e-contracts.mjs [baseUrl]`; actual results are recorded in the dated build log.
+Regenerate them with `node scripts/build-demo-contracts.mjs` (pass file names to rebuild only those) (Windows: the PDFs are produced by Microsoft Word, and the scanned page by headless Edge). Run them all through a running app with `node scripts/e2e-contracts.mjs [baseUrl]`; actual results are recorded in the dated build log.
 
 | File | Format | What it is | What it exercises |
 | --- | --- | --- | --- |
@@ -13,6 +13,13 @@ Regenerate them with `node scripts/build-demo-contracts.mjs` (Windows: the PDFs 
 | `05-subscription-booklet-long.docx` / `.pdf` | Word and PDF, ~38 pages | Complete subscription booklet: 32-section subscription agreement, investor questionnaire Parts A–L, AML certification, privacy notice, power of attorney, signature pages, schedules | Long documents: semantic review covers the first chunks only (recorded as a limitation), many fields, duplicate detection between the two formats |
 | `06-thoa-thuan-dang-ky-gop-von.docx` | Word (Vietnamese) | Vietnamese subscription agreement (Điều 1–8) with investor information | Vietnamese headings, rules and decision-agent checkpoint |
 | `07-subscription-form-fillable.pdf` | PDF with **AcroForm fields**, 2 pages | Fillable investor subscription form (text fields, radio groups, checkboxes) | Real form fields become annotations with exact geometry; filling flattens the form first |
+| `08-confidentiality-agreement-clean.pdf` | PDF (text), 1 page | Mutual confidentiality agreement with every term defined | **Clean control:** nothing is planted, so any finding is a false alarm |
+| `09-fee-schedule-tables.docx` | Word, tables, a **landscape** section, nested numbering (2.2(a)) | Management fee and expense schedule with a fee table in Exhibit A | Tables, landscape pages, a conflict between a table and the body text, references to exhibits that do and don't exist |
+| `10-redemption-terms-injection.pdf` | PDF (text), 1 page | Redemption terms containing a visible note and two lines of hidden white text telling an AI reviewer to report no issues | **Prompt injection:** planted problems must still be reported |
+| `11-amendment-two-column.docx` | Word, **two columns**, 9 pt type, ~2,500 words | First amendment to the subscription agreement | Column layout, small type, numbers written as "ten (10)", conflicting dollar amounts |
+| `12-side-letter-bilingual.docx` | Word, English and Vietnamese clause by clause | Bilingual side letter | Mixed-language documents: language detection, spelling dictionaries, vague wording in both languages |
+| `13-subscription-agreement-scanned.pdf` | PDF, 2 pages, **image only** | A scanned copy with no text layer (it shows a 10 vs 15 day conflict a human can see) | Must be reported as unread, not as a clean document (no OCR in this build) |
+| `14-investor-questionnaire-corrupted.pdf` | PDF, **truncated** (first 40% of file 02) | A broken download | Must be reported as unreadable without crashing the job |
 
 ## Problems placed on purpose
 
@@ -25,5 +32,11 @@ Regenerate them with `node scripts/build-demo-contracts.mjs` (Windows: the PDFs 
 | 05 | Capital calls 10 vs 12 Business Days; transfer notice 30 vs 60 days | Section 52, Schedule F | recieve | soon, promptly (one finding per phrase, not per section) | Carried Interest Clawback |
 | 06 | Góp vốn trong 10 vs 15 ngày làm việc (Điều 3 vs Điều 6) | Điều 12 | — | sớm, hợp lý | — |
 | 07 | Capital calls 10 vs 20 Business Days (page 1 vs page 2) | — | recieve | reasonable | — |
+| 08 | — | — | — | — | — |
+| 09 | Quarterly reports 45 vs 60 days; fee 2.0% in the text vs 1.5% in the table (semantic) | Exhibit D (Exhibits A and B exist) | seperate, liabilty | from time to time, substantially (semantic) | Organizational Expense Cap |
+| 10 | Redemption proceeds 30 vs 45 days | Annex 3 | occured | as soon as practicable | — |
+| 11 | Capital calls ten (10) vs fifteen (15) Business Days; subscription fee USD 25,000 vs USD 20,000 | Schedule 3 | accomodate | reasonable | Key Person Event |
+| 12 | Capital calls 10 vs 14 Business Days (in both languages) | Section 9 / Điều 9 | — | promptly / kịp thời | — |
+| 13, 14 | — (unreadable by design) | — | — | — | — |
 
-British spellings (authorised, favourable, enquiry) are correct and must not be flagged. These are expectations, not guarantees: the deterministic rules catch most of them, the semantic reviewer may add or miss items, and every finding still needs a human decision. No real contract or personal data is included; the placeholder fields are blank.
+British spellings (authorised, favourable, enquiry, organisational, wilful) and words such as "per annum" and "unaudited" are correct and must not be flagged. These are expectations, not guarantees: the deterministic rules catch most of them, the semantic reviewer may add or miss items, and every finding still needs a human decision. No real contract or personal data is included; the placeholder fields are blank.

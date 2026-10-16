@@ -52,13 +52,19 @@ it('scores the deterministic layer', { timeout: 600_000 }, async () => {
     let blocks: Block[] = [];
     let findings: Finding[] = [];
     let pages: number | null = null;
+    let error: string | null = null;
     for (let r = 0; r < RUNS; r++) {
       let t0 = performance.now();
-      if (file.endsWith('.pdf')) {
-        const pdf = await extractPdf(bytes.slice());
-        blocks = pdf.blocks;
-        pages = pdf.pages.length;
-      } else blocks = blocksFromDocx((await inspectDocx(bytes)).paragraphs); // ponytail: Word text without the worker's PDF conversion
+      try {
+        if (file.endsWith('.pdf')) {
+          const pdf = await extractPdf(bytes.slice());
+          blocks = pdf.blocks;
+          pages = pdf.pages.length;
+        } else blocks = blocksFromDocx((await inspectDocx(bytes)).paragraphs); // ponytail: Word text without the worker's PDF conversion
+      } catch (e) {
+        error = String(e).slice(0, 160); // an unreadable file is a result, not a harness failure
+        blocks = [];
+      }
       t.extract.push(performance.now() - t0);
       const lang = detectLanguage(blocks.map((b) => b.text).join(' '));
       t0 = performance.now();
@@ -86,10 +92,13 @@ it('scores the deterministic layer', { timeout: 600_000 }, async () => {
 
     contracts.push({
       file,
+      error,
       pages,
       blocks: blocks.length,
       words: blocks.reduce((n, b) => n + b.text.split(/\s+/).filter(Boolean).length, 0),
       findings: findings.length,
+      language: detectLanguage(blocks.map((b) => b.text).join(' ')),
+      titles: findings.map((f) => `${f.category}: ${f.title}`),
       by_category: Object.fromEntries([...new Set(findings.map((f) => f.category))].map((c) => [c, findings.filter((f) => f.category === c).length])),
       rule_items_found: ruleItems.length - missed.length,
       rule_items: ruleItems.length,

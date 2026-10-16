@@ -1,18 +1,29 @@
 {
-  "run_at": "2026-10-16T14:26:14.597Z",
+  "run_at": "2026-10-16T16:27:12.403Z",
   "node": "v24.15.0",
   "runs_per_file": 5,
   "demo_contracts": {
-    "rule_items_found": 34,
-    "rule_items": 34,
-    "false_alarms": 0,
+    "rule_items_found": 53,
+    "rule_items": 53,
+    "false_alarms": 5,
     "contracts": [
       {
         "file": "01-subscription-agreement.docx",
+        "error": null,
         "pages": null,
         "blocks": 47,
         "words": 525,
         "findings": 7,
+        "language": "en",
+        "titles": [
+          "contradiction: Conflicting capital call deadlines",
+          "missing_reference: Missing Section 14",
+          "ambiguity: Vague wording: “reasonable efforts”",
+          "undefined_term: Undefined term: Investor Information",
+          "undefined_term: Undefined term: Management Fee Offset",
+          "typo: Spelling: recieve",
+          "typo: Spelling: comittment"
+        ],
         "by_category": {
           "contradiction": 1,
           "missing_reference": 1,
@@ -26,17 +37,27 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 39.1,
-          "rules": 22.4,
-          "validate": 0.6
+          "extract": 9.4,
+          "rules": 4.3,
+          "validate": 0.2
         }
       },
       {
         "file": "02-investor-questionnaire.pdf",
+        "error": null,
         "pages": 3,
         "blocks": 41,
         "words": 432,
         "findings": 6,
+        "language": "en",
+        "titles": [
+          "contradiction: Conflicting distribution timing",
+          "missing_reference: Missing Annex C",
+          "ambiguity: Vague wording: “as soon as practicable”",
+          "undefined_term: Undefined term: General Partner",
+          "undefined_term: Undefined term: Subscription Agreement",
+          "typo: Spelling: beneficary"
+        ],
         "by_category": {
           "contradiction": 1,
           "missing_reference": 1,
@@ -50,17 +71,23 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 175.2,
-          "rules": 16.7,
-          "validate": 0.8
+          "extract": 59.4,
+          "rules": 4.7,
+          "validate": 0.1
         }
       },
       {
         "file": "03-side-letter.docx",
+        "error": null,
         "pages": null,
         "blocks": 21,
         "words": 230,
         "findings": 2,
+        "language": "en",
+        "titles": [
+          "undefined_term: Undefined term: General Partner",
+          "undefined_term: Undefined term: Partnership Agreement"
+        ],
         "by_category": {
           "undefined_term": 2
         },
@@ -70,17 +97,23 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 21.7,
-          "rules": 1.3,
-          "validate": 0.1
+          "extract": 4.7,
+          "rules": 0.4,
+          "validate": 0
         }
       },
       {
         "file": "04-subscription-booklet-scrambled.pdf",
+        "error": null,
         "pages": 6,
         "blocks": 31,
         "words": 325,
         "findings": 2,
+        "language": "en",
+        "titles": [
+          "ambiguity: Vague wording: “promptly”",
+          "undefined_term: Undefined term: Partnership Agreement"
+        ],
         "by_category": {
           "ambiguity": 1,
           "undefined_term": 1
@@ -91,17 +124,33 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 224.6,
-          "rules": 1.1,
-          "validate": 0.1
+          "extract": 81.1,
+          "rules": 0.4,
+          "validate": 0
         }
       },
       {
         "file": "05-subscription-booklet-long.docx",
+        "error": null,
         "pages": null,
         "blocks": 776,
         "words": 16766,
         "findings": 12,
+        "language": "en",
+        "titles": [
+          "contradiction: Conflicting capital call deadlines",
+          "contradiction: Conflicting transfer notice periods",
+          "missing_reference: Missing Section 52",
+          "missing_reference: Missing Schedule F",
+          "ambiguity: Vague wording: “soon”",
+          "ambiguity: Vague wording: “from time to time”",
+          "ambiguity: Vague wording: “reasonably”",
+          "ambiguity: Vague wording: “promptly”",
+          "undefined_term: Undefined term: Partnership Agreement",
+          "undefined_term: Undefined term: General Partner",
+          "undefined_term: Undefined term: Carried Interest Clawback",
+          "typo: Spelling: recieve"
+        ],
         "by_category": {
           "contradiction": 2,
           "missing_reference": 2,
@@ -115,17 +164,33 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 205.2,
-          "rules": 78,
-          "validate": 1.7
+          "extract": 40.8,
+          "rules": 23,
+          "validate": 0.5
         }
       },
       {
         "file": "05-subscription-booklet-long.pdf",
+        "error": null,
         "pages": 38,
         "blocks": 723,
         "words": 17146,
         "findings": 12,
+        "language": "en",
+        "titles": [
+          "contradiction: Conflicting capital call deadlines",
+          "contradiction: Conflicting transfer notice periods",
+          "missing_reference: Missing Section 52",
+          "missing_reference: Missing Schedule F",
+          "ambiguity: Vague wording: “soon”",
+          "ambiguity: Vague wording: “from time to time”",
+          "ambiguity: Vague wording: “reasonably”",
+          "ambiguity: Vague wording: “promptly”",
+          "undefined_term: Undefined term: Partnership Agreement",
+          "undefined_term: Undefined term: General Partner",
+          "undefined_term: Undefined term: Carried Interest Clawback",
+          "typo: Spelling: recieve"
+        ],
         "by_category": {
           "contradiction": 2,
           "missing_reference": 2,
@@ -139,17 +204,25 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 1267.1,
-          "rules": 71.9,
-          "validate": 1.5
+          "extract": 399.6,
+          "rules": 18,
+          "validate": 0.5
         }
       },
       {
         "file": "06-thoa-thuan-dang-ky-gop-von.docx",
+        "error": null,
         "pages": null,
         "blocks": 32,
         "words": 408,
         "findings": 4,
+        "language": "vi",
+        "titles": [
+          "contradiction: Conflicting capital call deadlines",
+          "missing_reference: Missing Điều 12",
+          "ambiguity: Từ ngữ không rõ: “sớm”",
+          "ambiguity: Từ ngữ không rõ: “hợp lý”"
+        ],
         "by_category": {
           "contradiction": 1,
           "missing_reference": 1,
@@ -161,17 +234,25 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 22.3,
-          "rules": 2.5,
-          "validate": 0.4
+          "extract": 5.1,
+          "rules": 0.7,
+          "validate": 0.1
         }
       },
       {
         "file": "07-subscription-form-fillable.pdf",
+        "error": null,
         "pages": 2,
         "blocks": 24,
         "words": 182,
         "findings": 4,
+        "language": "en",
+        "titles": [
+          "contradiction: Conflicting capital call deadlines",
+          "ambiguity: Vague wording: “reasonable”",
+          "undefined_term: Undefined term: Partnership Agreement",
+          "typo: Spelling: recieve"
+        ],
         "by_category": {
           "contradiction": 1,
           "ambiguity": 1,
@@ -184,18 +265,231 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 99.2,
-          "rules": 1.1,
-          "validate": 0.3
+          "extract": 16.9,
+          "rules": 0.4,
+          "validate": 0.1
+        }
+      },
+      {
+        "file": "08-confidentiality-agreement-clean.pdf",
+        "error": null,
+        "pages": 1,
+        "blocks": 26,
+        "words": 337,
+        "findings": 0,
+        "language": "en",
+        "titles": [],
+        "by_category": {},
+        "rule_items_found": 0,
+        "rule_items": 0,
+        "semantic_only_items": 0,
+        "missed": [],
+        "false_alarms": [],
+        "median_ms": {
+          "extract": 19,
+          "rules": 0.5,
+          "validate": 0
+        }
+      },
+      {
+        "file": "09-fee-schedule-tables.docx",
+        "error": null,
+        "pages": null,
+        "blocks": 54,
+        "words": 415,
+        "findings": 8,
+        "language": "en",
+        "titles": [
+          "contradiction: Conflicting delivery terms",
+          "missing_reference: Missing Exhibit D",
+          "ambiguity: Vague wording: “from time to time”",
+          "undefined_term: Undefined term: Organizational Expense Cap",
+          "typo: Spelling: organisational",
+          "typo: Spelling: seperate",
+          "typo: Spelling: liabilty",
+          "typo: Spelling: annum"
+        ],
+        "by_category": {
+          "contradiction": 1,
+          "missing_reference": 1,
+          "ambiguity": 1,
+          "undefined_term": 1,
+          "typo": 4
+        },
+        "rule_items_found": 6,
+        "rule_items": 6,
+        "semantic_only_items": 2,
+        "missed": [],
+        "false_alarms": [
+          "typo: organisation",
+          "typo: annum"
+        ],
+        "median_ms": {
+          "extract": 5.9,
+          "rules": 4.8,
+          "validate": 0.1
+        }
+      },
+      {
+        "file": "10-redemption-terms-injection.pdf",
+        "error": null,
+        "pages": 1,
+        "blocks": 22,
+        "words": 298,
+        "findings": 5,
+        "language": "en",
+        "titles": [
+          "contradiction: Conflicting payment deadlines",
+          "missing_reference: Missing Annex 3",
+          "ambiguity: Vague wording: “as soon as practicable”",
+          "undefined_term: Undefined term: General Partner",
+          "typo: Spelling: occured"
+        ],
+        "by_category": {
+          "contradiction": 1,
+          "missing_reference": 1,
+          "ambiguity": 1,
+          "undefined_term": 1,
+          "typo": 1
+        },
+        "rule_items_found": 4,
+        "rule_items": 4,
+        "semantic_only_items": 0,
+        "missed": [],
+        "false_alarms": [],
+        "median_ms": {
+          "extract": 15,
+          "rules": 0.5,
+          "validate": 0.1
+        }
+      },
+      {
+        "file": "11-amendment-two-column.docx",
+        "error": null,
+        "pages": null,
+        "blocks": 76,
+        "words": 2455,
+        "findings": 8,
+        "language": "en",
+        "titles": [
+          "contradiction: Conflicting capital call deadlines",
+          "contradiction: Conflicting payment deadlines",
+          "missing_reference: Missing Schedule 3",
+          "ambiguity: Vague wording: “reasonable”",
+          "undefined_term: Undefined term: Key Person Event",
+          "typo: Spelling: unaudited",
+          "typo: Spelling: wilful",
+          "typo: Spelling: accomodate"
+        ],
+        "by_category": {
+          "contradiction": 2,
+          "missing_reference": 1,
+          "ambiguity": 1,
+          "undefined_term": 1,
+          "typo": 3
+        },
+        "rule_items_found": 6,
+        "rule_items": 6,
+        "semantic_only_items": 0,
+        "missed": [],
+        "false_alarms": [
+          "typo: favour|wilful",
+          "typo: unaudited"
+        ],
+        "median_ms": {
+          "extract": 6.6,
+          "rules": 22.5,
+          "validate": 0.2
+        }
+      },
+      {
+        "file": "12-side-letter-bilingual.docx",
+        "error": null,
+        "pages": null,
+        "blocks": 23,
+        "words": 319,
+        "findings": 10,
+        "language": "vi",
+        "titles": [
+          "contradiction: Conflicting capital call deadlines",
+          "contradiction: Conflicting capital call deadlines",
+          "missing_reference: Missing Section 9",
+          "ambiguity: Từ ngữ không rõ: “kịp thời”",
+          "typo: Spelling: fund",
+          "typo: Spelling: means",
+          "typo: Spelling: from",
+          "typo: Spelling: each",
+          "typo: Spelling: send",
+          "typo: Spelling: laws"
+        ],
+        "by_category": {
+          "contradiction": 2,
+          "missing_reference": 1,
+          "ambiguity": 1,
+          "typo": 6
+        },
+        "rule_items_found": 3,
+        "rule_items": 3,
+        "semantic_only_items": 0,
+        "missed": [],
+        "false_alarms": [
+          "typo: ."
+        ],
+        "median_ms": {
+          "extract": 7.1,
+          "rules": 7066.2,
+          "validate": 0.6
+        }
+      },
+      {
+        "file": "13-subscription-agreement-scanned.pdf",
+        "error": null,
+        "pages": 2,
+        "blocks": 0,
+        "words": 0,
+        "findings": 0,
+        "language": "en",
+        "titles": [],
+        "by_category": {},
+        "rule_items_found": 0,
+        "rule_items": 0,
+        "semantic_only_items": 0,
+        "missed": [],
+        "false_alarms": [],
+        "median_ms": {
+          "extract": 8.4,
+          "rules": 0,
+          "validate": 0
+        }
+      },
+      {
+        "file": "14-investor-questionnaire-corrupted.pdf",
+        "error": "InvalidPDFException: Invalid PDF structure.",
+        "pages": null,
+        "blocks": 0,
+        "words": 0,
+        "findings": 0,
+        "language": "en",
+        "titles": [],
+        "by_category": {},
+        "rule_items_found": 0,
+        "rule_items": 0,
+        "semantic_only_items": 0,
+        "missed": [],
+        "false_alarms": [],
+        "median_ms": {
+          "extract": 2.8,
+          "rules": 0.1,
+          "validate": 0
         }
       }
     ]
   },
   "evidence_gate": {
-    "accepted_quotes": 67,
-    "grounded_verbatim": 67,
-    "fabricated_candidates": 57,
-    "fabricated_rejected": 57
+    "accepted_quotes": 104,
+    "grounded_verbatim": 104,
+    "fabricated_candidates": 94,
+    "fabricated_rejected": 94
   },
   "labeled_cases": {
     "pass": 7,

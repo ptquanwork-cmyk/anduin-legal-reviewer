@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-16: 15-file scenario test
+
+- Seven new synthetic demo files (08–14): clean control, tables with a landscape page, prompt injection, two-column amendment, bilingual letter, image-only scan, corrupted PDF; `build-demo-contracts.mjs` can rebuild single files.
+- `evals/results/2026-10-16-scenario-test-report.md`: 54/57 planted problems found on production. Defects found: two-column PDF extraction, the spelling dictionary on mixed-language files, British and legal words flagged, and the 300 s limit on long Word files.
+- `scripts/e2e-contracts.mjs` also checks the expected source status (unread or blocked).
+
 ## 2026-10-16: Introduction video, remade
 
 - 73-second, beat-synced walkthrough of every function:

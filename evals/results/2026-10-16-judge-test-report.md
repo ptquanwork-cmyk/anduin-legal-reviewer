@@ -2,6 +2,8 @@
 
 How the reviewer affects **speed**, **accuracy** and **confidence**, measured on real runs. Every number below comes from a run made on 16 Oct 2026 (source commit `e97319a`, production deployment at https://anduin-legal-reviewer.vercel.app), unless a line says otherwise. Raw outputs are next to this file.
 
+**Superseded in scope by the [15-file scenario test report](2026-10-16-scenario-test-report.md)** (same day), which adds seven new scenarios and the defects they exposed.
+
 **Read this first.** The eight test documents are synthetic fund subscription documents written for this project, with problems planted on purpose (`data/demo-contracts/expected.json`). The results show the pipeline finds what was planted, without false alarms. They are not a benchmark of real contracts, and they do not predict accuracy on contracts the system has not seen.
 
 ## Headline results

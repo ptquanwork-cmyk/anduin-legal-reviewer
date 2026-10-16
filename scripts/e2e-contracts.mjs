@@ -17,7 +17,7 @@ const PER_WORKSPACE = 3;
 // Planted problems (data/demo-contracts/expected.json): recall of what must be found, and false alarms to avoid.
 const EXPECTED = JSON.parse(await readFile(path.join(DIR, 'expected.json'), 'utf8'));
 
-function score(name, findings, anns) {
+function score(name, findings, anns, source) {
   let exp = EXPECTED[name];
   if (exp?.same_as) exp = EXPECTED[exp.same_as];
   if (!exp) return null;
@@ -26,7 +26,8 @@ function score(name, findings, anns) {
   const missed = exp.find.filter((i) => !hits(i)).map((i) => `${i.category}: ${i.pattern}${i.semantic ? ' (semantic)' : ''}`);
   const falseAlarms = (exp.avoid ?? []).filter(hits).map((i) => `${i.category}: ${i.pattern}`);
   const fieldsWrong = exp.fields ? Object.entries(exp.fields).filter(([t, n]) => (anns ?? []).filter((a) => a.type === t).length !== n).map(([t, n]) => `${t} expected ${n}`) : [];
-  return { found: exp.find.length - missed.length, of: exp.find.length, missed, falseAlarms, fieldsWrong };
+  const sourceWrong = exp.source && !new RegExp(`^(${exp.source})$`).test(source ?? '') ? `source ${source ?? 'none'}, expected ${exp.source}` : null;
+  return { found: exp.find.length - missed.length, of: exp.find.length, missed, falseAlarms, fieldsWrong, sourceWrong };
 }
 
 // This machine's network drops the odd request; the script retries its own calls so a blip is not reported as an app
@@ -136,7 +137,7 @@ async function run(ws, name) {
     fields: `${count('text_box')} text, ${count('radio')} radio, ${count('checkbox')} checkbox, ${count('paragraph')} paragraph; ${(anns ?? []).filter((a) => a.transfer_state === 'uncertain').length} uncertain`,
     report,
     digitise,
-    accuracy: score(name, findings ?? [], anns),
+    accuracy: score(name, findings ?? [], anns, v.source_status),
     versionId: reg.versionId,
   };
 }
@@ -158,7 +159,7 @@ for (const [i, name] of files.entries()) {
 console.log('SUMMARY');
 for (const r of results) {
   const a = r.accuracy;
-  console.log(`${r.file}: job ${r.job}${r.error ? ` (${r.error})` : ''}, ${r.seconds ?? '?'} s, ${r.findings?.length ?? 0} findings, planted ${a ? `${a.found}/${a.of}` : '-'}${a?.missed.length ? ` missed [${a.missed.join('; ')}]` : ''}${a?.falseAlarms.length ? ` FALSE ALARMS [${a.falseAlarms.join('; ')}]` : ''}${a?.fieldsWrong.length ? ` FIELDS [${a.fieldsWrong.join('; ')}]` : ''}, report ${r.report ?? '-'}, ${r.digitise ?? '-'}`);
+  console.log(`${r.file}: job ${r.job}${r.error ? ` (${r.error})` : ''}, ${r.seconds ?? '?'} s, ${r.findings?.length ?? 0} findings, planted ${a ? `${a.found}/${a.of}` : '-'}${a?.missed.length ? ` missed [${a.missed.join('; ')}]` : ''}${a?.falseAlarms.length ? ` FALSE ALARMS [${a.falseAlarms.join('; ')}]` : ''}${a?.fieldsWrong.length ? ` FIELDS [${a.fieldsWrong.join('; ')}]` : ''}${a?.sourceWrong ? ` SOURCE [${a.sourceWrong}]` : ''}, source ${r.source ?? '-'} (${r.coverage ?? '-'}), report ${r.report ?? '-'}, ${r.digitise ?? '-'}`);
 }
 const all = results.map((r) => r.accuracy).filter(Boolean);
 const found = all.reduce((n, a) => n + a.found, 0);

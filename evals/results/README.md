@@ -4,6 +4,7 @@
 
 | Date | Dataset | What ran | Result | Record |
 | --- | --- | --- | --- | --- |
+| 16 Oct 2026 | 15 files: the eight originals plus seven new scenarios (clean, tables, injection, two-column, bilingual, scan, corrupted) | Production run of all 15, retry of the long Word booklet, and the offline evaluation | 54/57 planted found; 34 of 129 findings wrong (24 from two-column extraction); 129/129 grounded; offline 53/53, 94/94 fabricated quotes rejected | [Scenario test report](2026-10-16-scenario-test-report.md) |
 | 16 Oct 2026 | Same eight documents, plus the eight labeled cases | Production end-to-end runs (two passes) and the new offline evaluation of the deterministic layer | 35/36 planted found, 0/11 false-alarm traps, 80/80 findings grounded, 35 candidates removed before display (34 duplicates, 1 one-sided contradiction); offline 34/34, 57/57 fabricated quotes rejected, 7/8 labeled cases | [Judge test report](2026-10-16-judge-test-report.md) |
 | 15 Oct 2026 | Eight synthetic fund documents in `data/demo-contracts/`, with planted problems listed in `expected.json` | `scripts/e2e-contracts.mjs` against the production app. The full pipeline ran: rules, the semantic reviewer (Codex CLI engine) and the evidence validator | 35/36 planted problems found, 0 false alarms; every document reached a confirmed final PDF | [Build log, 15 Oct](../../progress/build-log/2026-10-15.md#follow-up-security-review-speed-and-accuracy) |
 

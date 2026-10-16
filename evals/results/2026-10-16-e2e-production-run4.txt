@@ -1,0 +1,57 @@
+{
+  "file": "05-subscription-booklet-long.docx",
+  "seconds": 205,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (723 blocks · 0 source issue(s) · verified)",
+    "routing: done (contract · 30323 ms)",
+    "review: done (19 finding(s) · 4 unsupported candidate(s) rejected)",
+    "fields: done (66 input field(s), 555 paragraph region(s), 18 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "38/38 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "contradiction: Conflicting transfer notice periods [rules, matched]",
+    "missing_reference: Missing Section 52 [rules, matched]",
+    "missing_reference: Missing Schedule F [rules, matched]",
+    "ambiguity: Vague wording: “soon” [rules, matched]",
+    "ambiguity: Vague wording: “from time to time” [rules, matched]",
+    "ambiguity: Vague wording: “reasonably” [rules, matched]",
+    "ambiguity: Vague wording: “promptly” [rules, matched]",
+    "ambiguity: Unclear applicable version of changing policies [semantic/codex-cli, matched]",
+    "ambiguity: Unclear “manifest error” standard [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: Undefined term: General Partner [rules, matched]",
+    "undefined_term: Undefined term: Carried Interest Clawback [rules, matched]",
+    "undefined_term: “General Partner” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Investor” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Partnership” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Partnership Agreement” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Interest” is undefined [semantic/codex-cli, matched]",
+    "typo: Spelling: recieve [rules, matched]"
+  ],
+  "fields": "54 text, 7 radio, 5 checkbox, 555 paragraph; 18 uncertain",
+  "report": "exported",
+  "digitise": "66 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 8,
+    "of": 8,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "201a95f5-4947-43b3-b7c7-9ef0e5b8fb0e"
+}
+SUMMARY
+05-subscription-booklet-long.docx: job done, 205 s, 19 findings, planted 8/8, source verified (38/38 pages read), report exported, 66 fields filled; draft QA passed; final final
+TOTAL planted problems found 8/8 (100%), false alarms 0, total time 205 s
