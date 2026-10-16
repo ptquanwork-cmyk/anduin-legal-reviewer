@@ -4,7 +4,47 @@
 
 My entry for **The Legal Reviewer** challenge (Legal track) of Anduin's Cybernetics hackathon.
 
-**[Live application](https://anduin-legal-reviewer.vercel.app)** · **[Introduction video (89 s)](demo/video/anduin-legal-reviewer-intro.mp4)** · **[Judge reading guide](docs/judging/README.md)** · **[Build logs](progress/build-log/)** · **[Architecture](docs/architecture/overview.md)**
+**[Live application](https://anduin-legal-reviewer.vercel.app)** · **[Introduction video (89 s)](demo/video/anduin-legal-reviewer-intro.mp4)** · **[Test reports](evals/results/)** · **[Judge reading guide](docs/judging/README.md)** · **[Build logs](progress/build-log/)**
+
+[![Introduction video: measured results first, then every step of the app (89 s). Click to play.](demo/screenshots/video-poster.jpg)](demo/video/anduin-legal-reviewer-intro.mp4)
+
+*Click the image to play the introduction video: test results first, then the workflow in six short chapters.*
+
+---
+
+## The app in one minute
+
+Before a fund document is turned into an online form, someone has to read it for typos, broken references, conflicting clauses and unclear terms. Found late, these cause rework and questions to outside counsel. Anduin Legal Reviewer is a **pre-digitization gate** for that review:
+
+1. **Upload** a Word or PDF file. A Word file is converted with Microsoft Word and compared word for word with its PDF, so the review starts from verified text.
+2. **Review.** Rules and an AI reviewer flag problems. Each finding quotes the exact passage and page; anything that cannot be quoted from the source is rejected.
+3. **Decide.** The reviewer confirms, dismisses with a reason, or writes a question for counsel. The report states one outcome and the next step.
+4. **Digitize.** Fields are anchored with four types (paragraph, text box, radio box, checkbox), shown as a form that keeps the full contract text, and answered.
+5. **Export.** The filled PDF is read back and checked (content, mapping, values, clipped answers) before the final export is allowed.
+
+Decisions are remembered, so later reviews in the same workspace learn from them.
+
+![The workflow hub: nine stations from Intake to PDF QA / export](demo/screenshots/hub-light.jpg)
+
+---
+
+## How I tested it, and the results
+
+I wrote synthetic fund documents and **planted known problems** in each one (typos, missing sections, conflicting numbers, vague terms, undefined terms), plus **traps**: correct text that a careless checker would flag. Every file's planted problems and traps are listed in [`expected.json`](data/demo-contracts/expected.json). Then I tested at four levels:
+
+| Level | How | Result |
+| --- | --- | --- |
+| Unit tests | `npm test`: rules, evidence gate, annotation QA, form export and import, source checks | 15 passed, 1 manual test skipped |
+| Rules alone, offline | `npx vitest run --dir evals`: no AI, no network | 53/53 rule-detectable problems found; 94/94 fabricated quotes rejected |
+| Full pipeline on the live app | `scripts/e2e-contracts.mjs` uploads all 15 files to production and runs every step to a confirmed final PDF | **54/57 planted problems found (95%)**; 129/129 findings quote the source verbatim |
+| Hard cases | Prompt injection, two-column layout, bilingual text, tables, a scanned page, a corrupted PDF | Injection ignored (4/4 found); scan and corrupted file reported as unreadable, never crashed |
+| Manual check | I read all 129 findings | **34 were wrong**: 24 from the two-column file (text merged across columns), 8 spelling flags on British, legal or bilingual wording, 2 needless wording questions |
+
+**Speed.** The 38-page, 17,146-word booklet goes from upload to a finished review in 3–4.5 minutes; reading it once takes about 72 minutes at an average reading rate. No timed human study was run, so I don't claim a speed-up factor.
+
+**Known limits:** two-column PDFs are extracted poorly; scanned pages are reported, not read (no OCR); one 38-page Word run hit the 300-second server limit and needed a retry.
+
+Full method and per-file results: [scenario test report (15 files)](evals/results/2026-10-16-scenario-test-report.md) and [judge test report (8 files)](evals/results/2026-10-16-judge-test-report.md). All documents are synthetic; this is not a benchmark of real contracts.
 
 ---
 
@@ -19,7 +59,7 @@ My entry for **The Legal Reviewer** challenge (Legal track) of Anduin's Cybernet
 | 5 | [How findings are produced](#how-findings-are-produced) | Rules, semantic reviewer, evidence validator, decision agent |
 | 6 | [Architecture](#architecture) | Browser, Vercel, Supabase and the worker; project and pipeline maps |
 | 7 | [Technology and languages](#technology-and-languages) | Stack, programming languages, contract languages supported |
-| 8 | [Testing and evidence](#testing-and-evidence) | Unit tests, end-to-end runs on eight synthetic contracts, measured results |
+| 8 | [Testing and evidence](#testing-and-evidence) | Every check, with its latest recorded result |
 | 9 | [Security and privacy](#security-and-privacy) | How uploads, sessions, untrusted Word files and contract text are handled |
 | 10 | [Status and limitations](#status-and-limitations) | What is verified, what is not, and why |
 | 11 | [Running locally](#running-locally) | App, worker and checks |
@@ -90,7 +130,7 @@ More synthetic documents to upload yourself are in [`data/demo-contracts/`](data
 
 ## What the application does
 
-One page: a 3D workflow hub, with stations modelled in Blender and rendered live with three.js, opens nine workspaces. Clicking a station flies its object into the workspace header.
+One page: a 3D workflow hub opens nine workspaces. Its stations are the approved high-resolution 3D renders; real-time three.js versions modelled in Blender are available with `?three`. Clicking a station flies its object into the workspace header.
 
 | # | Workspace | What actually happens |
 | --- | --- | --- |
@@ -131,7 +171,7 @@ flowchart LR
 ```
 
 ```text
-Browser (Next.js single page, three.js stations, pdf.js viewer)
+Browser (Next.js single page, 3D station renders, pdf.js viewer)
   │  Supabase anonymous session (RLS: owner = auth.uid()), direct upload to private storage
   ▼
 Vercel functions (Next.js route handlers; pipeline runs after the response, job steps via Realtime)
@@ -210,7 +250,7 @@ Status as of 16 October 2026.
 | End-to-end flow | Verified on production with eight synthetic contracts (see [Testing and evidence](#testing-and-evidence)) |
 | Semantic reviewer | Working through the Codex CLI engine on the worker; the OpenAI API path is implemented but not exercised because the key is unfunded |
 | Decision agent (Laya) | Running in the worker; about 2–35 s per call on CPU, depending on document length |
-| Blender stations | Nine modules built by script, exported as Draco GLB; approximations of the approved stills, which remain the fallback |
+| 3D stations | The approved high-resolution renders are shown by default (sharper and lighter on the GPU). Nine Blender modules, exported as Draco GLB, render in real time with `?three`; they approximate the renders |
 | Model-quality evaluation on real contracts | Not done; no calibration claim |
 | Worker availability | Depends on my laptop being on; otherwise the app reports it offline |
 | Accounts | Workspaces are anonymous and tied to one browser; clearing site data loses access |
@@ -248,7 +288,7 @@ npm test
 npx tsc --noEmit
 ```
 
-Developer aids: `?overlay=04` lays an approved design over the page (development only); `?theme=dark|light` sets the theme; `?static` forces the PNG stations; `scripts/shot.ps1` takes headless screenshots; `scripts/pdf-text.mjs` prints the text of an exported PDF.
+Developer aids: `?overlay=04` lays an approved design over the page (development only); `?theme=dark|light` sets the theme; `?three` switches the stations to real-time 3D; `scripts/shot.ps1` takes headless screenshots; `scripts/pdf-text.mjs` prints the text of an exported PDF.
 
 ---
 
@@ -256,29 +296,29 @@ Developer aids: `?overlay=04` lays an approved design over the page (development
 
 ```text
 anduin-legal-reviewer/
-├── src/app/          # Next.js App Router: single page + API routes
-├── src/components/   # Shell, hub, nine workspaces, PDF viewer, three.js stations
-├── src/review/       # Extraction, rules, semantic adapter, validator, pipeline
-├── src/digitize/     # Field detection, annotation QA, form model, PDF fill and QA
-├── src/integrations/ # Supabase (server), worker client
-├── worker/           # FastAPI worker (Laya, Word/LibreOffice, Codex), local tunnel runner, Dockerfile, tests
-├── supabase/         # Migrations
-├── design/           # Approved designs, Blender build script and .blend, prompts, manifests
-├── public/3d/        # Station GLB models and PNG fallbacks
-├── tests/            # Deterministic tests
-├── data/demo-contracts/ # Synthetic fund subscription documents and expected results
-├── data/ evals/      # Synthetic text samples, schema, evaluation cases
-├── scripts/          # Demo builders, end-to-end contract and memory runs, screenshot and PDF helpers
-├── docs/ context/ prompts/ progress/ references/ openai/
+├── src/        # Next.js app: page, API routes, components, review and digitize pipelines
+├── public/     # Station renders and models, synthetic demo files
+├── worker/     # Python worker: decision agent, Word conversion, semantic review, tunnel runner, tests
+├── supabase/   # SQL migrations
+├── scripts/    # Demo builders, end-to-end runs, screenshot and PDF helpers
+├── tests/      # Deterministic tests
+├── evals/      # Offline evaluation and dated test reports
+├── data/       # Synthetic demo contracts with planted problems, samples, schemas
+├── docs/       # Product, architecture, security, deployment, judging guide, model notes, references
+├── design/     # Approved designs, 3D references, Blender script
+├── demo/       # Introduction video and screenshots
+├── context/    # Request briefs and research notes
+├── prompts/    # Versioned prompts
+└── progress/   # Build logs, changelog, roadmap
 ```
 
 **Suggested reading for judges**
 
 1. [Judge reading guide](docs/judging/README.md) and the three primary specifications: [Overall Plan](docs/project/01-first-overall-plan.md), [design.md](design/design.md), [UI Master](design/UI%20Master.md).
 2. [Architecture and workflow map](docs/architecture/overview.md): how each screen maps to the system and the pipeline.
-3. Build logs: [15 October](progress/build-log/2026-10-15.md) (application build, security, speed, accuracy, memory) and [16 October](progress/build-log/2026-10-16.md) (stability fix), with actual results and limitations.
+3. Build logs: [15 October](progress/build-log/2026-10-15.md) (application build, security, speed, accuracy, memory) and [16 October](progress/build-log/2026-10-16.md) (stability, full-screen mode, test reports, introduction video), with actual results and limitations.
 4. [Security review](docs/security.md) and [deployment and backend setup](docs/deployment/setup.md).
-5. [Prompt library](prompts/README.md), [evaluation plan](evals/README.md) and [references](references/README.md) (upstream provenance and licences).
+5. [Prompt library](prompts/README.md), [evaluation plan](evals/README.md) and [references](docs/references/README.md) (upstream provenance and licences).
 6. [Full repository map](docs/repository-map.md) and [changelog](progress/CHANGELOG.md).
 
 ---

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-17: Sharper hub, README front page, tidier layout
+
+- The hub shows the approved 3D renders at up to 1200 px by default, with deeper shadows; real-time 3D with `?three`.
+- Brand inset from the left edge.
+- README opens with the introduction video, a one-minute introduction and how the app was tested, with results and limits.
+- `openai/` and `references/` moved under `docs/`; empty scaffolding removed.
+
 ## 2026-10-16: Introduction video, results first
 
 - 89 seconds: measured results from the 15-file scenario test open the video (54/57 found, 129/129 quoted, 94/94 fabricated quotes rejected, the known two-column limit), then a speed comparison, then six chaptered sections.

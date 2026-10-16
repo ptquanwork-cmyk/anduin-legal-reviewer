@@ -5,7 +5,7 @@ Record source URL, access date, the observation it supports, and the product imp
 Initial sources:
 
 - Owner-supplied screenshots: [challenge brief](../../docs/challenge/brief.md).
-- Official OpenAI documentation reviewed on 2026-10-13: [source registry](../../openai/sources.md).
-- Existing upstream checkouts inspected on 2026-10-13: [reference register](../../references/upstream.md).
+- Official OpenAI documentation reviewed on 2026-10-13: [source registry](../../docs/openai/sources.md).
+- Existing upstream checkouts inspected on 2026-10-13: [reference register](../../docs/references/upstream.md).
 
 No additional market research or company claims have been established for this repository.

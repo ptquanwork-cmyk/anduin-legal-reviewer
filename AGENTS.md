@@ -33,20 +33,19 @@ This instruction applies to this project. It does not authorize publishing unrel
 
 - `context/`: inputs and evidence supplied to development tasks.
 - `prompts/`: instructions intended for development or review models; version in filenames and the prompt registry.
-- `openai/`: cited concepts and proposed/implemented OpenAI integration details.
+- `docs/openai/`: cited concepts and proposed/implemented OpenAI integration details.
 - `docs/`: problem, product, architecture, and decision records.
 - `src/`: the actual application; update run instructions when adding a runtime.
 - `supabase/`: backend project record and future versioned migration conventions.
 - `tests/`: deterministic code checks. `evals/`: model behavior and quality checks.
 - `data/`: explicitly synthetic, publishable examples and schema definitions.
-- `experiments/`: hypotheses, configurations, actual outcomes, and limitations.
-- `demo/`: demonstration assets and submission preparation.
+- `demo/`: introduction video, screenshots, demo script and submission checklist.
 - `progress/`: dated development log, roadmap, and changelog.
-- `references/`: attribution and upstream provenance.
+- `docs/references/`: attribution and upstream provenance.
 
 ## Existing nested checkouts
 
-`contract-reader-agent/` and `laya/` are independent Git repositories excluded by this root's `.gitignore`. Preserve their remotes, histories, and uncommitted work. Do not add them as gitlinks or stage them recursively. Document their use in `references/`. If future work adapts their code for the hackathon application, check attribution and licensing, then bring the reviewed changes into this repository so the delivered work is visible to judges. If a task intentionally stays only in a nested checkout, publish an accurate progress summary and state that its implementation remains local.
+`contract-reader-agent/` and `laya/` are independent Git repositories excluded by this root's `.gitignore`. Preserve their remotes, histories, and uncommitted work. Do not add them as gitlinks or stage them recursively. Document their use in `docs/references/`. If future work adapts their code for the hackathon application, check attribution and licensing, then bring the reviewed changes into this repository so the delivered work is visible to judges. If a task intentionally stays only in a nested checkout, publish an accurate progress summary and state that its implementation remains local.
 
 ## Evidence and data
 

@@ -42,7 +42,10 @@ export function StationArt({
         style={{
           opacity: three && ready ? 0 : 1,
           transform: lifted ? 'translateY(-2%) rotate(-2deg) scale(1.02)' : 'none',
-          filter: lifted ? 'drop-shadow(0 0 14px rgba(72,175,240,.55)) drop-shadow(0 18px 18px rgba(20,70,150,.22))' : 'drop-shadow(0 14px 14px rgba(20,70,150,.16))',
+          // A tight contact shadow plus a soft cast shadow seats each object on its shelf.
+          filter: lifted
+            ? 'drop-shadow(0 0 14px rgba(72,175,240,.55)) drop-shadow(0 4px 3px rgba(8,24,60,.3)) drop-shadow(0 22px 20px rgba(14,50,130,.3))'
+            : 'drop-shadow(0 3px 2px rgba(8,24,60,.28)) drop-shadow(0 16px 16px rgba(14,50,130,.24))',
         }}
       />
       {three && !hidden && (

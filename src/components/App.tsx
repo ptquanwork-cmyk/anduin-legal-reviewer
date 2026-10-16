@@ -64,13 +64,9 @@ export default function App() {
   const [focus, setFocus] = useState(false);
   const [fit, setFit] = useState<{ vk: number; vb: number } | null>(null);
 
-  // Real-time 3D when WebGL is available; the approved PNG stills stay for reduced motion and ?static.
-  const [three, setThree] = useState(() => {
-    const q = new URLSearchParams(window.location.search);
-    if (q.has('static')) return false;
-    if (q.has('three')) return webgl();
-    return webgl() && !matchMedia('(prefers-reduced-motion: reduce)').matches;
-  });
+  // The approved high-resolution stills by default: sharper and deeper than the real-time models, and no GPU load.
+  // ?three opts into the real-time 3D stations when WebGL is available.
+  const [three, setThree] = useState(() => new URLSearchParams(window.location.search).has('three') && webgl());
 
   useEffect(() => {
     const sync = () => {

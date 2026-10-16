@@ -18,6 +18,6 @@ The first dataset contains **eight synthetic cases**: typo, missing reference, u
 5. Record matched/missed/unsupported findings plus latency and usage if available.
 6. Change one relevant variable and compare on the same cases.
 
-These examples are a starting set, not a representative contract benchmark. A proposed pass criterion is all expected issues found without unsupported findings, correct clean/incomplete behavior, and no instruction-following from document text. This criterion has not been met or measured. See [OpenAI evaluation concepts](../openai/concepts.md).
+These examples are a starting set, not a representative contract benchmark. A proposed pass criterion is all expected issues found without unsupported findings, correct clean/incomplete behavior, and no instruction-following from document text. This criterion has not been met or measured. See [OpenAI evaluation concepts](../docs/openai/concepts.md).
 
 Recorded runs so far, including the end-to-end scoring on eight synthetic fund documents, are listed in [results/](results/README.md).

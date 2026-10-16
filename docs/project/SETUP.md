@@ -42,9 +42,9 @@ The standalone images are references, not meshes. [Blender handoff](../../design
 
 ## Implementation scaffold
 
-`src/app/`, `src/review/` and `src/integrations/` contain responsibility/run-note placeholders for future application work. `tests/` is for deterministic implemented behavior; `evals/` for actual model-quality evaluation; `experiments/` for reproducible runs. Synthetic cases/output schema are seeds, not results.
+`src/app/`, `src/review/` and `src/integrations/` contain responsibility/run-note placeholders for future application work. `tests/` is for deterministic implemented behavior; `evals/` for actual model-quality evaluation. Synthetic cases/output schema are seeds, not results.
 
-Before introducing a runtime, select dependencies using source/licensing review, implement the [original plan](01-first-overall-plan.md) milestones with the [English summary](PLAN.md) as a reading aid, record actual installation/startup commands, and test a reproducible flow. Do not present the independent local reference checkouts as the hackathon application. Their provenance is in [references](../../references/README.md).
+Before introducing a runtime, select dependencies using source/licensing review, implement the [original plan](01-first-overall-plan.md) milestones with the [English summary](PLAN.md) as a reading aid, record actual installation/startup commands, and test a reproducible flow. Do not present the independent local reference checkouts as the hackathon application. Their provenance is in [references](../references/README.md).
 
 ## Publishing and validation
 

@@ -12,7 +12,7 @@ for png in sorted(src.glob('0*.png')):
     img = Image.open(png).convert('RGBA')
     bbox = img.getchannel('A').point(lambda a: 255 if a > 8 else 0).getbbox()
     img = img.crop(bbox)
-    img.thumbnail((720, 720), Image.LANCZOS)
+    img.thumbnail((1200, 1200), Image.LANCZOS)  # sharp at 2x pixel density and in full screen
     out = dst / (png.stem + '.webp')
-    img.save(out, 'WEBP', quality=88, method=6)
+    img.save(out, 'WEBP', quality=90, method=6)
     print(f'{out.name} {img.width}x{img.height} {out.stat().st_size // 1024}KB')

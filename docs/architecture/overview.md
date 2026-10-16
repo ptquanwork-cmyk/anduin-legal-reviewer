@@ -106,6 +106,6 @@ Every reviewer decision is stored append-only in `decision_events` with a snapsh
 | Demo and test data | `data/demo-contracts/` (synthetic fund documents) · `public/demo/` (built-in demo) · `data/synthetic/` · `evals/datasets/` |
 | Quality | `tests/` · `worker/test_*.py` · `evals/` · `scripts/e2e-contracts.mjs` |
 | Instructions and prompts | `prompts/` · `context/briefs/` · `AGENTS.md` |
-| Documentation and evidence | `docs/` · `progress/` (build logs, changelog, roadmap) · `references/` · `demo/` |
+| Documentation and evidence | `docs/` · `progress/` (build logs, changelog, roadmap) · `demo/` |
 
 The complete folder list is in the [repository map](../repository-map.md).

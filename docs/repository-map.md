@@ -1,134 +1,75 @@
-# Complete repository map
+# Repository map
 
-Every directory below exists and is represented on GitHub by a meaningful document, fixture or code. For the workflow and how the folders fit together, start with the [architecture and workflow map](architecture/overview.md).
+The repository has four groups of folders: the application, its quality evidence, the documentation and design, and the record of how it was built. For how the folders fit together at run time, see the [architecture and workflow map](architecture/overview.md).
 
 ```text
 anduin-legal-reviewer/
-├── .github/
-│   └── ISSUE_TEMPLATE/
-├── docs/
-│   ├── challenge/
-│   ├── product/
-│   ├── architecture/
-│   ├── decisions/
-│   ├── project/
-│   ├── judging/
-│   └── deployment/
-├── design/
-│   ├── homepage/
-│   ├── interfaces/
-│   ├── dark-mode/
-│   ├── components-3d/
-│   ├── references/
-│   ├── prompts/
-│   ├── blender/
-│   └── manifests/
-├── context/
-│   ├── briefs/
-│   └── research/
-├── prompts/
-│   ├── development/
-│   ├── review/
-│   └── evaluation/
-├── openai/
-├── src/
-│   ├── app/
-│   ├── components/
-│   ├── review/
-│   ├── digitize/
-│   ├── integrations/
-│   └── lib/
-├── public/
-│   ├── 3d/
-│   └── demo/
-├── worker/
-├── scripts/
-├── tests/
-├── supabase/
-├── data/
-│   ├── demo-contracts/
-│   ├── synthetic/
-│   └── schemas/
-├── evals/
-│   ├── datasets/
-│   └── results/
-├── experiments/
-├── demo/
-│   ├── screenshots/
-│   └── submission/
-├── progress/
-│   └── build-log/
-└── references/
+│
+│  Application
+├── src/                  Next.js app: page, API routes, components, review and digitize pipelines
+│   ├── app/              page, layout and API routes
+│   ├── components/       shell, 3D hub, nine workspaces, PDF viewer, three.js stations
+│   ├── review/           extraction, rules, semantic adapter, evidence validator, pipeline
+│   ├── digitize/         field detection, annotation QA, form model, PDF fill and QA
+│   ├── integrations/     Supabase server client, worker client
+│   └── lib/              shared types, navigation, workspace state, uploads, guides
+├── public/               station stills (3d/png), station models (3d), demo files (demo)
+├── worker/               Python worker: decision agent, Word conversion, semantic review, tunnel runner, tests
+├── supabase/             SQL migrations (schema, RLS, storage, Realtime)
+├── scripts/              demo builders, end-to-end runs, screenshot and PDF helpers
+│
+│  Quality evidence
+├── tests/                deterministic tests of application code
+├── evals/                offline evaluation, datasets, dated test reports (results/)
+├── data/                 synthetic demo contracts with planted problems, text samples, output schemas
+│
+│  Documentation and design
+├── docs/                 product, architecture, security, deployment, judging guide, decisions
+│   ├── openai/           official-source notes and the model integration plan
+│   └── references/       upstream provenance and licences
+├── design/               approved designs (light, dark, 3D objects), Blender script, prompts, manifests
+├── demo/                 introduction video and its sources, screenshots, demo script, submission checklist
+│
+│  How it was built
+├── context/briefs/       public-safe summary of every request
+├── prompts/              versioned prompts (review, development, evaluation)
+└── progress/             dated build logs, changelog, roadmap
 ```
 
 | Folder | What belongs here |
 | --- | --- |
-| `.github/` | Pull-request review template |
-| `.github/ISSUE_TEMPLATE/` | Task intake template |
-| `docs/` | Project documentation index, this complete map and the [security review](security.md) |
-| `docs/challenge/` | Source-backed organizer challenge and event constraints |
-| `docs/product/` | User problem, proposed workflow, scope, acceptance criteria |
-| `docs/architecture/` | Workflow, system and pipeline maps; folder categories |
-| `docs/decisions/` | Dated decisions, alternatives when relevant, consequences |
-| `docs/deployment/` | Actual Vercel/Supabase setup, links, and reproduction steps |
-| `docs/project/` | Public English project profile, full workflow plan, proposed system and reproducible inspection/setup |
-| `docs/judging/` | Reading order and evidence boundaries for judges |
-| `design/` | Overall visual specification and complete design package index |
-| `design/homepage/` | Approved homepage image, preserved byte-for-byte |
-| `design/interfaces/` | Nine synthetic functional-screen concept stills |
-| `design/dark-mode/` | Ten separate dark companions for the hub and nine screens |
-| `design/components-3d/` | Nine individual transparent object modeling references |
-| `design/references/` | Structured UI 2/web and UI 3/object reference descriptions |
-| `design/prompts/` | Exact image prompts and targeted refinement records |
-| `design/blender/` | Blender build script, saved scene and station documentation |
-| `design/manifests/` | Actual asset metadata, integrity/alpha checks and archive verification |
-| `context/` | Development context conventions |
-| `context/briefs/` | Public-safe user request summaries and reusable context packs |
-| `context/research/` | Sources, observations, and implications |
-| `prompts/` | Versioned prompt registry and usage conventions |
-| `prompts/development/` | Build-task prompts for development work |
-| `prompts/review/` | Contract reviewer instruction drafts |
-| `prompts/evaluation/` | Optional evaluator instruction drafts |
-| `openai/` | Official-source notes, concepts, and integration plan |
-| `src/` | Application source (see `src/README.md`) |
-| `src/app/` | Next.js page, layout and API routes |
-| `src/components/` | Shell, 3D hub, nine workspaces, PDF viewer, three.js stations |
-| `src/review/` | Extraction, checks, semantic adapter, evidence validation, pipeline |
-| `src/digitize/` | Field detection, annotation QA, form model, PDF fill and QA |
-| `src/integrations/` | Supabase server client and worker client |
-| `src/lib/` | Shared types, navigation, workspace state, uploads |
-| `public/` | Station models (`3d/`), PNG fallbacks and synthetic demo files (`demo/`) |
-| `worker/` | Decision-agent and conversion worker, local tunnel runner, Dockerfile |
-| `scripts/` | Demo builders (`build-demo.mjs`, `build-demo-contracts.mjs`), end-to-end contract run (`e2e-contracts.mjs`), asset, screenshot and PDF text helpers |
-| `tests/` | Deterministic tests of application code (worker tests live in `worker/test_*.py`) |
+| `.github/` | Pull-request and task templates |
+| `src/` | Application source (see [`src/README.md`](../src/README.md)) |
+| `public/` | Station stills and models, synthetic demo files served by the app |
+| `worker/` | Decision-agent, conversion and semantic-review worker; local tunnel runner; Dockerfile; Python tests |
 | `supabase/` | Backend record and applied SQL migrations |
-| `data/` | Public data conventions |
-| `data/demo-contracts/` | Synthetic fund subscription documents (Word, PDF, scrambled scan, long booklet, Vietnamese, fillable AcroForm) with their planted problems |
-| `data/synthetic/` | Fictional plain-text samples used by tests and evaluations |
-| `data/schemas/` | Versioned model/application output contracts |
-| `evals/` | Model-quality plan and scoring rubric |
-| `evals/datasets/` | Synthetic inputs with expected finding labels |
-| `evals/results/` | Actual outputs and assessment after execution |
-| `experiments/` | Hypotheses, reproducible configurations, actual observations |
-| `demo/` | Demonstration script and artifact conventions |
-| `demo/screenshots/` | Actual application screenshots after implementation |
-| `demo/submission/` | Live/repository links and submission record |
-| `progress/` | Roadmap, changelog, and development-log conventions |
-| `progress/build-log/` | Dated tasks, decisions, validation evidence, limits |
-| `references/` | Upstream provenance and adaptation attribution |
+| `scripts/` | `build-demo.mjs`, `build-demo-contracts.mjs`, `e2e-contracts.mjs`, `e2e-memory.mjs`, asset, screenshot and PDF text helpers |
+| `tests/` | Vitest tests of application code |
+| `evals/` | Offline evaluation of the rule layer, rubric, datasets and dated [test reports](../evals/results/) |
+| `data/demo-contracts/` | Synthetic fund documents and `expected.json` with their planted problems and traps |
+| `data/synthetic/`, `data/schemas/` | Fictional text samples; output contracts |
+| `docs/` | Documentation index, [security review](security.md), this map |
+| `docs/challenge/`, `docs/product/` | Challenge brief; user problem, scope, acceptance criteria |
+| `docs/architecture/`, `docs/deployment/` | Workflow, system and pipeline maps; actual Vercel and Supabase setup |
+| `docs/decisions/`, `docs/project/`, `docs/judging/` | Dated decisions; project profile and full plan; reading order for judges |
+| `docs/openai/`, `docs/references/` | Model integration notes; upstream provenance and licences |
+| `design/` | Visual specification and the complete design package (see [`design/README.md`](../design/README.md)) |
+| `demo/` | [Introduction video](../demo/video/), screenshots, demo script, submission checklist |
+| `context/` | Request briefs and research notes |
+| `prompts/` | Prompt registry and versioned prompts |
+| `progress/` | [Build logs](../progress/build-log/), [changelog](../progress/CHANGELOG.md), roadmap |
 
 ## Root files
 
-- `README.md`: reviewer-facing overview, status, and entry points.
-- `AGENTS.md`: persistent project instructions, including GitHub synchronization after each project task.
-- `.gitignore`: exclusions for existing independent checkouts, secrets, private inputs, environments, and local runtime data.
-- `.gitattributes`: text/line-ending conventions.
-- `package.json`, `next.config.ts`, `tsconfig.json`, `postcss.config.mjs`: Next.js application configuration.
-- `vercel.json` and `.vercelignore`: Vercel framework settings, daily health cron, security headers and upload exclusions.
-- `.env.example`: configuration variable names and placeholders; actual values remain ignored.
+- `README.md`: overview, video, test results and entry points.
+- `AGENTS.md`: standing instructions for the coding agents, including GitHub synchronization after each task.
+- `package.json`, `next.config.ts`, `tsconfig.json`, `postcss.config.mjs`: Next.js configuration.
+- `vercel.json`, `.vercelignore`: framework settings, daily health cron, security headers, upload exclusions.
+- `.env.example`: variable names only; values stay in ignored files.
+- `.gitignore`, `.gitattributes`: exclusions and line-ending rules.
 
-## Local-only existing folders
+## Local-only folders
 
-`contract-reader-agent/` and `laya/` remain in the local workspace as independent repositories. They are excluded from this public repository and listed in [the reference register](../references/upstream.md). The hidden root `.git/` contains repository metadata and is not published as a folder.
+`contract-reader-agent/` and `laya/` stay in the local workspace as independent repositories. They are excluded from this repository and listed in [the reference register](references/upstream.md).
 
-`design/references/source-images/` contains the owner's supplied JPEGs locally. `design/exports/` contains the local delivery ZIP. Both are untracked; the public package consists of the generated images and design documents. The first overall plan's local source remains in its existing ignored context location. At the owner's explicit request, an unchanged public copy is available as [docs/project/01-first-overall-plan.md](project/01-first-overall-plan.md); other private planning inputs remain excluded.
+`design/references/source-images/` (the owner's supplied JPEGs) and `design/exports/` (the delivery ZIP) are untracked. At the owner's request, an unchanged public copy of the first overall plan is at [docs/project/01-first-overall-plan.md](project/01-first-overall-plan.md); other private planning inputs stay excluded.

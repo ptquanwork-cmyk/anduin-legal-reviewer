@@ -34,7 +34,7 @@ export function Brand() {
   const demo = version?.file_name.toLowerCase().startsWith('demo agreement');
   return (
     <>
-      <div className="abs flex items-baseline gap-2 select-none" style={box(35, 18)}>
+      <div className="abs flex items-baseline gap-2 select-none" style={box(56, 18)}>
         <span className="font-display text-[31px] font-bold tracking-tight" style={{ color: 'var(--ink)' }}>
           Anduin
         </span>
@@ -42,7 +42,7 @@ export function Brand() {
           Legal Reviewer
         </span>
       </div>
-      <div className="abs text-right text-[19px] uppercase tracking-wide" style={{ ...box(1000, 29, 502), color: 'var(--ink)' }}>
+      <div className="abs text-right text-[19px] uppercase tracking-wide" style={{ ...box(979, 29, 502), color: 'var(--ink)' }}>
         {demo ? 'Private workspace · Synthetic data' : 'Private workspace'}
       </div>
     </>

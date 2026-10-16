@@ -20,7 +20,7 @@
 
 The private overall plan proposes a separately authenticated CLI worker for complex inference and optional Laya typed decisions after evaluation. These are technical candidates, not a deployed service or proof that the owner's account/runtime can serve a website. Hosting the UI does not itself host the worker. The public UI copy remains provider-neutral; technical integration records remain in repository documentation.
 
-No new inference was run to create this architecture document. See [initial architecture](../architecture/overview.md) and [integration proposal](../../openai/integration-plan.md) for the existing technical context.
+No new inference was run to create this architecture document. See [initial architecture](../architecture/overview.md) and [integration proposal](../openai/integration-plan.md) for the existing technical context.
 
 ## Document representation
 
