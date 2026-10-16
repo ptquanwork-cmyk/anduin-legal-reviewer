@@ -1,0 +1,23 @@
+{
+  "name": "anduin-legal-reviewer-intro-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "capture": "node capture.mjs",
+    "music": "node music.mjs",
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts Intro out/anduin-legal-reviewer-intro.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.535",
+    "@remotion/google-fonts": "^4.0.535",
+    "@remotion/transitions": "^4.0.535",
+    "@supabase/supabase-js": "^2.118.0",
+    "@types/react": "^19.3.0",
+    "playwright-core": "^1.52.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.535",
+    "typescript": "^5.9.3"
+  }
+}

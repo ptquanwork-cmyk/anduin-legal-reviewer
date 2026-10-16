@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-16: Introduction video
+
+- `demo/video/`: a 68-second Remotion introduction built from real app screens, with camera zooms, cursor clicks with sound, captions and original synthesised music.
+- The worker address lookup no longer marks the worker offline after one slow lookup.
+- The worker closes a hung hidden Word instance when a conversion times out.
+
 ## 2026-10-16: Full-screen workspace and overlap sweep
 
 - Full screen has its own bar (exit, steps 01–09, How to use, Prev / Next); the screen header is hidden and working toolbars are kept.

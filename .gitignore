@@ -57,3 +57,7 @@ desktop.ini
 next-env.d.ts
 /public/draco/
 /worker/.worker-secret
+
+# Introduction video: render outputs and generated audio (rebuilt by demo/video scripts)
+/demo/video/out/
+/demo/video/public/audio/
