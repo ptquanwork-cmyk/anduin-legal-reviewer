@@ -4,7 +4,7 @@
 
 My entry for **The Legal Reviewer** challenge (Legal track) of Anduin's Cybernetics hackathon.
 
-**[Live application](https://anduin-legal-reviewer.vercel.app)** · **[Introduction video (73 s)](demo/video/anduin-legal-reviewer-intro.mp4)** · **[Judge reading guide](docs/judging/README.md)** · **[Build logs](progress/build-log/)** · **[Architecture](docs/architecture/overview.md)**
+**[Live application](https://anduin-legal-reviewer.vercel.app)** · **[Introduction video (89 s)](demo/video/anduin-legal-reviewer-intro.mp4)** · **[Judge reading guide](docs/judging/README.md)** · **[Build logs](progress/build-log/)** · **[Architecture](docs/architecture/overview.md)**
 
 ---
 

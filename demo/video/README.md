@@ -1,24 +1,24 @@
 # Introduction video
 
-A 73-second, fast-paced introduction to Anduin Legal Reviewer, built with [Remotion](https://www.remotion.dev/) from real screens of the app.
+An 89-second introduction to Anduin Legal Reviewer, built with [Remotion](https://www.remotion.dev/) from real screens of the app.
 
 ## What it shows
 
-There are 28 beats, cut on the music's beat (120 BPM: one beat is 15 frames at 30 fps):
+Results come first, then the workflow in six chapters. Each chapter opens with a short title card (number, title, one-line summary, progress dots):
 
-1. **Hook and overview:** kinetic title, the 3D hub, the "How to use" guide.
-2. **Intake and source quality:** Intake with Use demo and the six job checks, then Source quality: Word against PDF, and the Fonts tab.
-3. **Document map:** outline with findings per section, relationships graph, page map.
-4. **Legal review:**
-   - the quoted source, then the category filters;
-   - Dismiss with a reason, used as an example for later reviews;
-   - a question for counsel, then Confirm.
-5. **Report and revision:** Decision / report, then uploading revision v2 and marking a fixed finding resolved.
-6. **Digitization:** Annotation (field editor, draw mode), Form preview with plain-language help, the exported HTML form, Responses.
-7. **PDF QA:** a clipped answer caught, then the fixed version passing every check and exported.
-8. **Memory and workspace:** Feedback, Templates, full-screen mode with step navigation, dark theme, end card.
+1. **Title.**
+2. **Results:** six measured numbers from the [15-file scenario test](../../evals/results/2026-10-16-scenario-test-report.md), with a count-up and a ring for 54/57 planted problems found. The weakest number (34 of 129 findings wrong, 24 of them from a two-column layout) is shown on screen, with the source line.
+3. **Speed:** the 38-page booklet reviewed in 3–4.5 minutes against about 72 minutes to read it once. The footnote says how the reading time is estimated and that there was no timed human study.
+4. **Upload & check the source:** Intake with the six job checks; Word against the converted PDF.
+5. **Review with evidence:** relationships graph; a finding's exact passage; Dismiss with a reason.
+6. **Decide & report:** the outcome, next step and questions for counsel; revision v2 and a fixed finding resolved.
+7. **Digitize the form:** the annotation editor; the exported HTML form.
+8. **Verify & export:** a clipped answer caught; the fixed version passing every check and exported.
+9. **Memory & workspace:** decision history, the per-screen guide, full-screen mode; end card.
 
-Each beat is a screenshot of the running app, driven in Chrome with the synthetic demo agreement and its revision. The video adds the camera zoom and pan, the cursor with click ripples and click sounds, captions, slide and fade cuts, a beat pulse, a progress bar and music.
+Each shot is a screenshot of the running app, driven in Chrome with the synthetic demo agreement and its revision. The video adds a slow camera zoom and pan, the cursor with click ripples and click sounds, one short caption per shot, a section tag and fade transitions. Motion is not synced to the beat, so the screen stays calm.
+
+The numbers on screen live in `src/results.ts`; update them there when the report changes.
 
 ## Sources
 
@@ -37,7 +37,7 @@ npm install
 ```
 
 ```bash
-node music.mjs 74
+node music.mjs 90
 ```
 
 ```bash
@@ -49,6 +49,6 @@ npx remotion render src/index.ts Intro out/anduin-legal-reviewer-intro.mp4 --cod
 ```
 
 The capture expects the app at the given address (for example `npx next start -p 3100` after `next build`) and the worker online.
-- Scene timing (in beats), camera keyframes, cursor paths and captions are in `src/scenes.ts`.
-- The components (camera, cursor, captions, kinetic title, end card, cuts and audio) are in `src/Intro.tsx`.
+- Sections, scene timing, camera keyframes, cursor paths and captions are in `src/scenes.ts`; the result numbers are in `src/results.ts`.
+- The components (camera, cursor, captions, section tag, results and speed cards, chapter cards, end card, transitions and audio) are in `src/Intro.tsx`.
 - `npx remotion studio src/index.ts` previews the video interactively.

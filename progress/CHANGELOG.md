@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-16: Introduction video, results first
+
+- 89 seconds: measured results from the 15-file scenario test open the video (54/57 found, 129/129 quoted, 94/94 fabricated quotes rejected, the known two-column limit), then a speed comparison, then six chaptered sections.
+- Calm camera and fade transitions; the beat pulse is gone; one short caption per shot.
+
 ## 2026-10-16: 15-file scenario test
 
 - Seven new synthetic demo files (08–14): clean control, tables with a landscape page, prompt injection, two-column amendment, bilingual letter, image-only scan, corrupted PDF; `build-demo-contracts.mjs` can rebuild single files.
