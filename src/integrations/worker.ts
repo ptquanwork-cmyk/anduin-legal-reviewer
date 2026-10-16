@@ -10,20 +10,25 @@ let cached: { url: string | null; at: number } | null = null;
 async function baseUrl() {
   if (process.env.WORKER_URL) return process.env.WORKER_URL.replace(/\/$/, '');
   if (cached && Date.now() - cached.at < 30_000) return cached.url;
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/worker_endpoint?select=url,updated_at&id=eq.1`, {
-      headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY! },
-      signal: AbortSignal.timeout(5000),
-      cache: 'no-store',
-    });
-    const rows = (await res.json()) as { url: string | null }[];
-    const url = rows[0]?.url?.replace(/\/$/, '') ?? null;
-    // Session tokens are only ever sent to a Cloudflare quick-tunnel host (same rule as the database function).
-    cached = { url: url && /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(url) ? url : null, at: Date.now() };
-  } catch {
-    cached = { url: null, at: Date.now() };
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/worker_endpoint?select=url,updated_at&id=eq.1`, {
+        headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY! },
+        signal: AbortSignal.timeout(5000),
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error(`worker_endpoint ${res.status}`);
+      const rows = (await res.json()) as { url: string | null }[];
+      const url = rows[0]?.url?.replace(/\/$/, '') ?? null;
+      // Session tokens are only ever sent to a Cloudflare quick-tunnel host (same rule as the database function).
+      cached = { url: url && /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(url) ? url : null, at: Date.now() };
+      return cached.url;
+    } catch {
+      // try once more below
+    }
   }
-  return cached.url;
+  // A failed lookup (slow network) keeps the last known address and is not cached, instead of marking the worker offline.
+  return cached?.url ?? null;
 }
 
 // The caller's Supabase session token authenticates each request (the worker verifies it with Supabase Auth).

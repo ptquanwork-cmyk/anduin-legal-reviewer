@@ -366,7 +366,13 @@ def _word_to_pdf(src: Path, out: Path):
     )
     env = {**os.environ, "SRC": str(src), "OUT": str(out)}
     with word_lock:
-        return subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script], capture_output=True, text=True, timeout=180, env=env)
+        try:
+            return subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script], capture_output=True, text=True, timeout=180, env=env)
+        except subprocess.TimeoutExpired:
+            # A hidden dialog can freeze the automation instance; close windowless Word processes (never a window the
+            # owner is using) so the next conversion starts clean, and report the failure.
+            subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", "Get-Process WINWORD -ErrorAction SilentlyContinue | Where-Object { -not $_.MainWindowTitle } | Stop-Process -Force"], capture_output=True, timeout=30)
+            raise HTTPException(status_code=504, detail="Word did not finish the conversion in time")
 
 
 def _check_docx(data: bytes) -> bytes:
