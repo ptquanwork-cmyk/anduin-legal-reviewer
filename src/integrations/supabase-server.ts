@@ -51,7 +51,14 @@ export async function limitProcessing(sb: SupabaseClient, perHour = 30) {
 }
 
 export async function download(sb: SupabaseClient, bucket: string, path: string) {
-  const { data, error } = await sb.storage.from(bucket).download(path);
-  if (error || !data) throw new HttpError(404, `Could not read ${bucket}/${path}: ${error?.message ?? 'missing'}`);
-  return new Uint8Array(await data.arrayBuffer());
+  // One retry: a transient network error must not fail a fill or export whose file is there.
+  let last: string | undefined;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const { data, error } = await sb.storage.from(bucket).download(path);
+    if (data) return new Uint8Array(await data.arrayBuffer());
+    last = error?.message;
+    if (/not.?found/i.test(last ?? '')) break;
+    await new Promise((r) => setTimeout(r, 800));
+  }
+  throw new HttpError(404, `Could not read ${bucket}/${path}: ${last ?? 'missing'}`);
 }
