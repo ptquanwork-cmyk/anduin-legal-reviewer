@@ -22,168 +22,254 @@ export interface Caption {
 }
 export interface Scene {
   id: string;
-  dur: number;
+  /** Length in beats (120 BPM: one beat = 15 frames), so every cut lands on the beat. */
+  beats: number;
   layers?: { img: string; from: number }[];
   cam?: Cam[];
   cursor?: Point[];
   captions?: Caption[];
 }
 
+export const FPS = 30;
+export const BEAT = 15;
+export const TRANSITION = 8;
+
 type Shots = typeof manifest.shots;
 /** Centre of a captured element (from capture.mjs) in screen pixels. */
-const t = <S extends keyof Shots>(shot: S, key: string) => {
-  const target = (manifest.shots[shot].targets as Record<string, { x: number; y: number } | null>)[key];
+const t = (shot: keyof Shots | string, key: string) => {
+  const target = ((manifest.shots as Record<string, { targets: Record<string, { x: number; y: number } | null> }>)[shot]?.targets ?? {})[key];
   if (!target) throw new Error(`No target ${String(shot)}.${key}`);
   return target;
 };
-
-const demo = t('intake', 'demo');
-const status = t('intake-running', 'status');
-const confirm = t('review', 'confirm');
-const quote = t('review', 'quote');
-const outcome = t('report', 'outcome');
-const exportReport = t('report', 'export');
-const exportHtml = t('form', 'export');
-const create = t('responses', 'create');
-const final = t('export', 'final');
-const checks = t('export', 'checks');
-const station = t('hub', 'review');
-const fullButton = t('review', 'full');
-
-export const FPS = 30;
-export const TRANSITION = 15;
+// Fixed layout positions at the 1920 × 1080 capture size (panels are where the app's design places them).
+const P = {
+  leftList: { x: 377, y: 600 },
+  middle: { x: 933, y: 660 },
+  right: { x: 1601, y: 640 },
+  modal: { x: 960, y: 530 },
+};
+const b = (n: number) => n * BEAT; // beats → frames within a scene
 
 export const SCENES: Scene[] = [
-  { id: 'title', dur: 150 },
+  { id: 'title', beats: 8 },
   {
     id: 'hub',
-    dur: 150,
-    layers: [{ img: 'hub', from: 0 }, { img: 'hub-hover', from: 78 }],
-    cam: [{ f: 0, x: 960, y: 540, z: 1 }, { f: 150, x: 1180, y: 430, z: 1.22 }],
-    cursor: [{ f: 10, x: 760, y: 860 }, { f: 75, x: station.x, y: station.y + 30 }],
-    captions: [{ from: 12, kicker: 'Anduin Legal Reviewer', title: 'Nine steps from contract to verified PDF' }],
+    beats: 6,
+    layers: [{ img: 'hub', from: 0 }, { img: 'hub-hover', from: b(3) }],
+    cam: [{ f: 0, x: 960, y: 540, z: 1.08 }, { f: b(6), x: 1180, y: 430, z: 1.3 }],
+    cursor: [{ f: 4, x: 760, y: 860 }, { f: b(3) - 4, x: t('hub', 'review').x, y: t('hub', 'review').y + 30 }],
+    captions: [{ from: 6, kicker: 'Anduin Legal Reviewer', title: 'Nine steps from contract to verified PDF' }],
+  },
+  {
+    id: 'guide',
+    beats: 4,
+    layers: [{ img: 'guide', from: 0 }],
+    cam: [{ f: 0, x: 960, y: 540, z: 1 }, { f: b(2), x: P.modal.x, y: P.modal.y, z: 1.35 }],
+    captions: [{ from: 4, kicker: 'Built-in guide', title: '"How to use" on every screen' }],
   },
   {
     id: 'intake',
-    dur: 210,
-    layers: [{ img: 'intake', from: 0 }, { img: 'intake-running', from: 62 }, { img: 'intake-done', from: 150 }],
+    beats: 6,
+    layers: [{ img: 'intake', from: 0 }, { img: 'intake-running', from: b(2) + 4 }, { img: 'intake-done', from: b(4) + 4 }],
     cam: [
-      { f: 0, x: 960, y: 540, z: 1 },
-      { f: 40, x: 760, y: 640, z: 1.3 },
-      { f: 70, x: 760, y: 640, z: 1.3 },
-      { f: 105, x: status.x, y: status.y + 90, z: 1.4 },
-      { f: 210, x: status.x, y: status.y + 110, z: 1.42 },
+      { f: 0, x: 760, y: 640, z: 1.25 },
+      { f: b(2), x: 760, y: 640, z: 1.3 },
+      { f: b(2) + 14, x: t('intake-running', 'status').x, y: t('intake-running', 'status').y + 100, z: 1.5 },
+      { f: b(6), x: t('intake-running', 'status').x, y: t('intake-running', 'status').y + 110, z: 1.55 },
     ],
-    cursor: [{ f: 5, x: 1100, y: 900 }, { f: 48, x: demo.x, y: demo.y, click: true }, { f: 95, x: 1150, y: 820 }],
-    captions: [{ from: 10, kicker: '01 · Intake', title: 'Upload Word or PDF. Checks start on their own.' }],
+    cursor: [{ f: 2, x: 1000, y: 860 }, { f: b(2), x: t('intake', 'demo').x, y: t('intake', 'demo').y, click: true }, { f: b(3), x: 1150, y: 820 }],
+    captions: [{ from: 4, kicker: '01 · Intake', title: 'Drop a Word or PDF file. Six checks run on their own.' }],
   },
   {
     id: 'source',
-    dur: 180,
+    beats: 6,
     layers: [{ img: 'source', from: 0 }],
     cam: [
-      { f: 0, x: 960, y: 540, z: 1 },
-      { f: 35, x: 560, y: 640, z: 1.35 },
-      { f: 80, x: 560, y: 640, z: 1.35 },
-      { f: 115, x: 1150, y: 640, z: 1.35 },
-      { f: 140, x: 1150, y: 640, z: 1.35 },
-      { f: 178, x: 1640, y: 560, z: 1.55 },
+      { f: 0, x: 960, y: 540, z: 1.05 },
+      { f: b(1), x: 540, y: 640, z: 1.4 },
+      { f: b(3), x: 1140, y: 640, z: 1.4 },
+      { f: b(5), x: 1650, y: 560, z: 1.6 },
     ],
-    captions: [{ from: 10, kicker: '02 · Source quality', title: 'Word rendered to PDF and checked word for word' }],
+    captions: [{ from: 4, kicker: '02 · Source quality', title: 'Word becomes PDF, checked word for word' }],
   },
   {
-    id: 'map',
-    dur: 150,
-    layers: [{ img: 'map', from: 0 }],
-    cam: [{ f: 0, x: 960, y: 540, z: 1 }, { f: 55, x: 933, y: 720, z: 1.4 }, { f: 150, x: 933, y: 720, z: 1.48 }],
-    captions: [{ from: 10, kicker: '03 · Document map', title: 'Every section, reference and definition, connected' }],
+    id: 'source-fonts',
+    beats: 4,
+    layers: [{ img: 'source-fonts', from: 0 }],
+    cam: [{ f: 0, x: 960, y: 540, z: 1.1 }, { f: b(2), x: 812, y: 600, z: 1.45 }],
+    cursor: [{ f: 0, x: 600, y: 520 }, { f: 10, x: t('source', 'fonts').x, y: t('source', 'fonts').y, click: true }],
+    captions: [{ from: 4, kicker: '02 · Source quality', title: 'Declared fonts against embedded fonts' }],
+  },
+  {
+    id: 'map-outline',
+    beats: 5,
+    layers: [{ img: 'map-outline', from: 0 }],
+    cam: [{ f: 0, x: 342, y: 620, z: 1.45 }, { f: b(2), x: 342, y: 620, z: 1.5 }, { f: b(3) + 10, x: P.right.x, y: 640, z: 1.45 }],
+    cursor: [{ f: 0, x: 500, y: 700 }, { f: 12, x: t('map-outline', 'section').x, y: t('map-outline', 'section').y, click: true }],
+    captions: [{ from: 4, kicker: '03 · Document map', title: 'Every section, with its findings' }],
+  },
+  {
+    id: 'map-graph',
+    beats: 4,
+    layers: [{ img: 'map-graph', from: 0 }],
+    cam: [{ f: 0, x: 933, y: 640, z: 1.2 }, { f: b(4), x: 933, y: 720, z: 1.55 }],
+    cursor: [{ f: 0, x: 700, y: 500 }, { f: 10, x: t('map-graph', 'tab').x, y: t('map-graph', 'tab').y, click: true }],
+    captions: [{ from: 4, kicker: '03 · Document map', title: 'References and conflicts, connected' }],
+  },
+  {
+    id: 'map-pages',
+    beats: 3,
+    layers: [{ img: 'map-pages', from: 0 }],
+    cam: [{ f: 0, x: 933, y: 660, z: 1.25 }, { f: b(3), x: 933, y: 700, z: 1.45 }],
+    cursor: [{ f: 0, x: 760, y: 420 }, { f: 9, x: t('map-pages', 'tab').x, y: t('map-pages', 'tab').y, click: true }],
+    captions: [{ from: 3, kicker: '03 · Document map', title: 'Page by page' }],
   },
   {
     id: 'review',
-    dur: 240,
-    layers: [{ img: 'review', from: 0 }, { img: 'review-confirmed', from: 178 }],
-    cam: [
-      { f: 0, x: 960, y: 540, z: 1 },
-      { f: 40, x: quote.x, y: quote.y, z: 1.9 },
-      { f: 110, x: quote.x, y: quote.y, z: 1.95 },
-      { f: 150, x: 1480, y: 760, z: 1.3 },
-      { f: 240, x: 1480, y: 760, z: 1.32 },
-    ],
-    cursor: [{ f: 128, x: 1180, y: 920 }, { f: 168, x: confirm.x, y: confirm.y, click: true }, { f: 215, x: 1500, y: 960 }],
-    captions: [
-      { from: 10, to: 122, kicker: '04 · Legal review', title: 'Every finding quotes its exact source' },
-      { from: 128, kicker: '04 · Legal review', title: 'You decide: confirm, dismiss or ask counsel' },
-    ],
+    beats: 6,
+    layers: [{ img: 'review', from: 0 }],
+    cam: [{ f: 0, x: 960, y: 540, z: 1.1 }, { f: b(1), x: t('review', 'quote').x, y: t('review', 'quote').y + 40, z: 2.1 }, { f: b(6), x: t('review', 'quote').x, y: t('review', 'quote').y + 40, z: 2.2 }],
+    captions: [{ from: 4, kicker: '04 · Legal review', title: 'Every finding quotes its exact source' }],
+  },
+  {
+    id: 'review-filter',
+    beats: 4,
+    layers: [{ img: 'review', from: 0 }, { img: 'review-filter', from: 14 }],
+    cam: [{ f: 0, x: P.leftList.x, y: 560, z: 1.55 }, { f: b(4), x: P.leftList.x, y: 560, z: 1.6 }],
+    cursor: [{ f: 0, x: 500, y: 640 }, { f: 12, x: t('review-filter', 'chip').x, y: t('review-filter', 'chip').y, click: true }],
+    captions: [{ from: 4, kicker: '04 · Legal review', title: 'Typos · references · contradictions · ambiguities · terms' }],
+  },
+  {
+    id: 'review-dismiss',
+    beats: 5,
+    layers: [{ img: 'review', from: 0 }, { img: 'review-dismiss', from: 14 }],
+    cam: [{ f: 0, x: 1500, y: 800, z: 1.35 }, { f: 16, x: P.modal.x, y: 540, z: 1.4 }, { f: b(5), x: P.modal.x, y: 560, z: 1.45 }],
+    cursor: [{ f: 0, x: 1400, y: 960 }, { f: 12, x: t('review-dismiss', 'open').x, y: t('review-dismiss', 'open').y, click: true }, { f: b(4), x: t('review-dismiss', 'submit').x, y: t('review-dismiss', 'submit').y, click: true }],
+    captions: [{ from: 4, kicker: '04 · Legal review', title: 'Dismiss with a reason, and teach later reviews' }],
+  },
+  {
+    id: 'review-clarify',
+    beats: 4,
+    layers: [{ img: 'review-clarify', from: 0 }],
+    cam: [{ f: 0, x: P.modal.x, y: 540, z: 1.25 }, { f: b(4), x: P.modal.x, y: 520, z: 1.45 }],
+    captions: [{ from: 3, kicker: '04 · Legal review', title: 'Or turn it into a question for counsel' }],
+  },
+  {
+    id: 'review-confirmed',
+    beats: 4,
+    layers: [{ img: 'review', from: 0 }, { img: 'review-confirmed', from: 16 }],
+    cam: [{ f: 0, x: 1500, y: 780, z: 1.35 }, { f: b(4), x: 1500, y: 780, z: 1.4 }],
+    cursor: [{ f: 0, x: 1300, y: 960 }, { f: 14, x: t('review-confirmed', 'confirm').x, y: t('review-confirmed', 'confirm').y, click: true }],
+    captions: [{ from: 3, kicker: '04 · Legal review', title: 'Confirm. Nothing is resolved without you.' }],
   },
   {
     id: 'report',
-    dur: 180,
+    beats: 6,
     layers: [{ img: 'report', from: 0 }],
     cam: [
-      { f: 0, x: 960, y: 540, z: 1 },
-      { f: 40, x: outcome.x, y: outcome.y + 20, z: 1.6 },
-      { f: 90, x: outcome.x, y: outcome.y + 20, z: 1.6 },
-      { f: 130, x: 1620, y: 860, z: 1.35 },
-      { f: 180, x: 1620, y: 860, z: 1.36 },
+      { f: 0, x: t('report', 'outcome').x, y: t('report', 'outcome').y + 20, z: 1.7 },
+      { f: b(2), x: t('report', 'outcome').x, y: t('report', 'outcome').y + 20, z: 1.7 },
+      { f: b(3), x: t('report', 'questions').x, y: t('report', 'questions').y + 120, z: 1.45 },
+      { f: b(6), x: t('report', 'questions').x, y: t('report', 'questions').y + 300, z: 1.45 },
     ],
-    cursor: [{ f: 100, x: 1300, y: 720 }, { f: 140, x: exportReport.x, y: exportReport.y, click: true }],
-    captions: [{ from: 10, kicker: '05 · Decision / report', title: 'Questions for counsel and a report, ready to share' }],
+    captions: [{ from: 4, kicker: '05 · Decision / report', title: 'Outcome, next step and questions for counsel' }],
+  },
+  {
+    id: 'compare',
+    beats: 6,
+    layers: [{ img: 'report', from: 0 }, { img: 'compare', from: 16 }, { img: 'compare-resolved', from: b(4) + 6 }],
+    cam: [{ f: 0, x: 1500, y: 300, z: 1.3 }, { f: 18, x: P.modal.x, y: 520, z: 1.35 }, { f: b(6), x: P.modal.x, y: 560, z: 1.45 }],
+    cursor: [{ f: 0, x: 1500, y: 420 }, { f: 12, x: t('compare', 'open').x, y: t('compare', 'open').y, click: true }, { f: b(4), x: t('compare', 'resolve').x, y: t('compare', 'resolve').y, click: true }],
+    captions: [{ from: 4, kicker: 'Revision v2', title: 'Upload the fix. Missing findings are proposed as resolved.' }],
   },
   {
     id: 'annotation',
-    dur: 180,
+    beats: 6,
     layers: [{ img: 'annotation', from: 0 }],
-    cam: [{ f: 0, x: 960, y: 540, z: 1 }, { f: 50, x: 760, y: 760, z: 1.55 }, { f: 180, x: 760, y: 700, z: 1.62 }],
-    captions: [{ from: 10, kicker: '06 · Annotation', title: 'Four field types, anchored to the exact page' }],
+    cam: [{ f: 0, x: 760, y: 600, z: 1.2 }, { f: b(1), x: t('annotation', 'types').x, y: t('annotation', 'types').y + 280, z: 1.6 }, { f: b(4), x: P.right.x, y: 560, z: 1.5 }],
+    cursor: [{ f: b(3), x: 1500, y: 700 }, { f: b(4), x: t('annotation', 'next').x, y: t('annotation', 'next').y, click: true }],
+    captions: [{ from: 4, kicker: '06 · Annotation', title: 'Four field types, anchored to the exact page' }],
+  },
+  {
+    id: 'annotation-draw',
+    beats: 4,
+    layers: [{ img: 'annotation', from: 0 }, { img: 'annotation-draw', from: 14 }],
+    cam: [{ f: 0, x: t('annotation-draw', 'draw').x, y: t('annotation-draw', 'draw').y + 120, z: 1.6 }, { f: b(4), x: 900, y: 650, z: 1.45 }],
+    cursor: [{ f: 0, x: 900, y: 600 }, { f: 12, x: t('annotation-draw', 'draw').x, y: t('annotation-draw', 'draw').y, click: true }],
+    captions: [{ from: 3, kicker: '06 · Annotation', title: 'Draw, move and resize any region' }],
   },
   {
     id: 'form',
-    dur: 150,
-    layers: [{ img: 'form', from: 0 }],
-    cam: [{ f: 0, x: 960, y: 540, z: 1 }, { f: 60, x: 1300, y: 800, z: 1.3 }, { f: 150, x: 1340, y: 820, z: 1.34 }],
-    cursor: [{ f: 30, x: 1100, y: 700 }, { f: 85, x: exportHtml.x, y: exportHtml.y, click: true }],
-    captions: [{ from: 10, kicker: '07 · Form preview', title: 'The full contract as a form, exported in one click' }],
+    beats: 6,
+    layers: [{ img: 'form', from: 0 }, { img: 'form-help', from: b(2) + 6 }],
+    cam: [{ f: 0, x: 960, y: 540, z: 1.1 }, { f: b(2), x: 1100, y: 520, z: 1.5 }, { f: b(6), x: 1100, y: 560, z: 1.55 }],
+    cursor: [{ f: 4, x: 900, y: 700 }, { f: b(2), x: t('form', 'help').x, y: t('form', 'help').y, click: true }],
+    captions: [{ from: 4, kicker: '07 · Form preview', title: 'The full contract as a form, with plain-language help' }],
   },
   {
-    id: 'html',
-    dur: 120,
-    layers: [{ img: 'html-form', from: 0 }],
-    cam: [{ f: 0, x: 960, y: 540, z: 1 }, { f: 120, x: 960, y: 470, z: 1.15 }],
-    captions: [{ from: 8, kicker: 'Shareable form', title: 'Anyone can fill it in a browser' }],
+    id: 'html-form',
+    beats: 6,
+    layers: [{ img: 'form', from: 0 }, { img: 'html-form', from: 18 }, { img: 'html-form-next', from: b(4) }],
+    cam: [{ f: 0, x: t('form', 'export').x, y: t('form', 'export').y - 100, z: 1.5 }, { f: 20, x: 960, y: 540, z: 1.05 }, { f: b(4), x: 960, y: 470, z: 1.2 }, { f: b(6), x: 900, y: 420, z: 1.3 }],
+    cursor: [{ f: 0, x: 1400, y: 820 }, { f: 12, x: t('form', 'export').x, y: t('form', 'export').y, click: true }, { f: b(3) + 10, x: t('html-form', 'next').x, y: t('html-form', 'next').y, click: true }],
+    captions: [{ from: 22, kicker: 'Shareable form', title: 'Export it. Anyone can fill it in a browser.' }],
   },
   {
     id: 'responses',
-    dur: 90,
+    beats: 4,
     layers: [{ img: 'responses', from: 0 }],
-    cam: [{ f: 0, x: 960, y: 540, z: 1 }, { f: 90, x: 1450, y: 800, z: 1.25 }],
-    cursor: [{ f: 15, x: 1300, y: 760 }, { f: 58, x: create.x, y: create.y, click: true }],
-    captions: [{ from: 8, kicker: '08 · Responses', title: 'Answers bound to this exact version' }],
+    cam: [{ f: 0, x: 702, y: 660, z: 1.4 }, { f: b(4), x: 1500, y: 860, z: 1.35 }],
+    cursor: [{ f: 8, x: 1300, y: 800 }, { f: b(3), x: t('responses', 'create').x, y: t('responses', 'create').y, click: true }],
+    captions: [{ from: 3, kicker: '08 · Responses', title: 'Answers validated and bound to this version' }],
+  },
+  {
+    id: 'export-clipped',
+    beats: 5,
+    layers: [{ img: 'export-clipped', from: 0 }],
+    cam: [{ f: 0, x: 960, y: 540, z: 1.1 }, { f: b(1), x: 1560, y: 520, z: 1.55 }, { f: b(5), x: 1560, y: 600, z: 1.6 }],
+    captions: [{ from: 4, kicker: '09 · PDF QA', title: 'The filled PDF is re-read: a clipped answer is caught' }],
   },
   {
     id: 'export',
-    dur: 180,
-    layers: [{ img: 'export', from: 0 }, { img: 'export-final', from: 150 }],
-    cam: [
-      { f: 0, x: 960, y: 540, z: 1 },
-      { f: 40, x: checks.x, y: checks.y + 90, z: 1.45 },
-      { f: 100, x: checks.x, y: checks.y + 90, z: 1.45 },
-      { f: 135, x: 1700, y: 820, z: 1.35 },
-      { f: 180, x: 1700, y: 820, z: 1.36 },
-    ],
-    cursor: [{ f: 100, x: 1380, y: 700 }, { f: 140, x: final.x, y: final.y, click: true }],
-    captions: [{ from: 10, kicker: '09 · PDF QA / export', title: 'The filled PDF is re-read and checked before export' }],
+    beats: 6,
+    layers: [{ img: 'export', from: 0 }],
+    cam: [{ f: 0, x: t('export', 'checks').x, y: t('export', 'checks').y + 90, z: 1.55 }, { f: b(2), x: t('export', 'checks').x, y: t('export', 'checks').y + 90, z: 1.55 }, { f: b(4), x: t('export', 'final').x, y: t('export', 'final').y, z: 1.45 }],
+    cursor: [{ f: b(3), x: 1400, y: 700 }, { f: b(4) + 6, x: t('export', 'final').x, y: t('export', 'final').y, click: true }],
+    captions: [{ from: 4, kicker: '09 · PDF QA / export', title: 'Fixed, every check passed, final PDF exported' }],
+  },
+  {
+    id: 'feedback',
+    beats: 5,
+    layers: [{ img: 'feedback', from: 0 }],
+    cam: [{ f: 0, x: 960, y: 540, z: 1.1 }, { f: b(2), x: 1285, y: 560, z: 1.45 }, { f: b(5), x: 1285, y: 620, z: 1.5 }],
+    captions: [{ from: 4, kicker: 'Memory', title: 'Every decision is kept and guides later reviews' }],
+  },
+  {
+    id: 'templates',
+    beats: 4,
+    layers: [{ img: 'templates', from: 0 }],
+    cam: [{ f: 0, x: 960, y: 540, z: 1.1 }, { f: b(4), x: 1296, y: 560, z: 1.4 }],
+    captions: [{ from: 3, kicker: 'Templates', title: 'Approved field structures, reused for new versions' }],
   },
   {
     id: 'full',
-    dur: 120,
-    layers: [{ img: 'review', from: 0 }, { img: 'review-full', from: 28 }],
-    cam: [{ f: 0, x: 960, y: 540, z: 1.12 }, { f: 30, x: 960, y: 540, z: 1 }, { f: 120, x: 960, y: 540, z: 1.04 }],
-    cursor: [{ f: 0, x: 900, y: 300 }, { f: 22, x: fullButton.x, y: fullButton.y, click: true }],
-    captions: [{ from: 34, kicker: 'Full screen', title: 'A focused workspace, step by step' }],
+    beats: 6,
+    layers: [{ img: 'review', from: 0 }, { img: 'review-full', from: 16 }, { img: 'full-next', from: b(4) + 4 }],
+    cam: [{ f: 0, x: 960, y: 540, z: 1.12 }, { f: 18, x: 960, y: 540, z: 1 }, { f: b(6), x: 960, y: 540, z: 1.05 }],
+    cursor: [{ f: 0, x: 800, y: 300 }, { f: 12, x: t('review-full', 'full').x, y: t('review-full', 'full').y, click: true }, { f: b(4), x: t('review-full', 'next').x, y: t('review-full', 'next').y, click: true }],
+    captions: [{ from: 18, kicker: 'Full screen', title: 'A focused workspace with step-by-step navigation' }],
   },
-  { id: 'end', dur: 150 },
+  {
+    id: 'dark',
+    beats: 5,
+    layers: [{ img: 'dark-hub', from: 0 }, { img: 'dark-review', from: b(2) + 4 }],
+    cam: [{ f: 0, x: 960, y: 540, z: 1.04 }, { f: b(5), x: 960, y: 540, z: 1.15 }],
+    captions: [{ from: 4, kicker: 'Light and dark', title: 'Designed for long review sessions' }],
+  },
+  { id: 'end', beats: 8 },
 ];
 
-export const TOTAL = SCENES.reduce((s, x) => s + x.dur, 0) - TRANSITION * (SCENES.length - 1);
-/** Start frame of each scene in the final timeline (scenes overlap by the transition). */
-export const STARTS = SCENES.reduce<number[]>((acc, s, i) => [...acc, i === 0 ? 0 : acc[i - 1] + SCENES[i - 1].dur - TRANSITION], []);
+export const durOf = (s: Scene) => s.beats * BEAT + TRANSITION;
+export const TOTAL = SCENES.reduce((sum, s) => sum + durOf(s), 0) - TRANSITION * (SCENES.length - 1);
+/** Start frame of each scene in the final timeline: on the beat grid, because each scene is beats × 15 + the transition. */
+export const STARTS = SCENES.reduce<number[]>((acc, s, i) => [...acc, i === 0 ? 0 : acc[i - 1] + SCENES[i - 1].beats * BEAT], []);

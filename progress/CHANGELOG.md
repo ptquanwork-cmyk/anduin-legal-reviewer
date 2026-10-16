@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-16: Introduction video, remade
+
+- 73-second, beat-synced walkthrough of every function:
+  - review dialogs and the v2 comparison;
+  - QA catching a clipped answer;
+  - memory, templates, full screen and dark mode.
+- Original upbeat 120 BPM music.
+- Storage reads used by fill and export retry once on a transient error.
+
 ## 2026-10-16: Test report for judges
 
 - `evals/results/2026-10-16-judge-test-report.md`: speed, accuracy and confidence measured on production and offline: 35/36 planted problems, 0/11 false-alarm traps, 80/80 findings grounded, 57/57 fabricated quotes rejected, 7/8 labeled cases.

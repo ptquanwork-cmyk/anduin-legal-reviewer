@@ -8,4 +8,4 @@ The [static project hub](https://anduin-legal-reviewer.vercel.app) is deployed. 
 
 ## Introduction video
 
-[`video/anduin-legal-reviewer-intro.mp4`](video/anduin-legal-reviewer-intro.mp4) is a 68-second walkthrough built with Remotion from real screens of the app (synthetic demo data). Sources and rebuild steps are in [`video/README.md`](video/README.md).
+[`video/anduin-legal-reviewer-intro.mp4`](video/anduin-legal-reviewer-intro.mp4) is a fast-paced 73-second walkthrough of every function, built with Remotion from real screens of the app (synthetic demo data). Sources and rebuild steps are in [`video/README.md`](video/README.md).

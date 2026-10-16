@@ -1,5 +1,7 @@
-// Original music and sound effects for the introduction video, synthesised from scratch (no samples, no licences):
-// a warm 100 BPM electronic bed (pad, bass, plucked arpeggio, soft kick and hats), a mouse click and a soft whoosh.
+// Original music and sound effects for the introduction video, synthesised from scratch (no samples, no licences).
+// Upbeat 120 BPM track — one beat is exactly 15 frames at 30 fps, so the video's cuts land on the beat:
+// 2-bar intro with a riser, a drop on bar 3 (the first app scene), four-on-the-floor kick, claps on 2 and 4,
+// off-beat bass, sidechain-pumped chords (C–G–Am–F) and a plucky lead hook. Also a mouse click and a quick whoosh.
 // Usage: node music.mjs [seconds]   → public/audio/music.wav, click.wav, whoosh.wav
 import { mkdir, writeFile } from 'node:fs/promises';
 
@@ -20,125 +22,181 @@ function wav(left, right) {
   return buf;
 }
 const hz = (midi) => 440 * 2 ** ((midi - 69) / 12);
-let seed = 7;
+let seed = 11;
 const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * 2 - 1; // deterministic noise
 
-// ---- music -------------------------------------------------------------------------------------------------------
-const seconds = Number(process.argv[2] ?? 78);
+const seconds = Number(process.argv[2] ?? 74);
 const N = Math.round(seconds * SR);
-const L = new Float32Array(N);
-const R = new Float32Array(N);
-const BPM = 100;
+const BPM = 120;
 const beat = 60 / BPM;
 const bar = beat * 4;
-// Fmaj7 – Am7 – Cmaj7 – G6 (bright, forward-moving)
-const chords = [
-  [53, 57, 60, 64],
-  [57, 60, 64, 67],
-  [48, 52, 55, 59],
-  [55, 59, 62, 64],
-];
-const roots = [41, 45, 48, 43];
-const add = (t0, dur, f, amp, shape, pan = 0, attack = 0.005, release = 0.1) => {
+const DROP = 2 * bar; // first app scene
+const OUTRO = seconds - 4.5;
+
+// Separate buses so the chords and bass can be "pumped" by the kick (sidechain) before mixing.
+const drumsL = new Float32Array(N), drumsR = new Float32Array(N);
+const musL = new Float32Array(N), musR = new Float32Array(N);
+const add = (L, R, t0, dur, f, amp, shape, pan = 0, attack = 0.004, release = 0.08) => {
   const s0 = Math.floor(t0 * SR);
   const len = Math.floor((dur + release) * SR);
   for (let i = 0; i < len && s0 + i < N; i++) {
+    if (s0 + i < 0) continue;
     const t = i / SR;
     const env = Math.min(1, t / attack) * (t < dur ? 1 : Math.max(0, 1 - (t - dur) / release));
     const v = shape(2 * Math.PI * f * t, t) * amp * env;
-    L[s0 + i] += v * (1 - pan) * 0.5 * 2 ** 0.5;
-    R[s0 + i] += v * (1 + pan) * 0.5 * 2 ** 0.5;
+    L[s0 + i] += v * (1 - pan);
+    R[s0 + i] += v * (1 + pan);
   }
 };
-const pad = (p, t) => (Math.sin(p) + 0.35 * Math.sin(2 * p) + 0.12 * Math.sin(3 * p)) * (0.85 + 0.15 * Math.sin(2 * Math.PI * 0.25 * t));
-const pluck = (p, t) => (Math.sin(p) + 0.3 * Math.sin(3 * p) / 3 + 0.2 * Math.sin(2 * p)) * Math.exp(-t * 7);
-const bass = (p, t) => (Math.sin(p) + 0.25 * Math.sin(2 * p)) * Math.exp(-t * 2.2);
+// Supersaw-ish stab: a few detuned harmonic-rich oscillators.
+const saw = (p) => Math.sin(p) + Math.sin(2 * p) / 2 + Math.sin(3 * p) / 3 + Math.sin(4 * p) / 4 + Math.sin(5 * p) / 5;
+const stab = (p, t) => (saw(p) + saw(p * 1.006) + saw(p * 0.994)) * 0.33 * Math.exp(-t * 3.2);
+const pad = (p, t) => (Math.sin(p) + 0.4 * Math.sin(2 * p) + 0.15 * Math.sin(3 * p)) * (0.9 + 0.1 * Math.sin(2 * Math.PI * 0.5 * t));
+const pluck = (p, t) => (Math.sin(p) + 0.5 * Math.sin(2 * p) + 0.25 * Math.sin(3 * p)) * Math.exp(-t * 9);
+const bassTone = (p, t) => (Math.sin(p) + 0.45 * Math.sin(2 * p) + 0.2 * Math.sin(3 * p)) * Math.exp(-t * 5);
+
+const chords = [
+  [60, 64, 67, 72], // C
+  [55, 59, 62, 67], // G
+  [57, 60, 64, 69], // Am
+  [53, 57, 60, 65], // F
+];
+const roots = [36, 31, 33, 29];
+// Lead hook (8th-note grid, two bars per motif; -1 = rest), transposed per chord.
+const hook = [
+  [72, -1, 76, -1, 79, 76, -1, 74, 72, -1, 74, 76, -1, 72, -1, -1],
+  [74, -1, 79, -1, 83, 79, -1, 78, 74, -1, 76, 79, -1, 74, -1, -1],
+  [76, -1, 81, -1, 84, 81, -1, 79, 76, -1, 79, 81, -1, 76, -1, -1],
+  [77, -1, 81, -1, 84, 81, -1, 79, 77, -1, 76, 74, -1, 72, -1, -1],
+];
 
 const bars = Math.ceil(seconds / bar);
-const introBars = 3; // pad + arpeggio only
-const outroStart = seconds - 5;
 for (let b = 0; b < bars; b++) {
   const t0 = b * bar;
-  if (t0 > seconds) break;
-  const c = chords[b % 4];
-  // pad: each chord tone slightly detuned left/right
+  const ci = b % 4;
+  const c = chords[ci];
+  const full = t0 >= DROP && t0 < OUTRO;
+  // pads (intro: soft and open; groove: under the stabs)
   for (const m of c) {
-    add(t0, bar, hz(m) * 0.998, 0.035, pad, -0.6, 0.6, 0.8);
-    add(t0, bar, hz(m) * 1.002, 0.035, pad, 0.6, 0.6, 0.8);
+    add(musL, musR, t0, bar, hz(m) * 0.998, full ? 0.022 : 0.035, pad, -0.5, 0.25, 0.4);
+    add(musL, musR, t0, bar, hz(m) * 1.002, full ? 0.022 : 0.035, pad, 0.5, 0.25, 0.4);
   }
-  // arpeggio: 8th notes, chord tones an octave up, alternating sides
-  const arp = [c[0] + 12, c[1] + 12, c[2] + 12, c[3] + 12, c[2] + 12, c[1] + 12, c[0] + 24, c[2] + 12];
-  arp.forEach((m, k) => add(t0 + (k * beat) / 2, beat / 2, hz(m), b < introBars ? 0.05 : 0.065, pluck, k % 2 ? 0.35 : -0.35, 0.003, 0.25));
-  if (b >= introBars - 1) {
-    // bass on beats 1 and 3 (and a pickup on 4&)
-    add(t0, beat * 1.5, hz(roots[b % 4]), 0.16, bass, 0, 0.01, 0.15);
-    add(t0 + beat * 2, beat * 1.2, hz(roots[b % 4]), 0.13, bass, 0, 0.01, 0.15);
-    add(t0 + beat * 3.5, beat * 0.4, hz(roots[(b + 1) % 4]), 0.09, bass, 0, 0.01, 0.1);
-  }
-  if (b >= introBars) {
-    for (let k = 0; k < 4; k++) {
-      // soft kick: pitch sweep 110 → 45 Hz
-      const s0 = Math.floor((t0 + k * beat) * SR);
-      for (let i = 0; i < 0.28 * SR && s0 + i < N; i++) {
-        const t = i / SR;
-        const f = 45 + 65 * Math.exp(-t * 30);
-        const v = Math.sin(2 * Math.PI * f * t) * Math.exp(-t * 12) * 0.32;
-        L[s0 + i] += v; R[s0 + i] += v;
-      }
-      // hats on the off-beats: short high-passed noise
-      const h0 = Math.floor((t0 + k * beat + beat / 2) * SR);
-      let prev = 0;
-      for (let i = 0; i < 0.05 * SR && h0 + i < N; i++) {
-        const n = rnd();
-        const hp = n - prev; prev = n;
-        const v = hp * Math.exp(-(i / SR) * 70) * 0.028;
-        L[h0 + i] += v * 0.8; R[h0 + i] += v;
-      }
+  if (full) {
+    // chord stabs on the off-beat "and"s
+    for (const k of [0.5, 1.5, 2.5, 3.5]) for (const m of c) add(musL, musR, t0 + k * beat, beat * 0.4, hz(m + 12), 0.03, stab, (m % 2 ? 0.3 : -0.3), 0.002, 0.06);
+    // off-beat bass, plus a pickup
+    for (let k = 0; k < 4; k++) add(musL, musR, t0 + (k + 0.5) * beat, beat * 0.42, hz(roots[ci]), 0.2, bassTone, 0, 0.003, 0.05);
+    add(musL, musR, t0 + 3.75 * beat, beat * 0.2, hz(roots[(ci + 1) % 4] + 12), 0.12, bassTone, 0, 0.003, 0.04);
+    // lead hook from the 3rd groove bar onwards, every other phrase an octave up for lift
+    if (b >= 4) {
+      const lift = Math.floor((b - 4) / 8) % 2 ? 12 : 0;
+      hook[ci].forEach((m, k) => m > 0 && add(musL, musR, t0 + (k * beat) / 2, beat * 0.45, hz(m + lift), 0.07, pluck, k % 2 ? 0.25 : -0.25, 0.002, 0.18));
     }
+  } else if (t0 < DROP) {
+    // intro arpeggio
+    [0, 1, 2, 3, 2, 1, 0, 2].forEach((k, j) => add(musL, musR, t0 + (j * beat) / 2, beat * 0.45, hz(c[k] + 12), 0.05, pluck, j % 2 ? 0.3 : -0.3, 0.002, 0.15));
   }
 }
-// master: fade in/out, gentle saturation, normalise to -3 dBFS
+
+// Drums
+const kicks = [];
+for (let t = DROP; t < OUTRO + bar; t += beat) kicks.push(t);
+for (const t of kicks) {
+  const s0 = Math.floor(t * SR);
+  for (let i = 0; i < 0.3 * SR && s0 + i < N; i++) {
+    const tt = i / SR;
+    const f = 50 + 110 * Math.exp(-tt * 28);
+    const v = Math.sin(2 * Math.PI * f * tt) * Math.exp(-tt * 9) * 0.55 + (i < 90 ? rnd() * 0.15 * (1 - i / 90) : 0);
+    drumsL[s0 + i] += v; drumsR[s0 + i] += v;
+  }
+}
+const noiseHit = (t, dur, amp, hpStrength, pan = 0, decay = 30) => {
+  const s0 = Math.floor(t * SR);
+  let prev = 0;
+  for (let i = 0; i < dur * SR && s0 + i < N; i++) {
+    const n = rnd();
+    const hp = n - prev * hpStrength; prev = n;
+    const v = hp * Math.exp(-(i / SR) * decay) * amp;
+    drumsL[s0 + i] += v * (1 - pan); drumsR[s0 + i] += v * (1 + pan);
+  }
+};
+for (let t = DROP; t < OUTRO + bar; t += bar) {
+  // claps on 2 and 4: three quick bursts
+  for (const k of [1, 3]) for (const d of [0, 0.011, 0.022]) noiseHit(t + k * beat + d, 0.12, 0.13, 0.6, 0, 26);
+  // hats: closed 16ths, open on the off-beats
+  for (let s = 0; s < 16; s++) {
+    if (s % 4 === 2) noiseHit(t + (s * beat) / 4, 0.16, 0.06, 1, 0.2, 18);
+    else noiseHit(t + (s * beat) / 4, 0.03, s % 2 ? 0.025 : 0.035, 1, -0.2, 90);
+  }
+}
+// Riser into the drop and an impact on it
+{
+  const r0 = Math.floor((DROP - bar) * SR);
+  let lp = 0;
+  for (let i = 0; i < bar * SR; i++) {
+    const t = i / (bar * SR);
+    lp += (0.02 + 0.5 * t * t) * (rnd() - lp);
+    const v = lp * t * t * 0.35;
+    drumsL[r0 + i] += v; drumsR[r0 + i] += v;
+  }
+  const s0 = Math.floor(DROP * SR);
+  for (let i = 0; i < 1.2 * SR && s0 + i < N; i++) {
+    const tt = i / SR;
+    const v = Math.sin(2 * Math.PI * (38 + 40 * Math.exp(-tt * 6)) * tt) * Math.exp(-tt * 2.5) * 0.45;
+    drumsL[s0 + i] += v; drumsR[s0 + i] += v;
+  }
+}
+
+// Sidechain: duck the music bus right after each kick, then mix, saturate, fade, normalise to about -1 dBFS.
+const L = new Float32Array(N), R = new Float32Array(N);
+const kickSamples = new Set(kicks.map((t) => Math.floor(t * SR)));
+let since = 1e9;
 let peak = 0;
 for (let i = 0; i < N; i++) {
+  if (kickSamples.has(i)) since = 0;
+  const duck = since < 1e8 ? 1 - 0.65 * Math.exp(-(since / SR) * 9) : 1;
+  since++;
   const t = i / SR;
-  const g = Math.min(1, t / 1.5) * (t > outroStart ? Math.max(0, 1 - (t - outroStart) / 5) : 1);
-  L[i] = Math.tanh(L[i] * 1.2) * g;
-  R[i] = Math.tanh(R[i] * 1.2) * g;
+  const g = Math.min(1, t / 0.3) * (t > OUTRO + 1.5 ? Math.max(0, 1 - (t - OUTRO - 1.5) / 3) : 1);
+  L[i] = Math.tanh((musL[i] * duck + drumsL[i]) * 1.35) * g;
+  R[i] = Math.tanh((musR[i] * duck + drumsR[i]) * 1.35) * g;
   peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i]));
 }
-const norm = 0.7 / peak;
-for (let i = 0; i < N; i++) { L[i] *= norm; R[i] *= norm; }
+for (let i = 0; i < N; i++) { L[i] *= 0.89 / peak; R[i] *= 0.89 / peak; }
 await writeFile(new URL('music.wav', OUT), wav(L, R));
 
-// ---- click: a crisp mouse click (transient + short body) -------------------------------------------------------------
+// Mouse click: a press and a release, crisp and short.
 {
-  const n = Math.round(0.06 * SR);
+  const n = Math.round(0.09 * SR);
   const c = new Float32Array(n);
-  let prev = 0;
-  for (let i = 0; i < n; i++) {
-    const t = i / SR;
-    const noise = rnd();
-    const hp = noise - prev; prev = noise;
-    c[i] = hp * Math.exp(-t * 900) * 0.9 + Math.sin(2 * Math.PI * 2300 * t) * Math.exp(-t * 160) * 0.45 + Math.sin(2 * Math.PI * 900 * t) * Math.exp(-t * 90) * 0.25;
-  }
+  const part = (start, amp, tone) => {
+    let prev = 0;
+    for (let i = Math.round(start * SR); i < n; i++) {
+      const t = i / SR - start;
+      const noise = rnd();
+      const hp = noise - prev; prev = noise;
+      c[i] += hp * Math.exp(-t * 1100) * amp + Math.sin(2 * Math.PI * tone * t) * Math.exp(-t * 220) * amp * 0.5;
+    }
+  };
+  part(0, 1, 2600);
+  part(0.045, 0.55, 3200);
   await writeFile(new URL('click.wav', OUT), wav(c, c));
 }
 
-// ---- whoosh: band-limited noise swelling and fading, for scene changes ---------------------------------------------
+// Quick whoosh for cuts: band-limited noise sweeping up, 0.3 s.
 {
-  const n = Math.round(0.55 * SR);
-  const l = new Float32Array(n);
-  const r = new Float32Array(n);
+  const n = Math.round(0.3 * SR);
+  const l = new Float32Array(n), r = new Float32Array(n);
   let lp1 = 0, lp2 = 0;
   for (let i = 0; i < n; i++) {
     const t = i / n;
-    const env = Math.sin(Math.PI * t) ** 2;
-    const cutoff = 0.04 + 0.25 * t; // rising brightness
+    const env = Math.sin(Math.PI * t) ** 1.5;
+    const cutoff = 0.05 + 0.4 * t;
     lp1 += cutoff * (rnd() - lp1);
     lp2 += cutoff * (lp1 - lp2);
-    l[i] = lp2 * env * 0.9 * (1 - t * 0.5);
-    r[i] = lp2 * env * 0.9 * (0.5 + t * 0.5);
+    l[i] = lp2 * env * (1 - t * 0.6);
+    r[i] = lp2 * env * (0.4 + t * 0.6);
   }
   await writeFile(new URL('whoosh.wav', OUT), wav(l, r));
 }
-console.log(`music ${seconds}s, click, whoosh written`);
+console.log(`upbeat music ${seconds}s at ${BPM} BPM, click, whoosh written`);
