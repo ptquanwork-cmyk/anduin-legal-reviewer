@@ -20,7 +20,7 @@ Regenerate them with `node scripts/build-demo-contracts.mjs` (pass file names to
 | `12-side-letter-bilingual.docx` | Word, English and Vietnamese clause by clause | Bilingual side letter | Mixed-language documents: language detection, spelling dictionaries, vague wording in both languages |
 | `13-subscription-agreement-scanned.pdf` | PDF, 2 pages, **image only** | A scanned copy with no text layer (it shows a 10 vs 15 day conflict a human can see) | Must be reported as unread, not as a clean document (no OCR in this build) |
 | `14-investor-questionnaire-corrupted.pdf` | PDF, **truncated** (first 40% of file 02) | A broken download | Must be reported as unreadable without crashing the job |
-| `15-limited-partnership-agreement-100-pages.docx` | Word, **100 pages** (counted by Word), ~55,000 words | Amended and restated limited partnership agreement: 40 articles, schedules and exhibits | Very long input; problems are spread from page 11 to page 99 so a reviewer that reads only the opening chunks misses most |
+| `15-limited-partnership-agreement-100-pages.docx` | Word, **100 pages** (counted by Word), ~52,000 words | Amended and restated limited partnership agreement: 40 articles with investor elections, an investor questionnaire (Parts A–L), six signature blocks, schedules and exhibits | Very long input; problems are spread from page 11 to page 97 so a reviewer that reads only the opening chunks misses most; about 180 fill-in places (148 blanks, 21 radio groups, 12 checkbox groups, counted by paragraph in Word) from the cover page to the last exhibit |
 
 ## Problems placed on purpose
 

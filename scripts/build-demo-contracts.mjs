@@ -422,12 +422,50 @@ const PLANTED = {
   Liquidation: ['On liquidation the liquidator shall distribute the assets in a timely manner after paying the debts of Harborline Venture Fund 4 LP.', 'The Partnership shall continue for a term of twelve (12) years from the initial closing.'],
 };
 
+// Investor elections placed at the end of articles, so fill-in fields appear throughout the agreement, not only at the back.
+const LPA_ELECTIONS = {
+  Subscription: () => [field('Name of subscribing Investor'), field('Commitment amount (USD)', 20), field('Commitment amount in words', 40), choice('Subscribing as', ['Natural person', 'Entity', 'Joint investors'])],
+  Closings: () => [choice('Closing at which the Investor is admitted', ['Initial closing', 'Second closing', 'Final closing']), field('Requested admission date', 18)],
+  'Capital Calls': () => [field('Email address for Capital Call Notices'), field('Second email address for Capital Call Notices'), choice('Delivery of Capital Call Notices', ['Email', 'Investor portal', 'Courier'], '☐')],
+  Distributions: () => [choice('Distribution election', ['Pay in cash', 'Reinvest where permitted']), field('Distribution bank name'), field('Distribution account number or IBAN', 30), field('SWIFT or ABA code', 20)],
+  'Management Fee': () => [choice('Fee class', ['Class A (standard)', 'Class B (early closer)', 'Class C (anchor)']), field('Fee discount agreed in side letter, if any (%)', 10)],
+  'Advisory Committee': () => [choice('Investor wishes to be considered for the advisory committee', ['Yes', 'No']), field('Nominated representative', 30)],
+  Transfers: () => [field('Name of proposed transferee, if known'), field('Relationship to the Investor', 30), choice('Transferee is an affiliate of the Investor', ['Yes', 'No'])],
+  Reporting: () => [choice('Reports to be delivered by', ['Email', 'Investor portal'], '☐'), field('Reporting contact name'), field('Reporting contact email')],
+  Confidentiality: () => [choice('Investor is subject to freedom of information laws', ['Yes', 'No']), field('If yes, name the law', 34)],
+  'Tax Matters': () => [choice('U.S. person for tax purposes', ['Yes', 'No']), field('Taxpayer identification number', 24), field('Tax residence country', 24), choice('Tax forms enclosed', ['W-9', 'W-8BEN', 'W-8BEN-E', 'W-8IMY'], '☐')],
+  'ERISA Matters': () => [choice('Benefit plan investor', ['Yes', 'No']), field('Percentage of plan assets', 12), field('Name of plan fiduciary', 30)],
+  'Anti-Money Laundering': () => [choice('Documents enclosed', ['Certified passport copy', 'Proof of address', 'Certificate of incorporation', 'Register of directors', 'Ownership chart'], '☐'), field('Source of funds description', 40)],
+  Sanctions: () => [choice('Investor or any beneficial owner is a politically exposed person', ['Yes', 'No']), field('If yes, give details', 40)],
+  'Data Protection': () => [choice('Consents', ['Marketing of successor funds', 'Sharing data with co-investors', 'Electronic delivery of documents'], '☐')],
+  Notices: () => [field('Notice address line 1'), field('Notice address line 2'), field('City and postal code', 28), field('Country', 24), field('Telephone', 22), field('Copy to (legal counsel)', 30)],
+  'Co-Investment': () => [choice('Interested in co-investment opportunities', ['Yes', 'No']), field('Maximum co-investment per deal (USD)', 20), choice('Sectors of interest', ['Software', 'Healthcare', 'Fintech', 'Climate', 'Consumer'], '☐')],
+  'Side Letters': () => [choice('Investor has a side letter', ['Yes', 'No']), field('Date of side letter', 18), choice('Most favoured nation election', ['Elect all eligible terms', 'Elect selected terms', 'No election'])],
+  'Excuse and Exclusion': () => [choice('Excuse requested for investments in', ['Tobacco', 'Weapons', 'Gambling', 'Fossil fuels', 'None'], '☐'), field('Basis for excuse request', 40)],
+};
+
+const LPA_QUESTIONNAIRE = [
+  ['Part A Investor Identity', () => [field('Full legal name'), field('Former names, if any'), field('Date of birth or formation', 20), field('Country of citizenship or organization', 24), field('Registration or passport number', 26), choice('Investor type', ['Natural person', 'Corporation', 'Partnership', 'Trust', 'Pension plan', 'Fund of funds', 'Endowment'])]],
+  ['Part B Contact Details', () => [field('Residential or registered address'), field('Mailing address, if different'), field('City and postal code', 28), field('Country', 24), field('Telephone', 22), field('Mobile', 22), field('Email address')]],
+  ['Part C Authorised Signatories', () => [1, 2, 3, 4].flatMap((i) => [field(`Signatory ${i} name`), field(`Signatory ${i} title`, 26), field(`Signatory ${i} email`, 30), field(`Signatory ${i} specimen signature`, 30)])],
+  ['Part D Accredited Investor Status', () => [choice('Natural persons', ['Net worth over USD 1,000,000', 'Income over USD 200,000', 'Joint income over USD 300,000', 'Licensed securities professional'], '☐'), choice('Entities', ['Assets over USD 5,000,000', 'All owners accredited', 'Registered investment adviser', 'Bank or insurance company'], '☐')]],
+  ['Part E Qualified Purchaser Status', () => [choice('Qualified purchaser', ['Yes', 'No']), choice('Basis', ['Investments of USD 5,000,000 or more', 'Company with USD 25,000,000 or more', 'Trust sponsored by qualified purchasers', 'Knowledgeable employee'], '☐')]],
+  ['Part F Beneficial Ownership', () => [1, 2, 3, 4, 5].flatMap((i) => [field(`Beneficial owner ${i} name`), field(`Beneficial owner ${i} country of residence`, 24), field(`Beneficial owner ${i} ownership percentage`, 12)])],
+  ['Part G Controlling Persons', () => [1, 2, 3].flatMap((i) => [field(`Controlling person ${i} name`), field(`Controlling person ${i} role`, 26)])],
+  ['Part H Source of Wealth', () => [choice('Source of wealth', ['Employment income', 'Business proceeds', 'Investment returns', 'Inheritance', 'Sale of property', 'Other'], '☐'), field('Description of source of wealth', 40), field('Estimated net worth (USD)', 20)]],
+  ['Part I Investment Experience', () => [choice('Years of private fund investing', ['None', '1 to 5', '6 to 10', 'More than 10']), choice('Asset classes held', ['Venture capital', 'Private equity', 'Hedge funds', 'Real estate', 'Private credit'], '☐')]],
+  ['Part J Regulatory Status', () => [choice('Investor is a bank holding company', ['Yes', 'No']), choice('Investor is a governmental entity', ['Yes', 'No']), choice('Investor is subject to the Bank Secrecy Act', ['Yes', 'No']), field('Primary regulator, if any', 30)]],
+  ['Part K Wire Instructions for Refunds', () => [table([['Wire instruction', 'Investor answer'], ['Bank name', '______________________'], ['Bank address', '______________________'], ['Account name', '______________________'], ['Account number or IBAN', '______________________'], ['SWIFT or ABA code', '______________________'], ['Intermediary bank', '______________________'], ['Reference', '______________________']])]],
+  ['Part L Commitment and Feeder', () => [field('Commitment amount (USD)', 20), choice('Investment route', ['Direct investment', 'Through a feeder fund', 'Through a parallel fund']), field('Name of feeder or parallel fund, if any', 30)]],
+];
+
 function longLpa() {
   const ch = [
     title(FUND.toUpperCase(), 30),
     title('AMENDED AND RESTATED LIMITED PARTNERSHIP AGREEMENT', 32),
     centre(`Among ${GP}, as general partner, and the limited partners named in the register`, { bold: true }),
     centre(NOTICE, { size: 18, italic: true, after: 400 }),
+    field('Dated as of', 24), field('Investor name'), field('Investor reference number', 20), field('Relationship manager', 30),
     h('Recitals'),
     p(`The Partnership was formed as a Delaware limited partnership. The General Partner and the Investors wish to amend and restate the original agreement of the Partnership in its entirety on the terms set out below.`),
     pageBreak(),
@@ -435,7 +473,7 @@ function longLpa() {
   LPA_TOPICS.forEach(([name, topic], i) => {
     const n = i + 1;
     ch.push(h(`ARTICLE ${n}. ${name.toUpperCase()}`));
-    const count = 43 + (i % 7);
+    const count = 39 + (i % 7);
     for (let k = 0; k < count; k++) {
       const clause = k % 3 === 2 ? LPA_EXTRA[(i + k) % LPA_EXTRA.length] : CLAUSES[(i + k) % CLAUSES.length];
       // Planted: duplicate section number 12.5 in Article 12.
@@ -443,14 +481,21 @@ function longLpa() {
       ch.push(p(`${num} ${clause(topic)}`));
     }
     (PLANTED[name] ?? []).forEach((t, j) => ch.push(p(`${n}.${count + j + 1} ${t}`)));
+    if (LPA_ELECTIONS[name]) ch.push(p(`Investor elections under Article ${n}`, { bold: true, before: 120, keepNext: true }), ...LPA_ELECTIONS[name]());
   });
+  ch.push(pageBreak(), title('INVESTOR QUESTIONNAIRE', 28));
+  LPA_QUESTIONNAIRE.forEach(([name, items]) => ch.push(h(name), ...items()));
+  ch.push(pageBreak(), title('SIGNATURE PAGES', 26));
+  for (const who of ['Individual investor', 'Joint investor', 'Spousal consent', 'Entity investor (first authorised signatory)', 'Entity investor (second authorised signatory)', 'Acceptance by the General Partner']) {
+    ch.push(h(who), field('Signature'), field('Name'), field('Title or capacity', 28), field('Date', 18), field('Place of signing', 26));
+  }
   ch.push(pageBreak(), title('SCHEDULES AND EXHIBITS', 26));
-  ch.push(h('Schedule A Register of Partners'), table([['Partner', 'Commitment (USD)'], ['Investor 1 (placeholder)', '______________'], ['Investor 2 (placeholder)', '______________'], ['Investor 3 (placeholder)', '______________']]));
+  ch.push(h('Schedule A Register of Partners'), table([['Partner', 'Commitment (USD)'], ...[1, 2, 3, 4, 5, 6, 7, 8].map((i) => [`Investor ${i}: ______________`, '______________'])]));
   ch.push(h('Schedule B Fee Terms'), table([['Item', 'Rate'], ['Management fee during the investment period', '1.75% of aggregate Commitments'], ['Management fee after the investment period', '1.5% of invested capital'], ['Carried interest', '20%'], ['Preferred return', '8% per annum']]));
   ch.push(h('Schedule C Closing Calendar'), table([['Event', 'Date'], ['Initial closing', '31 March 2025'], ['Final closing', '31 December 2025']]));
   ch.push(h('Exhibit A Form of Capital Call Notice'));
-  for (let i = 1; i <= 20; i++) ch.push(p(`Example ${i}: for a Commitment of USD ${i * 2},000,000 and a call of 10%, the Investor funds USD ${(i * 0.2).toFixed(1)} million within the period stated in Article 5.`));
-  ch.push(h('Exhibit B Signature Page'), field('Signature'), field('Name'), field('Title or capacity', 28), field('Date', 18));
+  for (let i = 1; i <= 60; i++) ch.push(p(`Example ${i}: for a Commitment of USD ${i * 2},000,000 and a call of 10%, the Investor funds USD ${(i * 0.2).toFixed(1)} million within the period stated in Article 5.`));
+  ch.push(h('Exhibit B Form of Transfer Request'), field('Transferor name'), field('Transferee name'), field('Interest transferred (USD of Commitment)', 20), field('Proposed transfer date', 18), choice('Transfer type', ['Sale', 'Gift', 'Transfer to affiliate', 'Transfer by operation of law']), field('Transferor signature'), field('Transferee signature'));
   return doc([{ children: ch }], 'Harborline IV Limited Partnership Agreement (100 pages)');
 }
 
