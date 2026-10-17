@@ -382,6 +382,78 @@ function longBooklet() {
   return doc([{ children: ch }], 'Harborline IV Subscription Booklet (complete)');
 }
 
+// ---------- 15 100-page limited partnership agreement (Word) ----------
+// Planted problems are spread from the first pages to the last so a reviewer that reads only the opening chunks misses most.
+const LPA_TOPICS = [
+  ...TOPICS,
+  ['Investment Period', 'the investment period'], ['Co-Investment', 'co-investment opportunities'], ['Borrowing', 'borrowing by the Partnership'],
+  ['Side Letters', 'side letters'], ['Excuse and Exclusion', 'excuse and exclusion of investors'], ['Successor Funds', 'successor funds'],
+  ['Removal of the General Partner', 'removal of the General Partner'], ['Liquidation', 'the liquidation of the Partnership'],
+];
+const LPA_EXTRA = [
+  (t) => `The General Partner shall give the Investors not less than ten Business Days' written notice of any material change in its policies concerning ${t}.`,
+  (t) => `Matters relating to ${t} that are not addressed in this Agreement shall be resolved by the General Partner acting reasonably and consistently with the purpose of the Partnership.`,
+  (t) => `The obligations of the Partnership in respect of ${t} are obligations of the Partnership only, and no Investor is personally liable for them beyond its unfunded Commitment.`,
+  (t) => `The General Partner shall report on ${t} in the annual report to Investors, including any material exceptions approved during the fiscal year.`,
+  (t) => `Each Investor waives, to the fullest extent permitted by law, any right to object to actions concerning ${t} taken in accordance with this Agreement.`,
+  (t) => `This Article applies to ${t} notwithstanding any course of dealing between the Partnership and an Investor that is inconsistent with it.`,
+];
+const PLANTED = {
+  Interpretation: ['Capitalised terms used in this Agreement have the meanings given in Article 1, except that the Hurdle Catch-Up Amount has the meaning given in the distribution waterfall.'],
+  'Capital Calls': ['The Investor shall fund each capital call within 10 Business Days after receipt of a Capital Call Notice.', 'The General Partner shall issue Capital Call Notices promptly and shall use reasonable efforts to give advance notice of large calls.'],
+  'Capital Contributions': ['Each Investor shall make its comittment available to the Partnership in accordance with this Agreement.'],
+  'Management Fee': ['During the investment period the Partnership shall pay the General Partner an annual management fee equal to 2.0% of aggregate Commitments.'],
+  'Partnership Expenses': ['Expenses of the Partnership shall be kept in a seperate account and reconciled at least quarterly.'],
+  'Carried Interest': ['The General Partner shall be entitled to the Hurdle Catch-Up Amount only after the Investors have received their preferred return.', 'Amounts subject to clawback shall be returned to the Partnership as described in Section 47.3.'],
+  'Defaulting Partners': ['A Defaulting Partner shall be allocated to the Excused Investor Pool and shall forfeit 50% of its capital account as liquidated damages.'],
+  'Key Persons': ['On the occurrence of a key person event, the Key Person Suspension Period begins and the investment period is suspended.'],
+  Transfers: ['An Investor wishing to transfer its Interest shall give the General Partner written notice at least 30 days before the proposed transfer date.'],
+  Reporting: ['Each Investor will recieve quarterly reports within 45 days after the end of each quarter and the annual audited financial statements described in Schedule H.'],
+  Indemnification: ['The Partnership shall indemnify the General Partner against any liabilty arising from its activities, except liability caused by its fraud or wilful misconduct.'],
+  Confidentiality: ['Each Investor shall keep confidential information confidential and shall accomodate reasonable requests from the General Partner to return or destroy it.'],
+  'Tax Matters': ['The General Partner shall deliver Schedule K-1 to each Investor as soon as practicable after the end of each fiscal year.'],
+  'Term and Dissolution': ['The Partnership shall continue for a term of ten (10) years from the initial closing, subject to two one-year extensions.'],
+  'Governing Law': ['This Agreement is governed by the laws of the State of Delaware.'],
+  'Dispute Resolution': ['Any dispute shall be submitted to the exclusive jurisdiction of the courts of the State of New York, and this Agreement shall be construed under New York law.'],
+  'Investment Period': ['The investment period ends on 31 September 2027 unless terminated earlier under Article 15.'],
+  'Side Letters': ['The General Partner may enter into side letters from time to time, and the most favoured nation election described in Exhibit K applies to them.'],
+  'Excuse and Exclusion': ['An Investor that is excused from an investment shall nevertheless fund its share within fifteen (15) Business Days of the Capital Call Notice.'],
+  'Removal of the General Partner': ['The General Partner may be removed by Investors holding at least 75% of Commitments, and an event that occured before removal remains subject to Article 20.'],
+  Liquidation: ['On liquidation the liquidator shall distribute the assets in a timely manner after paying the debts of Harborline Venture Fund 4 LP.', 'The Partnership shall continue for a term of twelve (12) years from the initial closing.'],
+};
+
+function longLpa() {
+  const ch = [
+    title(FUND.toUpperCase(), 30),
+    title('AMENDED AND RESTATED LIMITED PARTNERSHIP AGREEMENT', 32),
+    centre(`Among ${GP}, as general partner, and the limited partners named in the register`, { bold: true }),
+    centre(NOTICE, { size: 18, italic: true, after: 400 }),
+    h('Recitals'),
+    p(`The Partnership was formed as a Delaware limited partnership. The General Partner and the Investors wish to amend and restate the original agreement of the Partnership in its entirety on the terms set out below.`),
+    pageBreak(),
+  ];
+  LPA_TOPICS.forEach(([name, topic], i) => {
+    const n = i + 1;
+    ch.push(h(`ARTICLE ${n}. ${name.toUpperCase()}`));
+    const count = 43 + (i % 7);
+    for (let k = 0; k < count; k++) {
+      const clause = k % 3 === 2 ? LPA_EXTRA[(i + k) % LPA_EXTRA.length] : CLAUSES[(i + k) % CLAUSES.length];
+      // Planted: duplicate section number 12.5 in Article 12.
+      const num = n === 12 && k === 5 ? '12.5' : `${n}.${k + 1}`;
+      ch.push(p(`${num} ${clause(topic)}`));
+    }
+    (PLANTED[name] ?? []).forEach((t, j) => ch.push(p(`${n}.${count + j + 1} ${t}`)));
+  });
+  ch.push(pageBreak(), title('SCHEDULES AND EXHIBITS', 26));
+  ch.push(h('Schedule A Register of Partners'), table([['Partner', 'Commitment (USD)'], ['Investor 1 (placeholder)', '______________'], ['Investor 2 (placeholder)', '______________'], ['Investor 3 (placeholder)', '______________']]));
+  ch.push(h('Schedule B Fee Terms'), table([['Item', 'Rate'], ['Management fee during the investment period', '1.75% of aggregate Commitments'], ['Management fee after the investment period', '1.5% of invested capital'], ['Carried interest', '20%'], ['Preferred return', '8% per annum']]));
+  ch.push(h('Schedule C Closing Calendar'), table([['Event', 'Date'], ['Initial closing', '31 March 2025'], ['Final closing', '31 December 2025']]));
+  ch.push(h('Exhibit A Form of Capital Call Notice'));
+  for (let i = 1; i <= 20; i++) ch.push(p(`Example ${i}: for a Commitment of USD ${i * 2},000,000 and a call of 10%, the Investor funds USD ${(i * 0.2).toFixed(1)} million within the period stated in Article 5.`));
+  ch.push(h('Exhibit B Signature Page'), field('Signature'), field('Name'), field('Title or capacity', 28), field('Date', 18));
+  return doc([{ children: ch }], 'Harborline IV Limited Partnership Agreement (100 pages)');
+}
+
 // ---------- 06 Vietnamese subscription agreement (Word) ----------
 function vietnameseAgreement() {
   const body = [
@@ -786,6 +858,10 @@ if (want('13-subscription-agreement-scanned.pdf')) {
 if (want('14-investor-questionnaire-corrupted.pdf')) {
   await corrupted(path.join(OUT, '14-investor-questionnaire-corrupted.pdf'));
   keep('14-investor-questionnaire-corrupted.pdf');
+}
+if (want('15-limited-partnership-agreement-100-pages.docx')) {
+  await saveDocx(longLpa(), '15-limited-partnership-agreement-100-pages.docx');
+  keep('15-limited-partnership-agreement-100-pages.docx');
 }
 
 for (const name of built) {

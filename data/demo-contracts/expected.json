@@ -408,5 +408,85 @@
       }
     ],
     "source": "blocked"
+  },
+  "15-limited-partnership-agreement-100-pages.docx": {
+    "find": [
+      {
+        "category": "contradiction",
+        "pattern": "10 Business Days|15 Business Days|fifteen \\(15\\)|capital call"
+      },
+      {
+        "category": "contradiction",
+        "pattern": "ten \\(10\\) years|twelve \\(12\\) years|term"
+      },
+      {
+        "category": "contradiction",
+        "pattern": "2\\.0%|1\\.75%|management fee",
+        "semantic": true
+      },
+      {
+        "category": "contradiction",
+        "pattern": "Delaware|New York|governing law",
+        "semantic": true
+      },
+      {
+        "category": "missing_reference",
+        "pattern": "Section 47"
+      },
+      {
+        "category": "missing_reference",
+        "pattern": "Schedule H"
+      },
+      {
+        "category": "missing_reference",
+        "pattern": "Exhibit K"
+      },
+      {
+        "category": "typo",
+        "pattern": "comittment"
+      },
+      {
+        "category": "typo",
+        "pattern": "seperate"
+      },
+      {
+        "category": "typo",
+        "pattern": "recieve"
+      },
+      {
+        "category": "typo",
+        "pattern": "liabilty"
+      },
+      {
+        "category": "typo",
+        "pattern": "accomodate"
+      },
+      {
+        "category": "typo",
+        "pattern": "occured"
+      },
+      {
+        "category": "ambiguity",
+        "pattern": "promptly|reasonable efforts|as soon as practicable|from time to time|in a timely manner"
+      },
+      {
+        "category": "undefined_term",
+        "pattern": "Hurdle Catch-Up Amount"
+      },
+      {
+        "category": "undefined_term",
+        "pattern": "Excused Investor Pool"
+      },
+      {
+        "category": "undefined_term",
+        "pattern": "Key Person Suspension Period"
+      }
+    ],
+    "avoid": [
+      {
+        "category": "typo",
+        "pattern": "wilful|favour|authoris|capitalised"
+      }
+    ]
   }
 }

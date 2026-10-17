@@ -20,6 +20,7 @@ Regenerate them with `node scripts/build-demo-contracts.mjs` (pass file names to
 | `12-side-letter-bilingual.docx` | Word, English and Vietnamese clause by clause | Bilingual side letter | Mixed-language documents: language detection, spelling dictionaries, vague wording in both languages |
 | `13-subscription-agreement-scanned.pdf` | PDF, 2 pages, **image only** | A scanned copy with no text layer (it shows a 10 vs 15 day conflict a human can see) | Must be reported as unread, not as a clean document (no OCR in this build) |
 | `14-investor-questionnaire-corrupted.pdf` | PDF, **truncated** (first 40% of file 02) | A broken download | Must be reported as unreadable without crashing the job |
+| `15-limited-partnership-agreement-100-pages.docx` | Word, **100 pages** (counted by Word), ~55,000 words | Amended and restated limited partnership agreement: 40 articles, schedules and exhibits | Very long input; problems are spread from page 11 to page 99 so a reviewer that reads only the opening chunks misses most |
 
 ## Problems placed on purpose
 
@@ -38,5 +39,6 @@ Regenerate them with `node scripts/build-demo-contracts.mjs` (pass file names to
 | 11 | Capital calls ten (10) vs fifteen (15) Business Days; subscription fee USD 25,000 vs USD 20,000 | Schedule 3 | accomodate | reasonable | Key Person Event |
 | 12 | Capital calls 10 vs 14 Business Days (in both languages) | Section 9 / Điều 9 | — | promptly / kịp thời | — |
 | 13, 14 | — (unreadable by design) | — | — | — | — |
+| 15 | Capital calls 10 (Art. 5) vs fifteen (15) Business Days (Art. 37); term ten (10) (Art. 28) vs twelve (12) years (Art. 40); management fee 2.0% (Art. 9) vs 1.75% (Schedule B, semantic); Delaware (Art. 31) vs New York law (Art. 32, semantic); invalid date 31 September 2027 (Art. 33); fund named "Harborline Venture Fund 4 LP" (Art. 40, semantic); section 12.5 numbered twice | Section 47.3, Schedule H, Exhibit K | comittment, seperate, recieve, liabilty, accomodate, occured | promptly, reasonable efforts, as soon as practicable, from time to time, in a timely manner | Hurdle Catch-Up Amount, Excused Investor Pool, Key Person Suspension Period |
 
 British spellings (authorised, favourable, enquiry, organisational, wilful) and words such as "per annum" and "unaudited" are correct and must not be flagged. These are expectations, not guarantees: the deterministic rules catch most of them, the semantic reviewer may add or miss items, and every finding still needs a human decision. No real contract or personal data is included; the placeholder fields are blank.

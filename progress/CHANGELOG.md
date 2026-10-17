@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-17: 100-page demo contract
+
+- `15-limited-partnership-agreement-100-pages.docx`: a 100-page synthetic agreement with contradictions, missing references, spelling errors, vague wording and undefined terms spread across the whole document. Not yet run through the app.
+
 ## 2026-10-17: Sharper hub, README front page, tidier layout
 
 - The hub shows the approved 3D renders at up to 1200 px by default, with deeper shadows; real-time 3D with `?three`.
