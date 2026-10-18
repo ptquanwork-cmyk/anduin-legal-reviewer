@@ -6,6 +6,7 @@ import { extractPdf } from '../src/review/extract';
 import type { Block } from '../src/review/model';
 import { applyEdits, proposedText } from '../src/review/revise';
 import { transferStates } from '../src/digitize/fields';
+import { allRows } from '../src/lib/rows';
 import { assignSections } from '../src/review/sections';
 import { validate } from '../src/review/validate';
 
@@ -79,5 +80,16 @@ describe('field transfer to a new version', () => {
     expect(out.map((d) => d.field_id)).toEqual(['sig.a', 'sig.b', 'sig.a-2']);
     expect(out.slice(0, 2).every((d) => d.transfer_state === 'matched')).toBe(true);
     expect(new Set(out.map((d) => d.field_id)).size).toBe(out.length);
+  });
+});
+
+describe('reading long documents', () => {
+  it('reads every row past the 1000-row page limit', async () => {
+    const rows = Array.from({ length: 2345 }, (_, i) => i);
+    const calls: [number, number][] = [];
+    const r = await allRows<number>(async (a, b) => (calls.push([a, b]), { data: rows.slice(a, b + 1), error: null }));
+    expect(r.data).toEqual(rows);
+    expect(calls).toEqual([[0, 999], [1000, 1999], [2000, 2999]]);
+    expect((await allRows(async () => ({ data: null, error: { message: 'denied' } }))).error?.message).toBe('denied');
   });
 });

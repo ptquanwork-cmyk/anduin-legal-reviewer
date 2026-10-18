@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { allRows } from './rows';
 import { ensureSession, supabase } from './supabase';
 import type {
   AnnotationRow,
@@ -91,10 +92,10 @@ export function WorkspaceProvider({
     const [doc, siblings, blocks, edges, findings, annotations, submission, exports, job, decisions] = await Promise.all([
       sb.from('documents').select('*').eq('id', version.document_id).maybeSingle(),
       sb.from('document_versions').select('*').eq('document_id', version.document_id).order('version_no'),
-      sb.from('source_blocks').select('*').eq('version_id', versionId).order('idx'),
+      allRows((a, b) => sb.from('source_blocks').select('*').eq('version_id', versionId).order('idx').range(a, b)),
       sb.from('graph_edges').select('*').eq('version_id', versionId),
       sb.from('findings').select('*').eq('version_id', versionId).order('seq'),
-      sb.from('annotations').select('*').eq('version_id', versionId).order('page').order('created_at'),
+      allRows((a, b) => sb.from('annotations').select('*').eq('version_id', versionId).order('page').order('created_at').order('id').range(a, b)),
       sb.from('submissions').select('*').eq('version_id', versionId).maybeSingle(),
       sb.from('exports').select('*').eq('version_id', versionId).order('created_at', { ascending: false }),
       sb.from('jobs').select('*').eq('version_id', versionId).order('created_at', { ascending: false }).limit(1).maybeSingle(),

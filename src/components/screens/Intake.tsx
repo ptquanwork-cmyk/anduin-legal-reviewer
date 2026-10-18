@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { diffArrays } from 'diff';
 import { ArrowRight, CircleCheck, CloudUpload, FileText, Globe, History, Info, Loader2, Lock, MoreVertical, Pencil, RotateCw, TriangleAlert } from 'lucide-react';
 import { useNav } from '../../lib/nav';
+import { allRows } from '../../lib/rows';
 import { api, supabase } from '../../lib/supabase';
 import type { DuplicateCandidate, JobStep } from '../../lib/types';
 import { ACCEPT, demoFile, uploadSource } from '../../lib/upload';
@@ -295,12 +296,7 @@ function CompareModal({ candidate, onClose }: { candidate: DuplicateCandidate | 
   useEffect(() => {
     setOther(null);
     if (!candidate) return;
-    supabase()
-      .from('source_blocks')
-      .select('text')
-      .eq('version_id', candidate.version_id)
-      .order('idx')
-      .then(({ data }) => setOther((data ?? []).map((b) => b.text)));
+    allRows<{ text: string }>((a, b) => supabase().from('source_blocks').select('text').eq('version_id', candidate.version_id).order('idx').range(a, b)).then(({ data }) => setOther((data ?? []).map((b) => b.text)));
   }, [candidate]);
   const parts = useMemo(() => (other ? diffArrays(other, ws.blocks.map((b) => b.text)) : []), [other, ws.blocks]);
   const changed = parts.filter((p) => p.added || p.removed).reduce((s, p) => s + p.count, 0);

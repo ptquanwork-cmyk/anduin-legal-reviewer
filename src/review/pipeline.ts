@@ -1,8 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { JobStep, Routing, SourceIssue, SourceReport, VersionRow } from '../lib/types';
+import type { AnnotationType, JobStep, Routing, SourceIssue, SourceReport, VersionRow } from '../lib/types';
 import { convertDocx, decide, decideBatch, WorkerUnavailable } from '../integrations/worker';
 import { acroFields, detectFields, transferStates } from '../digitize/fields';
 import { download } from '../integrations/supabase-server';
+import { allRows } from '../lib/rows';
 import { runRules, type Speller } from './checks';
 import { blocksFromDocx, extractPdf, inspectDocx } from './extract';
 import type { Block, Edge, Finding } from './model';
@@ -248,7 +249,7 @@ async function similarVersions(sb: SupabaseClient, versionId: string, blocks: Bl
   const { data: others } = await sb.from('document_versions').select('id, document_id, file_name, version_no, created_at').neq('id', versionId).order('created_at', { ascending: false }).limit(20);
   const out = [];
   for (const o of others ?? []) {
-    const { data: ob } = await sb.from('source_blocks').select('text').eq('version_id', o.id).order('idx');
+    const { data: ob } = await allRows<{ text: string }>((a, b) => sb.from('source_blocks').select('text').eq('version_id', o.id).order('idx').range(a, b));
     if (!ob?.length) continue;
     const score = jaccard(mine, shingles(ob.map((b) => b.text).join(' ')));
     if (score >= 0.35) out.push({ version_id: o.id, document_id: o.document_id, file_name: o.file_name, version_no: o.version_no, created_at: o.created_at, kind: 'similar' as const, score: Math.round(score * 100) / 100 });
@@ -310,8 +311,8 @@ async function storeFields(sb: SupabaseClient, version: VersionRow, blocks: Bloc
   const acro = sourcePdf ? await acroFields(sourcePdf, blocks) : [];
   if (acro.length) detected = [...acro, ...detected.filter((d) => d.type === 'paragraph')];
   if (version.parent_id) {
-    const { data: prev } = await sb.from('annotations').select('field_id, label, type, source_block_idx').eq('version_id', version.parent_id);
-    const { data: prevBlocks } = await sb.from('source_blocks').select('idx, text').eq('version_id', version.parent_id);
+    const { data: prev } = await allRows<{ field_id: string; label: string; type: AnnotationType; source_block_idx: number }>((a, b) => sb.from('annotations').select('field_id, label, type, source_block_idx').eq('version_id', version.parent_id).order('id').range(a, b));
+    const { data: prevBlocks } = await allRows<{ idx: number; text: string }>((a, b) => sb.from('source_blocks').select('idx, text').eq('version_id', version.parent_id).order('idx').range(a, b));
     const textOf = new Map((prevBlocks ?? []).map((b) => [b.idx, b.text as string]));
     detected = transferStates(detected, blocks, (prev ?? []).map((p) => ({ ...p, text: textOf.get(p.source_block_idx) ?? '' })));
   }

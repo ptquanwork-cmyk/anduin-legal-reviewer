@@ -1,6 +1,7 @@
 import { fillAndCheck } from '../../../../../digitize/fill';
 import { validateAnswers } from '../../../../../digitize/form';
 import { download, handle, HttpError, requireUser } from '../../../../../integrations/supabase-server';
+import { allRows } from '../../../../../lib/rows';
 import type { AnnotationRow, BlockRow } from '../../../../../lib/types';
 
 export const maxDuration = 120;
@@ -14,8 +15,8 @@ export const POST = handle(async (req, ctx) => {
   if (!v?.pdf_path) throw new HttpError(409, 'A source PDF is required.');
   if (!v.annotations_approved_at) throw new HttpError(409, 'Approve annotations before generating a PDF.');
   const [{ data: anns }, { data: blocks }, { data: sub }] = await Promise.all([
-    sb.from('annotations').select('*').eq('version_id', id),
-    sb.from('source_blocks').select('*').eq('version_id', id).order('idx'),
+    allRows((a, b) => sb.from('annotations').select('*').eq('version_id', id).order('id').range(a, b)),
+    allRows((a, b) => sb.from('source_blocks').select('*').eq('version_id', id).order('idx').range(a, b)),
     sb.from('submissions').select('*').eq('version_id', id).maybeSingle(),
   ]);
   const answers = (sub?.answers ?? {}) as Record<string, string | string[]>;

@@ -46,6 +46,17 @@ async function retry(fn, label) {
   }
 }
 
+// PostgREST returns at most 1000 rows per request; long documents have more annotations than that.
+async function allRows(page) {
+  const rows = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await page(from, from + 999);
+    if (error) throw error;
+    rows.push(...data);
+    if (data.length < 1000) return rows;
+  }
+}
+
 async function workspace() {
   const sb = createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY, { auth: { persistSession: false } });
   const { data, error } = await retry(() => sb.auth.signInAnonymously(), 'sign-in');
@@ -63,7 +74,7 @@ async function call(ws, route, body) {
 // Stands in for the reviewer on screens 06–09: confirms every proposed region, approves the annotations, saves
 // synthetic answers, then asks for a draft PDF (fill + QA) and, when QA passes, the confirmed final PDF.
 async function fillPdf(ws, versionId) {
-  const { data: anns } = await ws.sb.from('annotations').select('id, field_id, type, label, options, required').eq('version_id', versionId);
+  const anns = await allRows((a, b) => ws.sb.from('annotations').select('id, field_id, type, label, options, required').eq('version_id', versionId).order('id').range(a, b));
   const fields = (anns ?? []).filter((a) => a.type !== 'paragraph');
   if (!fields.length) return 'no input fields';
   const upd = await retry(() => ws.sb.from('annotations').update({ confirmed: true, transfer_state: 'new' }).eq('version_id', versionId), 'confirm');
@@ -110,7 +121,7 @@ async function run(ws, name) {
   }
   const { data: v } = await ws.sb.from('document_versions').select('source_status, routing, source_report, language').eq('id', reg.versionId).single();
   const { data: findings } = await ws.sb.from('findings').select('category, title, rationale, evidence, provenance, evidence_status').eq('version_id', reg.versionId).order('seq');
-  const { data: anns } = await ws.sb.from('annotations').select('type, transfer_state').eq('version_id', reg.versionId);
+  const anns = await allRows((a, b) => ws.sb.from('annotations').select('type, transfer_state').eq('version_id', reg.versionId).order('id').range(a, b));
   let report = 'not run';
   try {
     report = (await call(ws, `/api/versions/${reg.versionId}/report`, {})).path ? 'exported' : 'no path';
