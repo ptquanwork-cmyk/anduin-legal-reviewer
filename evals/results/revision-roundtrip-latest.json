@@ -15,7 +15,7 @@
       "corrected_still_present": [],
       "untouched_not_matched": [],
       "new_in_revision": [],
-      "render_and_read_ms": 766
+      "render_and_read_ms": 940
     },
     {
       "file": "02-investor-questionnaire.pdf",
@@ -31,7 +31,7 @@
       "corrected_still_present": [],
       "untouched_not_matched": [],
       "new_in_revision": [],
-      "render_and_read_ms": 179
+      "render_and_read_ms": 156
     },
     {
       "file": "03-side-letter.docx",
@@ -47,7 +47,7 @@
       "corrected_still_present": [],
       "untouched_not_matched": [],
       "new_in_revision": [],
-      "render_and_read_ms": 113
+      "render_and_read_ms": 121
     },
     {
       "file": "04-subscription-booklet-scrambled.pdf",
@@ -63,7 +63,7 @@
       "corrected_still_present": [],
       "untouched_not_matched": [],
       "new_in_revision": [],
-      "render_and_read_ms": 140
+      "render_and_read_ms": 132
     },
     {
       "file": "05-subscription-booklet-long.docx",
@@ -79,7 +79,7 @@
       "corrected_still_present": [],
       "untouched_not_matched": [],
       "new_in_revision": [],
-      "render_and_read_ms": 3456
+      "render_and_read_ms": 3637
     },
     {
       "file": "05-subscription-booklet-long.pdf",
@@ -95,7 +95,7 @@
       "corrected_still_present": [],
       "untouched_not_matched": [],
       "new_in_revision": [],
-      "render_and_read_ms": 3263
+      "render_and_read_ms": 3448
     },
     {
       "file": "06-thoa-thuan-dang-ky-gop-von.docx",
@@ -111,7 +111,7 @@
       "corrected_still_present": [],
       "untouched_not_matched": [],
       "new_in_revision": [],
-      "render_and_read_ms": 121
+      "render_and_read_ms": 109
     },
     {
       "file": "07-subscription-form-fillable.pdf",
@@ -127,7 +127,7 @@
       "corrected_still_present": [],
       "untouched_not_matched": [],
       "new_in_revision": [],
-      "render_and_read_ms": 77
+      "render_and_read_ms": 94
     },
     {
       "file": "08-confidentiality-agreement-clean.pdf",
@@ -143,7 +143,7 @@
       "corrected_still_present": [],
       "untouched_not_matched": [],
       "new_in_revision": [],
-      "render_and_read_ms": 137
+      "render_and_read_ms": 127
     },
     {
       "file": "09-fee-schedule-tables.docx",
@@ -151,15 +151,15 @@
         415,
         415
       ],
-      "findings": 8,
+      "findings": 6,
       "edits": [
-        4,
-        4
+        2,
+        2
       ],
       "corrected_still_present": [],
       "untouched_not_matched": [],
       "new_in_revision": [],
-      "render_and_read_ms": 120
+      "render_and_read_ms": 169
     },
     {
       "file": "10-redemption-terms-injection.pdf",
@@ -175,7 +175,7 @@
       "corrected_still_present": [],
       "untouched_not_matched": [],
       "new_in_revision": [],
-      "render_and_read_ms": 136
+      "render_and_read_ms": 137
     },
     {
       "file": "11-amendment-two-column.docx",
@@ -183,15 +183,15 @@
         2455,
         2455
       ],
-      "findings": 8,
+      "findings": 6,
       "edits": [
-        3,
-        3
+        1,
+        1
       ],
       "corrected_still_present": [],
       "untouched_not_matched": [],
       "new_in_revision": [],
-      "render_and_read_ms": 568
+      "render_and_read_ms": 517
     },
     {
       "file": "12-side-letter-bilingual.docx",
@@ -211,7 +211,7 @@
         "Spelling: this",
         "Spelling: copy"
       ],
-      "render_and_read_ms": 106
+      "render_and_read_ms": 107
     },
     {
       "file": "15-limited-partnership-agreement-100-pages.docx",
@@ -219,17 +219,15 @@
         52253,
         52253
       ],
-      "findings": 25,
+      "findings": 24,
       "edits": [
-        9,
-        9
+        6,
+        6
       ],
       "corrected_still_present": [],
       "untouched_not_matched": [],
-      "new_in_revision": [
-        "Spelling: wilful"
-      ],
-      "render_and_read_ms": 9784
+      "new_in_revision": [],
+      "render_and_read_ms": 10118
     }
   ]
 }

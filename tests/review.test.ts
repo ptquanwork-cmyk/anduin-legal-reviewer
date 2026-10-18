@@ -52,6 +52,24 @@ describe('deterministic review rules', () => {
     expect(findings.filter((f) => f.category === 'missing_reference').map((f) => f.title)).toEqual(['Missing Annex C']);
   });
 
+  it('matches the same period worded differently, but not different actions or starting events', () => {
+    const lines = [
+      'Section 1. Funding',
+      '1.1 The Investor shall fund each capital call within 10 Business Days after receipt of a Capital Call Notice.',
+      '1.2 The Partnership shall continue for a term of ten (10) years from the initial closing, subject to two one-year extensions.',
+      '1.3 The General Partner shall deliver Schedule K-1 to each Investor within 90 days after the end of each fiscal year.',
+      'Section 2. Excuse',
+      '2.1 An Investor that is excused from an investment shall nevertheless fund its share within fifteen (15) Business Days of the Capital Call Notice.',
+      '2.2 The Partnership shall continue for a term of twelve (12) years from the initial closing.',
+      '2.3 The General Partner shall issue a Capital Call Notice within 5 Business Days after the Closing Date.',
+      '2.4 The General Partner shall send the annual report within 120 days after the end of each fiscal year.',
+    ];
+    const blocks = assignSections(lines.map((text, idx) => ({ idx, page: 1, kind: 'paragraph' as const, text, bbox: null, fonts: [], section_ref: null, section_title: null })));
+    const { findings } = runRules(blocks, 'en', null);
+    expect(findings.filter((f) => f.category === 'contradiction').map((f) => f.title).sort()).toEqual(['Conflicting capital call deadlines', 'Conflicting term lengths']);
+    expect(findings.filter((f) => f.category === 'missing_reference')).toHaveLength(0); // Schedule K-1 is a tax form
+  });
+
   it('finds all four challenge categories in the defect sample', () => {
     const blocks = sampleBlocks('data/synthetic/sample-with-defects.txt');
     const { findings } = runRules(blocks, 'en', null);

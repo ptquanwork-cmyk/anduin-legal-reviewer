@@ -19,7 +19,7 @@ const COMMON: Record<string, string> = {
   thier: 'their', recipt: 'receipt', reciept: 'receipt', acknowledgement: 'acknowledgment', arbitation: 'arbitration', garantee: 'guarantee',
 };
 const LEGAL_OK = new Set(
-  'hereinafter herein hereof hereto hereunder thereof thereto therein thereunder whereof whereas indemnitee indemnitor licensor licensee lessor lessee sublicense subcontractor subcontractors assignee assignor counterparts nonexclusive sublicensable mutatis mutandis bona fide pro rata forthwith notwithstanding'.split(
+  'hereinafter herein hereof hereto hereunder thereof thereto therein thereunder whereof whereas indemnitee indemnitor licensor licensee lessor lessee sublicense subcontractor subcontractors assignee assignor counterparts nonexclusive sublicensable mutatis mutandis bona fide pro rata forthwith notwithstanding clawback clawbacks per annum inter alia pari passu'.split(
     ' ',
   ),
 );
@@ -27,15 +27,28 @@ const LEGAL_OK = new Set(
 /** US spellings of British forms (authorised → authorized, favourable → favorable, enquiry → inquiry). */
 function usVariants(w: string) {
   return [
-    w.replace(/is(e|ed|es|ing|ation|ations|er|ers)$/, 'iz$1'),
+    w.replace(/is(e|ed|es|ing|ation|ational|ations|er|ers)$/, 'iz$1'),
     w.replace(/our(s|ed|ing|able|ably|ite|ites|er)?$/, 'or$1'),
     w.replace(/tre(s)?$/, 'ter$1'),
     w.replace(/ence(s)?$/, 'ense$1'),
     w.replace(/ll(ed|ing|er|ers)$/, 'l$1'),
+    w.replace(/([^l])l(ful|ment|ments)$/, '$1ll$2'), // wilful, instalment, fulfilment
     w.replace(/^enquir/, 'inquir'),
     w.replace(/ogue(s)?$/, 'og$1'),
     w.replace(/yse(d|s)?$/, 'yze$1'),
   ].filter((v) => v !== w);
+}
+
+const PREFIXES = new Set('un non re pre co sub inter over under counter post multi'.split(' '));
+const known = (sp: Speller, w: string) => sp.correct(w) || usVariants(w).some((v) => sp.correct(v));
+
+/** Words the dictionary lacks but builds from known parts: unaudited, nonrefundable, transferee/transferor, pledgee. */
+function wellFormed(sp: Speller, w: string) {
+  if (known(sp, w)) return true;
+  const stem = /^(\p{L}{4,})(?:ee|or)s?$/u.exec(w)?.[1];
+  if (stem && (sp.correct(stem) || sp.correct(`${stem}e`))) return true;
+  // Prefix + known word only: splitting into any two dictionary words would pass "withold" (wit+hold) and "concensus".
+  return [...PREFIXES].some((p) => w.length - p.length >= 4 && w.startsWith(p) && known(sp, w.slice(p.length)));
 }
 
 export function checkSpelling(blocks: Block[], speller: Speller | null, defined: Set<string>): Candidate[] {
@@ -47,7 +60,7 @@ export function checkSpelling(blocks: Block[], speller: Speller | null, defined:
       const lower = word.toLowerCase();
       if (seen.has(lower) || LEGAL_OK.has(lower) || defined.has(lower) || /^\p{Lu}/u.test(word)) continue;
       let fix: string | undefined = COMMON[lower];
-      if (!fix && speller && word.length >= 4 && !speller.correct(word) && !speller.correct(lower) && !usVariants(lower).some((v) => speller.correct(v))) fix = speller.suggest(lower)[0];
+      if (!fix && speller && word.length >= 4 && !speller.correct(word) && !wellFormed(speller, lower)) fix = speller.suggest(lower)[0];
       if (!fix) continue;
       seen.add(lower);
       out.push({
@@ -134,6 +147,25 @@ const VAGUE_VI = ['sớm nhất có thể', 'trong thời gian sớm nhất', 'k
 const OBLIGATION = /\b(shall|must|will|agrees? to|is required to|undertakes? to)\b|(?<![\p{L}])(phải|sẽ|có trách nhiệm|có nghĩa vụ|cam kết)(?![\p{L}])/iu;
 // Values that make two near-identical obligations conflict: periods, percentages and amounts (not clause numbers).
 const VALUE = /(\d[\d,.]*)\)?\s*(business days?|calendar days?|days?|weeks?|months?|years?|%|percent|ngày làm việc|ngày|tháng|năm)(?![\p{L}])|(?:USD|US\$|\$|VND|EUR)\s*(\d[\d,.]*)/giu;
+// "fifteen (15)": the spelled-out number repeats the numeral, so it is not part of the sentence's wording.
+const SPELLED = /\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|forty-five|fifty|sixty|ninety|hundred)\s+(?=\(\d)/giu;
+// The obliged action: "shall [nevertheless] fund", "will continue".
+const VERB = /\b(?:shall|must|will|agrees? to|undertakes? to|is required to)\s+(?:not\s+)?(?:(?:also|nevertheless|still|then|thereafter|further|\p{L}+ly)\s+)*(\p{L}+)/iu;
+// What a period runs from: "within 10 Business Days after receipt of a Capital Call Notice", "for ten (10) years from the initial closing".
+const ANCHOR = /^\s*(?:after|of|from|following)\s+(?:(?:the\s+)?receipt\s+of\s+)?(?:(?:the|a|an|each|such|any)\s+)?(\p{L}+(?:\s+\p{L}+){0,2})/iu;
+
+/** "verb|unit|anchor" → number for each period a sentence sets, so the same deadline worded differently still lines up. */
+function anchoredPeriods(s: string) {
+  const verb = VERB.exec(s)?.[1]?.toLowerCase();
+  const out = new Map<string, string>();
+  if (!verb) return out;
+  for (const m of s.matchAll(VALUE)) {
+    if (!m[2] || m[2] === '%') continue;
+    const anchor = ANCHOR.exec(s.slice((m.index ?? 0) + m[0].length))?.[1];
+    if (anchor) out.set(`${verb}|${m[2].toLowerCase().replace(/s$/, '')}|${anchor.toLowerCase()}`, m[1]);
+  }
+  return out;
+}
 
 export function checkVagueTerms(blocks: Block[], lang: 'en' | 'vi'): Candidate[] {
   const list = lang === 'vi' ? VAGUE_VI : VAGUE_EN;
@@ -169,24 +201,27 @@ export function checkVagueTerms(blocks: Block[], lang: 'en' | 'vi'): Candidate[]
 
 /** Near-identical obligations that state different numbers (deadlines, amounts, percentages). */
 export function checkNumericConflicts(blocks: Block[]): Candidate[] {
-  const items: { s: string; block: Block; shape: Set<string>; nums: string[] }[] = [];
+  const items: { s: string; block: Block; shape: Set<string>; nums: string[]; periods: Map<string, string> }[] = [];
   for (const b of body(blocks)) {
     for (const raw of sentences(b.text)) {
       const s = raw.replace(/^\d+(?:\.\d+)+\s+/, ''); // clause numbers such as "12.3" are not values
       if (!OBLIGATION.test(s)) continue;
       const nums = [...s.matchAll(VALUE)].map((m) => `${m[1] ?? m[3]}${m[2] ? ` ${m[2].toLowerCase().replace(/s$/, '')}` : ''}`);
-      const w = words(s);
+      const w = words(s.replace(SPELLED, ''));
       if (!nums.length || w.length < 6) continue;
-      items.push({ s, block: b, nums, shape: new Set(w.filter((t) => !/^\d/.test(t))) });
+      items.push({ s, block: b, nums, shape: new Set(w.filter((t) => !/^\d/.test(t))), periods: anchoredPeriods(s) });
     }
   }
+  // Same action, same unit, same starting event, different number: "fund ... within 10 Business Days after ... Capital Call Notice"
+  // vs "fund ... within fifteen (15) Business Days of the Capital Call Notice", even when the rest of the wording differs.
+  const samePeriodDiffers = (a: (typeof items)[number], c: (typeof items)[number]) => [...a.periods].some(([k, n]) => c.periods.has(k) && c.periods.get(k) !== n);
   const out: Candidate[] = [];
   const pairs = new Set<string>();
   for (let i = 0; i < items.length; i++) {
     for (let j = i + 1; j < items.length; j++) {
       const a = items[i];
       const c = items[j];
-      if (a.s === c.s || jaccard(a.shape, c.shape) < 0.8) continue;
+      if (a.s === c.s || (jaccard(a.shape, c.shape) < 0.8 && !samePeriodDiffers(a, c))) continue;
       if (a.nums.join('|') === c.nums.join('|')) continue;
       const pair = [a.nums.join('|'), c.nums.join('|'), topic(a.s)].sort().join('#');
       if (pairs.has(pair)) continue;
@@ -218,6 +253,7 @@ function topic(s: string) {
   if (/\b(pay|payment|invoice|thanh toán)/iu.test(s)) return 'payment deadlines';
   if (/\b(deliver|delivery|giao)/iu.test(s)) return 'delivery terms';
   if (/\b(terminat|notice|chấm dứt)/iu.test(s)) return 'notice periods';
+  if (/\bterm of\b|\bthời hạn/iu.test(s)) return 'term lengths';
   return 'values';
 }
 

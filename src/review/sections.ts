@@ -71,6 +71,8 @@ export function findReferences(blocks: Block[]): Reference[] {
       for (let m = re.exec(b.text); m; m = re.exec(b.text)) {
         // "Section 9 of the Partnership Agreement" points into another document, not this one.
         if (EXTERNAL.test(b.text.slice(m.index + m[0].length))) continue;
+        // "Schedule K-1" is the US partnership tax form, not a schedule of this document.
+        if (m[2] === 'K' && b.text.startsWith('-1', m.index + m[0].length)) continue;
         const kind = m[1].replace(/s$/i, '');
         out.push({ key: refKey(kind, m[2]), label: `${cap(kind)} ${m[2]}`, block_idx: b.idx, quote: sentenceAround(b.text, m.index) });
       }

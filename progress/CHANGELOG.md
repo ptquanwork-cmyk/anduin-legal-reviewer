@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-19: Sharper rules on long agreements
+
+- Conflicts: the same deadline or term worded differently (same action, unit and starting event, such as "within 10 Business Days after ... Capital Call Notice" vs "within fifteen (15) Business Days of the Capital Call Notice") is now flagged; "Schedule K-1" is no longer read as a missing schedule. British and legal spellings (wilful, organisational, unaudited, transferee, per annum, clawback) are no longer flagged. Offline eval: 68/68 rule-detectable problems (was 65/68), false-alarm hits 6 → 2.
+
 ## 2026-10-19: Revised PDF from the review
 
 - Production test of every step with the worker online; fixed a job failure when a new version has two identical lines (duplicate field IDs), and Compare now flags AI reviewer findings that may only be reworded.
