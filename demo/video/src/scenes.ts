@@ -28,7 +28,8 @@ export interface Scene {
 }
 
 export const FPS = 30;
-export const TRANSITION = 12;
+/** One beat: every fade lasts a beat and is centred on a bar line. */
+export const TRANSITION = 10;
 
 export const SECTIONS = [
   { n: 1, title: 'Upload & check the source', blurb: 'Word or PDF in, verified text out' },
@@ -50,7 +51,8 @@ const s = (n: number) => Math.round(n * FPS); // seconds → frames
 
 const chapter = (n: number): Scene => ({ id: `chapter-${n}`, kind: 'chapter', section: n, dur: s(2.5) });
 
-export const SCENES: Scene[] = [
+/** Scene plan with the intended lengths; `sync` below fits it to the music. */
+const AUTHORED: Scene[] = [
   { id: 'title', kind: 'title', dur: s(4) },
   { id: 'results', kind: 'results', dur: s(7) },
   { id: 'speed', kind: 'speed', dur: s(5) },
@@ -211,5 +213,50 @@ export const SCENES: Scene[] = [
   { id: 'end', kind: 'end', dur: s(5) },
 ];
 
+/**
+ * Beat grid of public/audio/music-rock.mp3, measured with an onset-autocorrelation tracker
+ * (180 BPM, drift under 10 ms over the track). The track's sections change on the downbeat grid (43.55 s, 52.89 s),
+ * and the first drop lands on the bar at 11.55 s. Re-measure if the music changes.
+ */
+export const BEAT = FPS * 0.33338; // frames per beat (10.0)
+const BEAT0 = FPS * 0.2148; // first beat
+const BAR = 4 * BEAT;
+const BAR0 = FPS * 0.8815; // first downbeat
+const DROP = FPS * 11.55;
+const beatAt = (f: number) => Math.round(BEAT0 + Math.round((f - BEAT0) / BEAT) * BEAT);
+const barAt = (f: number) => BAR0 + Math.round((f - BAR0) / BAR) * BAR;
+
+/**
+ * Fits the authored plan to the music: every cut (the middle of a fade) sits on a bar line, every scene lasts a whole
+ * number of bars (at least two), the results card hands over to the speed card on the first drop, and inside each
+ * scene the clicks, screen changes and camera keyframes land on beats.
+ */
+function sync(plan: Scene[]): Scene[] {
+  const wants: number[] = [];
+  const cuts: number[] = [];
+  let at = 0;
+  plan.slice(0, -1).forEach((sc, i) => {
+    at += sc.dur - TRANSITION;
+    wants.push(at + TRANSITION / 2);
+    cuts.push(sc.id === 'results' ? barAt(DROP) : i === 0 ? barAt(wants[0]) : cuts[i - 1] + Math.max(2, Math.round((wants[i] - wants[i - 1]) / BAR)) * BAR);
+  });
+  const starts = [0, ...cuts.map((c) => Math.round(c - TRANSITION / 2))];
+  return plan.map((sc, i) => {
+    const dur = i < plan.length - 1 ? starts[i + 1] + TRANSITION - starts[i] : sc.dur;
+    const k = dur / sc.dur;
+    const last = dur - TRANSITION - 1;
+    const snap = (f: number) => Math.min(last, Math.max(1, beatAt(starts[i] + f * k) - starts[i]));
+    const rising = <T extends { f: number }>(xs: T[]) => xs.reduce<T[]>((acc, x) => [...acc, { ...x, f: acc.length && x.f <= acc[acc.length - 1].f ? acc[acc.length - 1].f + 1 : x.f }], []);
+    return {
+      ...sc,
+      dur,
+      layers: sc.layers?.map((l) => ({ ...l, from: l.from === 0 ? 0 : snap(l.from) })),
+      cam: sc.cam && rising(sc.cam.map((c) => ({ ...c, f: c.f === 0 ? 0 : snap(c.f) }))),
+      cursor: sc.cursor && rising(sc.cursor.map((p) => ({ ...p, f: p.click ? snap(p.f) : Math.round(p.f * k) }))),
+    };
+  });
+}
+
+export const SCENES = sync(AUTHORED);
 export const TOTAL = SCENES.reduce((sum, x) => sum + x.dur, 0) - TRANSITION * (SCENES.length - 1);
 export const STARTS = SCENES.reduce<number[]>((acc, x, i) => [...acc, i === 0 ? 0 : acc[i - 1] + SCENES[i - 1].dur - TRANSITION], []);

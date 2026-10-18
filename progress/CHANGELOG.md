@@ -7,7 +7,7 @@
 ## 2026-10-19: Revised PDF from the review
 
 - Long documents: every block and annotation is read (was cut at 1,000 rows; the 100-page agreement now fills all 160 fields).
-- Introduction video redone (94 s): 19 Oct production numbers with 95% intervals, the Create revised PDF step and a Vietnamese answer.
+- Introduction video redone (96 s): 19 Oct production numbers with 95% intervals, the Create revised PDF step and a Vietnamese answer; new rock track from the owner, with every cut on a bar line, clicks and screen changes on beats, and the music ducking under the clicks.
 - Production test of every step with the worker online; fixed a job failure when a new version has two identical lines (duplicate field IDs), and Compare now flags AI reviewer findings that may only be reworded.
 - Decision / report: **Create revised PDF** writes the corrections for confirmed issues into a revised PDF (spelling fixes pre-filled), to download or upload as the next version; Compare then shows which findings it no longer contains.
 - Compare waits for the newer version's checks and keeps same-named findings as still present.

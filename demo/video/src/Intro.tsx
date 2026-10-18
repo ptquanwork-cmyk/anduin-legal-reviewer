@@ -38,6 +38,7 @@ function camera(keys: Cam[] | undefined, f: number) {
 }
 
 /** Gentle entrance used everywhere: fade and rise. */
+// Card delays sit on beats: every scene after the first starts 5 frames before a bar line, and a beat is 10 frames.
 function useEnter(delay: number) {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -90,7 +91,7 @@ function SectionTag({ n }: { n: number }) {
 
 function Caption({ text, dur }: { text: string; dur: number }) {
   const f = useCurrentFrame();
-  const enter = useEnter(10);
+  const enter = useEnter(15);
   return (
     <div
       style={{
@@ -132,7 +133,7 @@ function Shot({ scene }: { scene: Scene }) {
         ?.filter((p) => p.click)
         .map((p) => (
           <Sequence key={p.f} from={p.f} durationInFrames={20} layout="none">
-            <Audio src={staticFile('audio/click.wav')} volume={0.9} />
+            <Audio src={staticFile('audio/click.wav')} volume={1} />
           </Sequence>
         ))}
     </AbsoluteFill>
@@ -164,10 +165,10 @@ function Title() {
             <span style={{ fontFamily: body, fontWeight: 400, fontSize: 104, color: INK }}>Legal Reviewer</span>
           </div>
         </Rise>
-        <Rise delay={22}>
+        <Rise delay={26}>
           <div style={{ fontFamily: display, fontWeight: 700, fontSize: 64, color: PRIMARY, marginTop: 18 }}>Review contracts before you digitize.</div>
         </Rise>
-        <Rise delay={40}>
+        <Rise delay={46}>
           <div style={{ fontFamily: body, fontWeight: 500, fontSize: 30, color: MUTED, marginTop: 30 }}>The Legal Reviewer challenge · Anduin Cybernetics hackathon</div>
         </Rise>
       </AbsoluteFill>
@@ -216,26 +217,26 @@ function Results() {
     <AbsoluteFill>
       <Backdrop />
       <AbsoluteFill style={{ padding: '90px 110px', flexDirection: 'column' }}>
-        <Rise delay={0}>
+        <Rise delay={5}>
           <div style={{ fontFamily: body, fontWeight: 600, fontSize: 28, color: PRIMARY, letterSpacing: 1 }}>RESULTS</div>
           <div style={{ fontFamily: display, fontWeight: 800, fontSize: 70, color: INK, letterSpacing: -1.5 }}>Tested end to end on the live app</div>
         </Rise>
         <div style={{ display: 'flex', gap: 40, marginTop: 50 }}>
           {RESULTS.accuracy.map((r, i) => (
-            <StatCard key={r.label} {...r} delay={14 + i * 10} />
+            <StatCard key={r.label} {...r} delay={15 + i * 10} />
           ))}
         </div>
         <div style={{ display: 'flex', gap: 40, marginTop: 36 }}>
           {RESULTS.trust.map((r, i) => (
-            <StatCard key={r.label} {...r} delay={70 + i * 10} />
+            <StatCard key={r.label} {...r} delay={75 + i * 10} />
           ))}
         </div>
-        <Rise delay={96} style={{ marginTop: 34 }}>
+        <Rise delay={105} style={{ marginTop: 34 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 14, padding: '14px 24px', borderRadius: 16, background: '#fff4dc', color: '#7a4b00', fontFamily: body, fontWeight: 600, fontSize: 24 }}>
             <span style={{ fontSize: 26 }}>⚠</span> {RESULTS.limit}
           </div>
         </Rise>
-        <Rise delay={104} style={{ marginTop: 'auto' }}>
+        <Rise delay={115} style={{ marginTop: 'auto' }}>
           <div style={{ fontFamily: body, fontSize: 20, color: MUTED }}>{RESULTS.source}</div>
         </Rise>
       </AbsoluteFill>
@@ -253,30 +254,30 @@ function Speed() {
     <AbsoluteFill>
       <Backdrop />
       <AbsoluteFill style={{ padding: '110px 130px', flexDirection: 'column' }}>
-        <Rise delay={0}>
+        <Rise delay={5}>
           <div style={{ fontFamily: body, fontWeight: 600, fontSize: 28, color: PRIMARY, letterSpacing: 1 }}>SPEED</div>
           <div style={{ fontFamily: display, fontWeight: 800, fontSize: 66, color: INK, letterSpacing: -1.5 }}>
             A {s.pages}-page booklet, {s.words} words
           </div>
         </Rise>
         <div style={{ marginTop: 70, display: 'flex', flexDirection: 'column', gap: 44 }}>
-          <Rise delay={12}>
+          <Rise delay={15}>
             <div style={{ fontFamily: display, fontWeight: 600, fontSize: 30, color: MUTED, marginBottom: 12 }}>Reading it once</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 26 }}>
-              <div style={{ height: 54, width: W * grow(14), borderRadius: 14, background: '#c7d3e3' }} />
+              <div style={{ height: 54, width: W * grow(15), borderRadius: 14, background: '#c7d3e3' }} />
               <span style={{ fontFamily: display, fontWeight: 700, fontSize: 44, color: MUTED }}>≈ {s.reading} min</span>
             </div>
           </Rise>
-          <Rise delay={30}>
+          <Rise delay={35}>
             <div style={{ fontFamily: display, fontWeight: 600, fontSize: 30, color: INK, marginBottom: 12 }}>Anduin Legal Reviewer</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 26 }}>
-              <div style={{ height: 54, width: Math.max(12, (W * appMinutes * grow(32)) / s.reading), borderRadius: 14, background: PRIMARY }} />
+              <div style={{ height: 54, width: Math.max(12, (W * appMinutes * grow(35)) / s.reading), borderRadius: 14, background: PRIMARY }} />
               <span style={{ fontFamily: display, fontWeight: 700, fontSize: 44, color: PRIMARY }}>{s.minutes} min</span>
               <span style={{ fontFamily: body, fontSize: 28, color: INK }}>→ {s.findings} findings, each linked to its source</span>
             </div>
           </Rise>
         </div>
-        <Rise delay={60} style={{ marginTop: 'auto' }}>
+        <Rise delay={65} style={{ marginTop: 'auto' }}>
           <div style={{ fontFamily: body, fontSize: 20, color: MUTED }}>Reading time estimated at 238 words per minute (Brysbaert, 2019). Review time measured on production. No timed human study.</div>
         </Rise>
       </AbsoluteFill>
@@ -286,7 +287,7 @@ function Speed() {
 
 function Chapter({ n }: { n: number }) {
   const sec = SECTIONS[n - 1];
-  const e = useEnter(4);
+  const e = useEnter(5);
   return (
     <AbsoluteFill>
       <Backdrop blur={20} opacity={0.14} />
@@ -294,15 +295,15 @@ function Chapter({ n }: { n: number }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 44 }}>
           <div style={{ width: 170, height: 170, borderRadius: '50%', display: 'grid', placeItems: 'center', background: PRIMARY, color: '#fff', fontFamily: display, fontWeight: 800, fontSize: 92, opacity: e, scale: String(0.85 + 0.15 * e), boxShadow: '0 24px 60px rgba(0,104,254,.35)' }}>{n}</div>
           <div>
-            <Rise delay={8}>
+            <Rise delay={15}>
               <div style={{ fontFamily: display, fontWeight: 800, fontSize: 84, color: INK, letterSpacing: -2 }}>{sec.title}</div>
             </Rise>
-            <Rise delay={16}>
+            <Rise delay={25}>
               <div style={{ fontFamily: body, fontWeight: 500, fontSize: 36, color: MUTED, marginTop: 8 }}>{sec.blurb}</div>
             </Rise>
           </div>
         </div>
-        <Rise delay={20} style={{ marginTop: 70, display: 'flex', gap: 14, paddingLeft: 214 }}>
+        <Rise delay={35} style={{ marginTop: 70, display: 'flex', gap: 14, paddingLeft: 214 }}>
           {SECTIONS.map((x) => (
             <span key={x.n} style={{ width: x.n === n ? 60 : 16, height: 16, borderRadius: 16, background: x.n <= n ? PRIMARY : '#c9d7ea' }} />
           ))}
@@ -317,20 +318,20 @@ function End() {
     <AbsoluteFill>
       <Backdrop opacity={0.22} />
       <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
-        <Rise delay={4}>
+        <Rise delay={5}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 18, justifyContent: 'center' }}>
             <span style={{ fontFamily: display, fontWeight: 800, fontSize: 96, letterSpacing: -2, color: INK }}>Anduin</span>
             <span style={{ fontFamily: body, fontSize: 68, color: INK }}>Legal Reviewer</span>
           </div>
         </Rise>
-        <Rise delay={16}>
+        <Rise delay={15}>
           <div style={{ fontFamily: body, fontWeight: 600, fontSize: 30, color: MUTED, marginTop: 36 }}>Try it live</div>
           <div style={{ fontFamily: display, fontWeight: 700, fontSize: 58, color: PRIMARY, marginTop: 6 }}>anduin-legal-reviewer.vercel.app</div>
         </Rise>
-        <Rise delay={28}>
+        <Rise delay={25}>
           <div style={{ fontFamily: body, fontSize: 28, color: '#3c4a66', marginTop: 40 }}>github.com/ptquanwork-cmyk/anduin-legal-reviewer</div>
         </Rise>
-        <Rise delay={40}>
+        <Rise delay={35}>
           <div style={{ fontFamily: body, fontWeight: 500, fontSize: 28, color: INK, marginTop: 46 }}>Built by Pham The Quan (Jayson)</div>
         </Rise>
       </AbsoluteFill>
@@ -355,6 +356,13 @@ function render(s: Scene) {
   }
 }
 
+const HITS = SCENES.flatMap((s, i) => [
+  ...(s.cursor ?? []).filter((p) => p.click).map((p) => STARTS[i] + p.f),
+  ...(s.kind === 'chapter' || s.kind === 'results' ? [STARTS[i] - 4] : []),
+]);
+/** Music gain under the clicks: down to 22% from 2 frames before a hit, back over the 6 frames after. */
+const duck = (fr: number) => HITS.reduce((g, h) => Math.min(g, interpolate(fr, [h - 3, h - 1, h + 4, h + 10], [1, 0.22, 0.22, 1], clamp)), 1);
+
 export function Intro() {
   return (
     <AbsoluteFill style={{ background: '#dbe8f7' }}>
@@ -372,11 +380,13 @@ export function Intro() {
       {SCENES.map((s, i) =>
         s.kind === 'chapter' || s.kind === 'results' ? (
           <Sequence key={s.id} from={STARTS[i] - 4} durationInFrames={12} layout="none">
-            <Audio src={staticFile('audio/whoosh.wav')} volume={0.25} />
+            <Audio src={staticFile('audio/whoosh.wav')} volume={0.45} />
           </Sequence>
         ) : null,
       )}
-      <Audio src={staticFile('audio/music.wav')} volume={(fr) => interpolate(fr, [0, 10, TOTAL - 45, TOTAL], [0, 0.7, 0.7, 0], clamp)} />
+      {/* Owner-supplied track (MorningLightMusic), kept out of the repository; see README. Clicks fall on beats, where the
+          drums would mask them, so the music ducks for a moment under every click and section whoosh. */}
+      <Audio src={staticFile('audio/music-rock.mp3')} volume={(fr) => interpolate(fr, [0, 10, TOTAL - 60, TOTAL], [0, 0.45, 0.45, 0], clamp) * duck(fr)} />
     </AbsoluteFill>
   );
 }

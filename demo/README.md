@@ -2,7 +2,7 @@
 
 ## Introduction video
 
-[`video/anduin-legal-reviewer-intro.mp4`](video/anduin-legal-reviewer-intro.mp4) is a 94-second introduction: measured results first (19 October production run, with 95% intervals), then six chaptered sections walking through every function, including the revised PDF and Vietnamese answers. It is built with Remotion from real screens of the app (synthetic demo data). Sources and rebuild steps are in [`video/README.md`](video/README.md). The README plays a 720p copy (under 10 MB) uploaded as a GitHub attachment, because GitHub only plays attached videos inline.
+[`video/anduin-legal-reviewer-intro.mp4`](video/anduin-legal-reviewer-intro.mp4) is a 96-second introduction, cut to the beat of its music: measured results first (19 October production run, with 95% intervals), then six chaptered sections walking through every function, including the revised PDF and Vietnamese answers. It is built with Remotion from real screens of the app (synthetic demo data). Sources and rebuild steps are in [`video/README.md`](video/README.md). The README plays a 720p copy (under 10 MB) uploaded as a GitHub attachment, because GitHub only plays attached videos inline.
 
 ## Screenshots
 
