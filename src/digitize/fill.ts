@@ -25,6 +25,9 @@ export async function fillAndCheck(source: Uint8Array, anns: AnnotationRow[], bl
   // Fillable source PDFs: their widgets would sit on top of the drawn answers, so they are flattened first.
   if (doc.getForm().getFields().length) doc.getForm().flatten();
   const fonts = await embedFonts(doc);
+  // Liberation keeps Latin answers as measured; an answer with letters it lacks (Vietnamese) is drawn and fitted in DejaVu.
+  const latin = new Set(fonts.regular.getCharacterSet());
+  let wide: PDFFont | undefined;
   const pages = doc.getPages();
   const issues: QaIssue[] = [];
   const drawn: { field_id: string; page: number; text: string; clipped: boolean }[] = [];
@@ -41,9 +44,11 @@ export async function fillAndCheck(source: Uint8Array, anns: AnnotationRow[], bl
     const toY = (y: number, h: number) => H - y - h;
     if (a.type === 'text_box' && typeof v === 'string' && v.trim()) {
       const padX = 3;
-      const f = fit(v.trim(), fonts.regular, a.bbox.w - padX * 2, a.bbox.h);
+      const t = v.trim();
+      const font = [...t].every((c) => latin.has(c.codePointAt(0)!) || /\s/.test(c)) ? fonts.regular : (wide ??= (await embedFonts(doc, true)).regular);
+      const f = fit(t, font, a.bbox.w - padX * 2, a.bbox.h);
       page.drawRectangle({ x: a.bbox.x, y: toY(a.bbox.y, a.bbox.h) + 2, width: a.bbox.w, height: a.bbox.h - 3, color: rgb(1, 1, 1) });
-      page.drawText(f.shown, { x: a.bbox.x + padX, y: toY(a.bbox.y, a.bbox.h) + (a.bbox.h - f.size) / 2 + 1, size: f.size, font: fonts.regular, color: rgb(0.05, 0.1, 0.3) });
+      page.drawText(f.shown, { x: a.bbox.x + padX, y: toY(a.bbox.y, a.bbox.h) + (a.bbox.h - f.size) / 2 + 1, size: f.size, font, color: rgb(0.05, 0.1, 0.3) });
       drawn.push({ field_id: a.field_id, page: a.page, text: f.shown, clipped: f.clipped });
       if (f.clipped) {
         if (!final) page.drawRectangle({ x: a.bbox.x - 2, y: toY(a.bbox.y, a.bbox.h) - 2, width: a.bbox.w + 4, height: a.bbox.h + 4, borderColor: rgb(0.9, 0.22, 0.25), borderWidth: 1.2 });

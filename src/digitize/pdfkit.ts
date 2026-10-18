@@ -6,8 +6,8 @@ import { BLOCK_START } from '../review/extract';
 
 /**
  * Liberation Sans 1.07 (SIL OFL, shipped with pdfjs-dist) has no Vietnamese letters beyond Đ/đ, so flowing text that
- * may quote the document (reports, revised drafts) uses DejaVu Sans (`wide`). Form fill keeps Liberation: its box
- * widths and clipping QA were measured with it.
+ * may quote the document (reports, revised drafts) uses DejaVu Sans (`wide`). Form fill keeps Liberation (its box
+ * widths and clipping QA were measured with it) and switches to DejaVu only for answers with letters Liberation lacks.
  */
 export async function embedFonts(doc: PDFDocument, wide = false) {
   doc.registerFontkit(fontkit);

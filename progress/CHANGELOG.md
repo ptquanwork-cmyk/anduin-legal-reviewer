@@ -5,6 +5,7 @@
 - Decision / report: **Create revised PDF** writes the corrections for confirmed issues into a revised PDF (spelling fixes pre-filled), to download or upload as the next version; Compare then shows which findings it no longer contains.
 - Compare waits for the newer version's checks and keeps same-named findings as still present.
 - Review report and revised PDFs use DejaVu Sans, so Vietnamese letters are no longer dropped.
+- Filled forms draw Vietnamese answers in DejaVu Sans, so every letter is kept; Latin-only answers are unchanged.
 
 ## 2026-10-17: 100-page demo contract
 
