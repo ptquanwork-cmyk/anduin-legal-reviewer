@@ -17,7 +17,8 @@ Both checkouts have local uncommitted files. Their original remotes remain intac
 
 - **Laya** is used as a library, not copied: `worker/requirements.txt` installs `laya==0.4.7` from PyPI (Apache-2.0); on the owner's machine the worker runs in the existing local Laya environment. The app calls `Router.predict` / `Router.predict_batch` with fixed question sets and reports `answer_confidence` as not calibrated (Laya's own documentation states shipped temperatures must be fitted on task data before gating). No Laya source or model weights are committed here; checkpoints are downloaded from Hugging Face (`convaiinnovations/laya`) at runtime.
 - **contract-reader-agent** code is not used. Its idea of learning from accepted/ignored suggestions informed the Feedback page, implemented independently (decision events, reviewer-selected examples).
-- **Liberation Sans** fonts (SIL Open Font License, licence in `src/assets/fonts/LICENSE_LIBERATION`) are copied from `pdfjs-dist` for Vietnamese-capable PDF output.
+- **Liberation Sans** fonts (SIL Open Font License, licence in `src/assets/fonts/LICENSE_LIBERATION`) are copied from `pdfjs-dist` for form-fill PDF output (version 1.07: no Vietnamese letters beyond Đ/đ).
+- **DejaVu Sans** fonts (Bitstream Vera licence with public-domain DejaVu changes, licence in `src/assets/fonts/LICENSE_DEJAVU`) are copied from matplotlib's bundled fonts for the review report and revised PDFs, including Vietnamese text.
 
 ## Reuse policy
 

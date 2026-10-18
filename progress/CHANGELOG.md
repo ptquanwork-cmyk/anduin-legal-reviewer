@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-19: Revised PDF from the review
+
+- Decision / report: **Create revised PDF** writes the corrections for confirmed issues into a revised PDF (spelling fixes pre-filled), to download or upload as the next version; Compare then shows which findings it no longer contains.
+- Compare waits for the newer version's checks and keeps same-named findings as still present.
+- Review report and revised PDFs use DejaVu Sans, so Vietnamese letters are no longer dropped.
+
 ## 2026-10-17: 100-page demo contract
 
 - `15-limited-partnership-agreement-100-pages.docx`: a 100-page synthetic agreement with contradictions, missing references, spelling errors, vague wording and undefined terms spread across the whole document, and about 180 places to fill in (blanks, radio groups, checkboxes) from the cover to the last exhibit. Not yet run through the app.

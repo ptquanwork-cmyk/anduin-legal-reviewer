@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, ChevronDown, ChevronRight, CircleAlert, CircleCheck, Copy, Download, FileText, Files, Info, Loader2, Upload } from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronRight, CircleAlert, CircleCheck, Copy, Download, FilePen, FileText, Files, Info, Loader2, RotateCw, Upload } from 'lucide-react';
 import { useNav } from '../../lib/nav';
 import { reviewOutcome } from '../../lib/outcome';
-import { api, signedUrl, supabase } from '../../lib/supabase';
+import { api, ensureSession, signedUrl, supabase } from '../../lib/supabase';
 import type { DecisionAction, FindingRow, VersionRow } from '../../lib/types';
 import { ACCEPT, uploadSource } from '../../lib/upload';
+import { proposedText, type Edit } from '../../review/revise';
 import { useWorkspace } from '../../lib/workspace';
 import { StageStrip } from '../shell/Chrome';
 import { fmtTime, Modal, reviewState, STATE, StateChip, type ReviewState } from '../ui';
@@ -30,6 +31,7 @@ export function DecisionReport() {
   const [questions, setQuestions] = useState('');
   const [exporting, setExporting] = useState(false);
   const [compare, setCompare] = useState(false);
+  const [revise, setRevise] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [modal, setModal] = useState<'dismiss' | 'clarify' | null>(null);
 
@@ -94,7 +96,7 @@ export function DecisionReport() {
         : count('clarify')
           ? `${count('clarify')} finding(s) wait for counsel. Send the question list; when answered, Dismiss, Approve as exception, or upload the revised version.`
           : count('confirmed')
-            ? `${count('confirmed')} confirmed issue(s) block digitization: upload the revised document (Compare, top right) or Approve as exception to accept the wording.`
+            ? `${count('confirmed')} confirmed issue(s) block digitization: upload the revised document (Compare, top right; Create revised PDF prepares one from your corrections) or Approve as exception to accept the wording.`
             : 'Every finding has a final decision. Export the report if needed, then continue to annotation.';
 
   const tone = TONE[outcome.key];
@@ -251,6 +253,9 @@ export function DecisionReport() {
         <button className="btn-outline mt-2 flex h-[38px] items-center justify-center gap-2 text-[15px]" onClick={exportReport} disabled={!ws.version || exporting}>
           {exporting ? <Loader2 size={17} className="animate-spin" /> : <Download size={17} />} Export review report
         </button>
+        <button className="btn-outline mt-2 flex h-[38px] items-center justify-center gap-2 text-[15px]" onClick={() => setRevise(true)} disabled={!ws.version}>
+          <FilePen size={17} /> Create revised PDF
+        </button>
         {!outcome.canDigitize && (
           <div className="mt-3 flex items-start gap-3 rounded-2xl px-4 py-2.5" style={{ background: tone[0] }}>
             <CircleAlert size={26} className="shrink-0" fill={tone[2]} color="#fff" />
@@ -276,6 +281,7 @@ export function DecisionReport() {
       </Panel>
 
       <CompareModal open={compare} onClose={() => setCompare(false)} newer={newer} />
+      <RevisionModal open={revise} onClose={() => setRevise(false)} onUploaded={() => { setRevise(false); setCompare(true); }} />
       {sel && <DismissModal open={modal === 'dismiss'} onClose={() => setModal(null)} onSubmit={(r, n, ex) => { setModal(null); decide('dismiss', r, n, ex); }} />}
       {sel && <ClarifyModal open={modal === 'clarify'} question={sel.question} onClose={() => setModal(null)} onSubmit={(q) => { setModal(null); decide('clarify', null, q); }} />}
     </>
@@ -354,18 +360,19 @@ function CompareModal({ open, onClose, newer }: { open: boolean; onClose: () => 
   const nav = useNav();
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
-  const [target, setTarget] = useState<{ fingerprints: Set<string>; titles: string[] } | null>(null);
+  const [target, setTarget] = useState<{ fingerprints: Set<string>; keys: Set<string>; titles: string[]; reviewed: boolean } | null>(null);
+  const [tick, setTick] = useState(0);
   const v2 = newer[0];
 
+  // The newer version's own status is read fresh: until its checks finish it has no findings, which must not read as "resolved".
   useEffect(() => {
     setTarget(null);
     if (!open || !v2) return;
-    supabase()
-      .from('findings')
-      .select('fingerprint, title')
-      .eq('version_id', v2.id)
-      .then(({ data }) => setTarget({ fingerprints: new Set((data ?? []).map((d) => d.fingerprint)), titles: (data ?? []).map((d) => d.title) }));
-  }, [open, v2]);
+    const sb = supabase();
+    Promise.all([sb.from('document_versions').select('status').eq('id', v2.id).maybeSingle(), sb.from('findings').select('fingerprint, title, category').eq('version_id', v2.id)]).then(([v, { data }]) =>
+      setTarget({ fingerprints: new Set((data ?? []).map((d) => d.fingerprint)), keys: new Set((data ?? []).map((d) => `${d.category}|${d.title}`)), titles: (data ?? []).map((d) => d.title), reviewed: v.data?.status === 'reviewed' }),
+    );
+  }, [open, v2, tick]);
 
   const upload = async (file: File) => {
     if (!ws.document) return;
@@ -400,13 +407,28 @@ function CompareModal({ open, onClose, newer }: { open: boolean; onClose: () => 
         </>
       ) : !target ? (
         <Loader2 className="mx-auto animate-spin" />
+      ) : !target.reviewed ? (
+        <div className="space-y-3">
+          <p className="text-[14.5px]" style={{ color: 'var(--muted)' }}>
+            Checks are still running on v{v2.version_no} (or stopped before finishing). Findings can be compared once they are done.
+          </p>
+          <div className="flex gap-4">
+            <button className="btn-outline flex h-10 items-center gap-2 px-4 text-[14px]" onClick={() => setTick((t) => t + 1)}>
+              <RotateCw size={16} /> Check again
+            </button>
+            <button className="text-[14px]" style={{ color: 'var(--primary)' }} onClick={() => { ws.setVersionId(v2.id); onClose(); }}>
+              Open v{v2.version_no} to see its job →
+            </button>
+          </div>
+        </div>
       ) : (
         <div className="space-y-2">
           <p className="mb-2 text-[14px]" style={{ color: 'var(--muted)' }}>
             Findings of v{ws.version?.version_no} compared by evidence with the checks of v{v2.version_no}. A finding absent from v{v2.version_no} is only a proposal until you mark it resolved.
           </p>
           {ws.findings.map((f) => {
-            const still = target.fingerprints.has(f.fingerprint);
+            // Same evidence, or the same rule result by name (editing a shared sentence changes the evidence of its other findings).
+            const still = target.fingerprints.has(f.fingerprint) || target.keys.has(`${f.category}|${f.title}`);
             const st = reviewState(f, ws.decisions);
             return (
               <div key={f.id} className="flex items-center justify-between gap-3 rounded-xl border px-4 py-2.5 text-[14px]" style={{ borderColor: 'var(--panel-border)' }}>
@@ -430,6 +452,120 @@ function CompareModal({ open, onClose, newer }: { open: boolean; onClose: () => 
           </button>
         </div>
       )}
+    </Modal>
+  );
+}
+
+/** Corrections for confirmed and clarification findings → revised draft PDF, downloaded or registered as the next version. */
+function RevisionModal({ open, onClose, onUploaded }: { open: boolean; onClose: () => void; onUploaded: () => void }) {
+  const ws = useWorkspace();
+  const nav = useNav();
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<'download' | 'upload' | null>(null);
+  useEffect(() => setDrafts({}), [ws.version?.id]);
+
+  // One editor per quoted passage: findings that quote the same sentence share it, so their corrections cannot collide.
+  const passages: { key: string; block_idx: number; quote: string; page: number | null; section: string | null; findings: FindingRow[] }[] = [];
+  for (const f of ws.findings.filter((x) => ['confirmed', 'clarify'].includes(reviewState(x, ws.decisions))))
+    for (const e of f.evidence.filter((x) => x.matched)) {
+      const key = `${e.block_idx}|${e.quote}`;
+      const p = passages.find((x) => x.key === key);
+      if (!p) passages.push({ key, block_idx: e.block_idx, quote: e.quote, page: e.page, section: e.section, findings: [f] });
+      else if (!p.findings.includes(f)) p.findings.push(f);
+    }
+  const value = (p: (typeof passages)[number]) => drafts[p.key] ?? p.findings.reduce((t, f) => proposedText(f, t), p.quote);
+  const edits: Edit[] = passages.filter((p) => value(p).trim() && value(p).trim() !== p.quote).map((p) => ({ block_idx: p.block_idx, quote: p.quote, text: value(p) }));
+
+  const build = async () => {
+    const session = await ensureSession();
+    const res = await fetch(`/api/versions/${ws.version!.id}/revise`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ edits }) });
+    if (!res.ok) throw new Error(((await res.json().catch(() => ({}))) as { error?: string }).error ?? `Request failed (${res.status})`);
+    const missed = Number(res.headers.get('x-missed') ?? 0);
+    if (missed) nav.notify(`${missed} change(s) were not applied: their passage overlaps another corrected passage. Put both corrections in one box.`, 'error');
+    return res.blob();
+  };
+  const fileName = () => `${(ws.version?.file_name ?? 'document').replace(/\.(pdf|docx)$/i, '')} (revised from v${ws.version?.version_no}).pdf`;
+
+  const run = async (mode: 'download' | 'upload') => {
+    if (!ws.version || !ws.document) return;
+    setBusy(mode);
+    try {
+      const blob = await build();
+      if (mode === 'download') {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName();
+        a.click();
+        nav.notify('Revised draft downloaded. Nothing was uploaded.');
+      } else {
+        const res = await uploadSource(new File([blob], fileName(), { type: 'application/pdf' }), ws.document.id);
+        await ws.reload();
+        nav.notify(res.duplicateOf ? 'This revision was uploaded before; the existing record is used.' : 'Revised version registered. Checks run on it now; Compare shows which findings it no longer contains.');
+        onUploaded();
+      }
+    } catch (e) {
+      nav.notify(e instanceof Error ? e.message : String(e), 'error');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} title={`Create revised PDF from v${ws.version?.version_no ?? 1}`} width={820}>
+      <p className="mb-4 text-[14px]" style={{ color: 'var(--muted)' }}>
+        Write the corrected wording for each confirmed issue (and, once counsel has answered, each clarification). Spelling fixes are filled in for you. The revised PDF is the extracted text of this version with your changes, in reading order and with the original page breaks; layout and form fields of the original are not copied. Upload it as the next version to run every check again, then mark findings resolved in Compare.
+      </p>
+      {!passages.length ? (
+        <Empty title="Nothing to correct" detail="Confirm issues (or request clarification) in Legal review or on this screen first. Dismissed findings and recorded exceptions keep the original wording." />
+      ) : (
+        <div className="space-y-3">
+          {passages.map((p) => {
+            const changed = value(p).trim() !== p.quote;
+            return (
+              <div key={p.key} className="rounded-2xl border p-4" style={{ borderColor: changed ? 'var(--primary)' : 'var(--panel-border)' }}>
+                {p.findings.map((f) => (
+                  <div key={f.id} className="mb-1 flex items-center justify-between gap-3">
+                    <span className="min-w-0 truncate text-[15px] font-semibold" style={{ color: 'var(--ink)' }}>
+                      {String(f.seq).padStart(2, '0')}. {f.title}
+                    </span>
+                    <StateChip s={reviewState(f, ws.decisions)} short />
+                  </div>
+                ))}
+                {p.findings
+                  .filter((f) => f.category !== 'typo' && f.suggestion)
+                  .map((f) => (
+                    <p key={f.id} className="text-[13px]" style={{ color: 'var(--muted)' }}>
+                      Reviewer suggestion: {f.suggestion}
+                    </p>
+                  ))}
+                <div className="mt-2 text-[12.5px]" style={{ color: 'var(--muted)' }}>
+                  Page {p.page ?? '–'} {p.section ?? ''} · original
+                </div>
+                <p className="paper mt-1 rounded-lg px-3 py-1.5 text-[14px]" style={{ color: 'var(--paper-ink)' }}>
+                  “{p.quote}”
+                </p>
+                <textarea aria-label={`Corrected wording for ${p.findings.map((f) => f.title).join(', ')}`} value={value(p)} onChange={(ev) => setDrafts((d) => ({ ...d, [p.key]: ev.target.value }))} rows={3} className="mt-2 w-full resize-y rounded-xl border p-3 text-[14px] leading-[19px]" style={{ borderColor: 'var(--panel-border)', background: 'var(--panel)', color: 'var(--ink)' }} />
+                {changed && (
+                  <button className="text-[13px]" style={{ color: 'var(--primary)' }} onClick={() => setDrafts((d) => ({ ...d, [p.key]: p.quote }))}>
+                    Keep original wording
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      <div className="sticky -bottom-6 -mx-6 -mb-6 mt-4 flex flex-wrap items-center justify-end gap-3 border-t px-6 py-4" style={{ background: 'var(--panel)', borderColor: 'var(--panel-border)' }}>
+        <span className="mr-auto text-[14px]" style={{ color: 'var(--ink)' }}>
+          {edits.length} change(s)
+        </span>
+        <button className="btn-outline flex h-10 items-center gap-2 px-4 text-[14.5px]" disabled={!edits.length || !!busy} onClick={() => run('download')}>
+          {busy === 'download' ? <Loader2 size={17} className="animate-spin" /> : <Download size={17} />} Download revised PDF
+        </button>
+        <button className="btn-primary flex h-10 items-center gap-2 px-4 text-[14.5px]" disabled={!edits.length || !!busy} onClick={() => run('upload')}>
+          {busy === 'upload' ? <Loader2 size={17} className="animate-spin" /> : <Upload size={17} />} Upload as new version
+        </button>
+      </div>
     </Modal>
   );
 }

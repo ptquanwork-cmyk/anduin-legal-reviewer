@@ -1,11 +1,11 @@
 {
-  "run_at": "2026-10-16T16:27:12.403Z",
+  "run_at": "2026-10-18T18:15:55.131Z",
   "node": "v24.15.0",
   "runs_per_file": 5,
   "demo_contracts": {
-    "rule_items_found": 53,
-    "rule_items": 53,
-    "false_alarms": 5,
+    "rule_items_found": 65,
+    "rule_items": 68,
+    "false_alarms": 6,
     "contracts": [
       {
         "file": "01-subscription-agreement.docx",
@@ -37,9 +37,9 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 9.4,
-          "rules": 4.3,
-          "validate": 0.2
+          "extract": 9.5,
+          "rules": 6.3,
+          "validate": 0.3
         }
       },
       {
@@ -71,8 +71,8 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 59.4,
-          "rules": 4.7,
+          "extract": 40.8,
+          "rules": 3.4,
           "validate": 0.1
         }
       },
@@ -97,7 +97,7 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 4.7,
+          "extract": 4.6,
           "rules": 0.4,
           "validate": 0
         }
@@ -124,7 +124,7 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 81.1,
+          "extract": 75.7,
           "rules": 0.4,
           "validate": 0
         }
@@ -164,9 +164,9 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 40.8,
-          "rules": 23,
-          "validate": 0.5
+          "extract": 63.3,
+          "rules": 23.3,
+          "validate": 0.6
         }
       },
       {
@@ -204,8 +204,8 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 399.6,
-          "rules": 18,
+          "extract": 312.2,
+          "rules": 16.3,
           "validate": 0.5
         }
       },
@@ -234,7 +234,7 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 5.1,
+          "extract": 4.3,
           "rules": 0.7,
           "validate": 0.1
         }
@@ -265,7 +265,7 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 16.9,
+          "extract": 14.5,
           "rules": 0.4,
           "validate": 0.1
         }
@@ -286,8 +286,8 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 19,
-          "rules": 0.5,
+          "extract": 17.2,
+          "rules": 0.9,
           "validate": 0
         }
       },
@@ -325,8 +325,8 @@
           "typo: annum"
         ],
         "median_ms": {
-          "extract": 5.9,
-          "rules": 4.8,
+          "extract": 7.6,
+          "rules": 6.6,
           "validate": 0.1
         }
       },
@@ -358,8 +358,8 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 15,
-          "rules": 0.5,
+          "extract": 21.5,
+          "rules": 0.8,
           "validate": 0.1
         }
       },
@@ -397,8 +397,8 @@
           "typo: unaudited"
         ],
         "median_ms": {
-          "extract": 6.6,
-          "rules": 22.5,
+          "extract": 10.3,
+          "rules": 26.3,
           "validate": 0.2
         }
       },
@@ -436,9 +436,9 @@
           "typo: ."
         ],
         "median_ms": {
-          "extract": 7.1,
-          "rules": 7066.2,
-          "validate": 0.6
+          "extract": 4.7,
+          "rules": 5370.5,
+          "validate": 0.3
         }
       },
       {
@@ -457,7 +457,7 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 8.4,
+          "extract": 3.6,
           "rules": 0,
           "validate": 0
         }
@@ -478,18 +478,76 @@
         "missed": [],
         "false_alarms": [],
         "median_ms": {
-          "extract": 2.8,
-          "rules": 0.1,
+          "extract": 1.5,
+          "rules": 0,
           "validate": 0
+        }
+      },
+      {
+        "file": "15-limited-partnership-agreement-100-pages.docx",
+        "error": null,
+        "pages": null,
+        "blocks": 2057,
+        "words": 52253,
+        "findings": 25,
+        "language": "en",
+        "titles": [
+          "missing_reference: Missing Section 47.3",
+          "missing_reference: Missing Schedule H",
+          "missing_reference: Missing Schedule K",
+          "ambiguity: Vague wording: “from time to time”",
+          "ambiguity: Vague wording: “reasonably”",
+          "ambiguity: Vague wording: “reasonable efforts”",
+          "ambiguity: Vague wording: “reasonable”",
+          "ambiguity: Vague wording: “as soon as practicable”",
+          "ambiguity: Vague wording: “in a timely manner”",
+          "undefined_term: Undefined term: Partnership Agreement",
+          "undefined_term: Undefined term: General Partner",
+          "undefined_term: Undefined term: Hurdle Catch",
+          "undefined_term: Undefined term: Excused Investor Pool",
+          "undefined_term: Undefined term: Key Person Suspension Period",
+          "undefined_term: Undefined term: Capital Call Notice",
+          "undefined_term: Undefined term: Bank Secrecy Act",
+          "typo: Spelling: comittment",
+          "typo: Spelling: seperate",
+          "typo: Spelling: clawback",
+          "typo: Spelling: transferee",
+          "typo: Spelling: recieve",
+          "typo: Spelling: liabilty",
+          "typo: Spelling: accomodate",
+          "typo: Spelling: occured",
+          "typo: Spelling: annum"
+        ],
+        "by_category": {
+          "missing_reference": 3,
+          "ambiguity": 6,
+          "undefined_term": 7,
+          "typo": 9
+        },
+        "rule_items_found": 12,
+        "rule_items": 15,
+        "semantic_only_items": 2,
+        "missed": [
+          "contradiction: 10 Business Days|15 Business Days|fifteen \\(15\\)|capital call",
+          "contradiction: ten \\(10\\) years|twelve \\(12\\) years|term",
+          "missing_reference: Exhibit K"
+        ],
+        "false_alarms": [
+          "typo: wilful|favour|authoris|capitalised"
+        ],
+        "median_ms": {
+          "extract": 99.6,
+          "rules": 71.3,
+          "validate": 1
         }
       }
     ]
   },
   "evidence_gate": {
-    "accepted_quotes": 104,
-    "grounded_verbatim": 104,
-    "fabricated_candidates": 94,
-    "fabricated_rejected": 94
+    "accepted_quotes": 133,
+    "grounded_verbatim": 133,
+    "fabricated_candidates": 119,
+    "fabricated_rejected": 119
   },
   "labeled_cases": {
     "pass": 7,

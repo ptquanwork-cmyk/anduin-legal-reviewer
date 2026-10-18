@@ -91,6 +91,9 @@ function lineText(l: Line) {
   return norm(s);
 }
 
+/** A line starting like this opens a new block (numbered clause or heading). */
+export const BLOCK_START = /^(\d+(\.\d+)*[.)]|section|article|điều|exhibit|schedule|phụ lục)\s/i;
+
 function linesToBlocks(lines: Line[], page: number, pageHeight: number): Omit<Block, 'idx'>[] {
   const out: Omit<Block, 'idx'>[] = [];
   const sizes = lines.map((l) => l.h).sort((a, b) => a - b);
@@ -130,7 +133,7 @@ function linesToBlocks(lines: Line[], page: number, pageHeight: number): Omit<Bl
     const gap = prev ? l.y - (prev.y + prev.h) : 0;
     const prevBold = prev?.items.every((it) => it.bold);
     const thisBold = l.items.every((it) => it.bold);
-    const newBlock = !cur || gap > l.h * 0.75 || Math.abs(l.h - prev.h) > 1.5 || prevBold !== thisBold || /^(\d+(\.\d+)*[.)]|section|article|điều|exhibit|schedule|phụ lục)\s/i.test(lineText(l));
+    const newBlock = !cur || gap > l.h * 0.75 || Math.abs(l.h - prev.h) > 1.5 || prevBold !== thisBold || BLOCK_START.test(lineText(l));
     if (newBlock) {
       flush();
       cur = { lines: [l] };

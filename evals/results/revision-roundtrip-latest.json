@@ -1,0 +1,235 @@
+{
+  "date": "2026-10-18",
+  "rows": [
+    {
+      "file": "01-subscription-agreement.docx",
+      "words": [
+        525,
+        525
+      ],
+      "findings": 7,
+      "edits": [
+        2,
+        2
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [],
+      "render_and_read_ms": 766
+    },
+    {
+      "file": "02-investor-questionnaire.pdf",
+      "words": [
+        405,
+        405
+      ],
+      "findings": 6,
+      "edits": [
+        1,
+        1
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [],
+      "render_and_read_ms": 179
+    },
+    {
+      "file": "03-side-letter.docx",
+      "words": [
+        230,
+        230
+      ],
+      "findings": 2,
+      "edits": [
+        0,
+        0
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [],
+      "render_and_read_ms": 113
+    },
+    {
+      "file": "04-subscription-booklet-scrambled.pdf",
+      "words": [
+        199,
+        199
+      ],
+      "findings": 2,
+      "edits": [
+        0,
+        0
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [],
+      "render_and_read_ms": 140
+    },
+    {
+      "file": "05-subscription-booklet-long.docx",
+      "words": [
+        16766,
+        16766
+      ],
+      "findings": 12,
+      "edits": [
+        1,
+        1
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [],
+      "render_and_read_ms": 3456
+    },
+    {
+      "file": "05-subscription-booklet-long.pdf",
+      "words": [
+        16766,
+        16766
+      ],
+      "findings": 12,
+      "edits": [
+        1,
+        1
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [],
+      "render_and_read_ms": 3263
+    },
+    {
+      "file": "06-thoa-thuan-dang-ky-gop-von.docx",
+      "words": [
+        408,
+        408
+      ],
+      "findings": 4,
+      "edits": [
+        0,
+        0
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [],
+      "render_and_read_ms": 121
+    },
+    {
+      "file": "07-subscription-form-fillable.pdf",
+      "words": [
+        182,
+        182
+      ],
+      "findings": 4,
+      "edits": [
+        1,
+        1
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [],
+      "render_and_read_ms": 77
+    },
+    {
+      "file": "08-confidentiality-agreement-clean.pdf",
+      "words": [
+        327,
+        327
+      ],
+      "findings": 0,
+      "edits": [
+        0,
+        0
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [],
+      "render_and_read_ms": 137
+    },
+    {
+      "file": "09-fee-schedule-tables.docx",
+      "words": [
+        415,
+        415
+      ],
+      "findings": 8,
+      "edits": [
+        4,
+        4
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [],
+      "render_and_read_ms": 120
+    },
+    {
+      "file": "10-redemption-terms-injection.pdf",
+      "words": [
+        289,
+        289
+      ],
+      "findings": 5,
+      "edits": [
+        1,
+        1
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [],
+      "render_and_read_ms": 136
+    },
+    {
+      "file": "11-amendment-two-column.docx",
+      "words": [
+        2455,
+        2455
+      ],
+      "findings": 8,
+      "edits": [
+        3,
+        3
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [],
+      "render_and_read_ms": 568
+    },
+    {
+      "file": "12-side-letter-bilingual.docx",
+      "words": [
+        319,
+        319
+      ],
+      "findings": 10,
+      "edits": [
+        6,
+        6
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [
+        "Spelling: terms",
+        "Spelling: this",
+        "Spelling: copy"
+      ],
+      "render_and_read_ms": 106
+    },
+    {
+      "file": "15-limited-partnership-agreement-100-pages.docx",
+      "words": [
+        52253,
+        52253
+      ],
+      "findings": 25,
+      "edits": [
+        9,
+        9
+      ],
+      "corrected_still_present": [],
+      "untouched_not_matched": [],
+      "new_in_revision": [
+        "Spelling: wilful"
+      ],
+      "render_and_read_ms": 9784
+    }
+  ]
+}

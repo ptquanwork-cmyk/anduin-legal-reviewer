@@ -85,6 +85,7 @@ export const GUIDES: Record<ScreenId, Guide> = {
       { do: 'Right: Questions for counsel', detail: 'Generated from open, confirmed and clarification findings. Edit the text, then Prepare question list (copies it and downloads a .md file; nothing is sent).' },
       { do: 'Right: Export review report', detail: 'Opens a PDF with all findings, decisions and questions.' },
       { do: 'Confirmed issues: fix or accept', detail: 'Upload the corrected document with Compare (top right): findings that disappear are proposed as resolved and you confirm them. Or choose Approve as exception to keep the wording.' },
+      { do: 'No corrected file yet? Click Create revised PDF', detail: 'Write the corrected wording for each confirmed issue (spelling fixes are filled in). Download revised PDF saves it; Upload as new version registers it as the next version, runs every check again and opens Compare.' },
       { do: 'Click Continue to annotation', detail: 'Unlocks when no finding is open, waiting for counsel or confirmed-but-unresolved. The "Next step" line above the button says what is still missing.' },
     ],
     next: 'Outcome Ready or Approved with exceptions → Continue to annotation.',

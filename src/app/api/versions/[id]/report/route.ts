@@ -24,7 +24,7 @@ export const POST = handle(async (req, ctx) => {
   const doc = await PDFDocument.create();
   doc.setTitle(`Review report · ${version.documents.title} v${version.version_no}`);
   doc.setProducer('Anduin Legal Reviewer');
-  const w = new Writer(doc, await embedFonts(doc));
+  const w = new Writer(doc, await embedFonts(doc, true));
   w.text('Review report', { size: 22, bold: true, gap: 2 });
   w.text(`${version.documents.title} · version ${version.version_no} · ${version.file_name}`, { size: 11, color: [0.33, 0.38, 0.48] });
   w.text(`Generated ${new Date().toISOString().replace('T', ' ').slice(0, 16)} UTC · SHA-256 ${version.sha256.slice(0, 16)}…`, { size: 9, color: [0.33, 0.38, 0.48], gap: 10 });
