@@ -10,7 +10,7 @@ My entry for **The Legal Reviewer** challenge (Legal track) of Anduin's Cybernet
 
 ## The app in one minute
 
-https://github.com/user-attachments/assets/48a10deb-1db1-4e8d-8055-efa1b6e6cafb
+https://github.com/user-attachments/assets/45020a08-c245-4fc0-8842-e1873a8b7f3f
 
 *Introduction video (96 s): test results first, then the workflow in six short chapters. [Full-resolution 1080p file](demo/video/anduin-legal-reviewer-intro.mp4).*
 
