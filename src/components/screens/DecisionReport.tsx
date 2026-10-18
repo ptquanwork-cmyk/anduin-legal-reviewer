@@ -432,7 +432,15 @@ function CompareModal({ open, onClose, newer }: { open: boolean; onClose: () => 
             const st = reviewState(f, ws.decisions);
             return (
               <div key={f.id} className="flex items-center justify-between gap-3 rounded-xl border px-4 py-2.5 text-[14px]" style={{ borderColor: 'var(--panel-border)' }}>
-                <span className="min-w-0 truncate">{f.title}</span>
+                <span className="min-w-0">
+                  <span className="block truncate">{f.title}</span>
+                  {/* Semantic findings are reworded between runs, so "not found" there needs a read of v2, not just a click. */}
+                  {!still && st !== 'resolved' && f.provenance.source !== 'rules' && (
+                    <span className="block text-[12.5px]" style={{ color: 'var(--muted)' }}>
+                      AI reviewer finding: its wording can change between runs. Check v{v2.version_no} before marking it resolved.
+                    </span>
+                  )}
+                </span>
                 {st === 'resolved' ? (
                   <StateChip s="resolved" />
                 ) : still ? (

@@ -1,0 +1,792 @@
+# Production end-to-end run, 19 Oct 2026 (main b48e53b, worker online: Microsoft Word, decision agent, semantic reviewer)
+# node scripts/e2e-contracts.mjs https://anduin-legal-reviewer.vercel.app [files], four batches
+
+{
+  "file": "01-subscription-agreement.docx",
+  "seconds": 111,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (50 blocks · 0 source issue(s) · verified)",
+    "routing: done (contract · 27454 ms)",
+    "review: done (8 finding(s) · 3 unsupported candidate(s) rejected)",
+    "fields: done (13 input field(s), 18 paragraph region(s), 8 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "3/3 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "missing_reference: Missing Section 14 [rules, matched]",
+    "ambiguity: Vague wording: “reasonable efforts” [rules, matched]",
+    "ambiguity: Unclear management-fee transition point [semantic/codex-cli, matched]",
+    "ambiguity: Uncertain time of receipt for capital-call notices [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: Management Fee Offset [rules, matched]",
+    "typo: Spelling: recieve [rules, matched]",
+    "typo: Spelling: comittment [rules, matched]"
+  ],
+  "fields": "9 text, 2 radio, 2 checkbox, 18 paragraph; 8 uncertain",
+  "report": "exported",
+  "digitise": "13 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 6,
+    "of": 6,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "2fe95c1e-ddd9-4374-8bdd-7b7fa25ee4b4"
+}
+{
+  "file": "02-investor-questionnaire.pdf",
+  "seconds": 73,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (41 blocks · 0 source issue(s) · verified)",
+    "routing: done (form · 13030 ms)",
+    "review: done (6 finding(s) · 3 unsupported candidate(s) rejected)",
+    "fields: done (15 input field(s), 12 paragraph region(s), 7 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "3/3 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting distribution timing [rules, matched]",
+    "missing_reference: Missing Annex C [rules, matched]",
+    "ambiguity: Vague wording: “as soon as practicable” [rules, matched]",
+    "undefined_term: Undefined term: General Partner [rules, matched]",
+    "undefined_term: Undefined term: Subscription Agreement [rules, matched]",
+    "typo: Spelling: beneficary [rules, matched]"
+  ],
+  "fields": "9 text, 4 radio, 2 checkbox, 12 paragraph; 7 uncertain",
+  "report": "exported",
+  "digitise": "15 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 4,
+    "of": 4,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "35cdd7a2-ad4e-4f22-bb86-324fa3749d46"
+}
+{
+  "file": "03-side-letter.docx",
+  "seconds": 98,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (22 blocks · 0 source issue(s) · verified)",
+    "routing: done (form · 5927 ms)",
+    "review: done (6 finding(s) · 3 unsupported candidate(s) rejected)",
+    "fields: done (3 input field(s), 10 paragraph region(s), 2 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "1/1 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "ambiguity: Unclear calculation of the management-fee reduction [semantic/codex-cli, matched]",
+    "ambiguity: Scope and timing of “reasonable access” are unclear [semantic/codex-cli, matched]",
+    "ambiguity: “More favourable economic terms” lacks a comparison standard [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: General Partner [rules, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: “Commitment” is undefined [semantic/codex-cli, matched]"
+  ],
+  "fields": "3 text, 0 radio, 0 checkbox, 10 paragraph; 2 uncertain",
+  "report": "exported",
+  "digitise": "3 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 1,
+    "of": 1,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "b565f202-55ad-41d5-b638-4c58fe3684b4"
+}
+
+{
+  "file": "04-subscription-booklet-scrambled.pdf",
+  "seconds": 78,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (31 blocks · 1 source issue(s) · needs review)",
+    "routing: done (contract · 16434 ms)",
+    "review: done (5 finding(s) · 5 unsupported candidate(s) rejected)",
+    "fields: done (6 input field(s), 9 paragraph region(s), 1 uncertain)"
+  ],
+  "language": "en",
+  "source": "needs_review",
+  "coverage": "5/6 pages read, unread 3",
+  "issues": [
+    "p3 Page 3 has no extractable text"
+  ],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "ambiguity: Vague wording: “promptly” [rules, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: Undefined term “General Partner” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “Business Days” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “Partnership” [semantic/codex-cli, matched]"
+  ],
+  "fields": "4 text, 2 radio, 0 checkbox, 9 paragraph; 1 uncertain",
+  "report": "exported",
+  "digitise": "6 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 1,
+    "of": 2,
+    "missed": [
+      "contradiction: 30 June|31 July|closing date (semantic)"
+    ],
+    "falseAlarms": [],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "3f06cc79-d5e4-4f51-9636-02d20fbe0832"
+}
+{
+  "file": "05-subscription-booklet-long.docx",
+  "seconds": 154,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (723 blocks · 0 source issue(s) · verified)",
+    "routing: done (contract · 13743 ms)",
+    "review: done (19 finding(s) · 5 unsupported candidate(s) rejected)",
+    "fields: done (66 input field(s), 555 paragraph region(s), 18 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "38/38 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "contradiction: Conflicting transfer notice periods [rules, matched]",
+    "missing_reference: Missing Section 52 [rules, matched]",
+    "missing_reference: Missing Schedule F [rules, matched]",
+    "ambiguity: Vague wording: “soon” [rules, matched]",
+    "ambiguity: Vague wording: “from time to time” [rules, matched]",
+    "ambiguity: Vague wording: “reasonably” [rules, matched]",
+    "ambiguity: Vague wording: “promptly” [rules, matched]",
+    "ambiguity: Unclear applicable closing date [semantic/codex-cli, matched]",
+    "ambiguity: Unclear “manifest error” standard [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: Undefined term: General Partner [rules, matched]",
+    "undefined_term: Undefined term: Carried Interest Clawback [rules, matched]",
+    "undefined_term: Undefined term “Business Days” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “Capital Call Notice” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “Interests” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined principal party and document terms [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “Interest” [semantic/codex-cli, matched]",
+    "typo: Spelling: recieve [rules, matched]"
+  ],
+  "fields": "54 text, 7 radio, 5 checkbox, 555 paragraph; 18 uncertain",
+  "report": "exported",
+  "digitise": "66 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 8,
+    "of": 8,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "b9daa1aa-e72d-492a-a17e-3d35259bcf6f"
+}
+{
+  "file": "05-subscription-booklet-long.pdf",
+  "seconds": 164,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (1 related candidate(s) need comparison)",
+    "source: done (723 blocks · 0 source issue(s) · verified)",
+    "routing: done (contract · 16252 ms)",
+    "review: done (20 finding(s) · 4 unsupported candidate(s) rejected)",
+    "fields: done (66 input field(s), 555 paragraph region(s), 18 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "38/38 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "contradiction: Conflicting transfer notice periods [rules, matched]",
+    "missing_reference: Missing Section 52 [rules, matched]",
+    "missing_reference: Missing Schedule F [rules, matched]",
+    "ambiguity: Vague wording: “soon” [rules, matched]",
+    "ambiguity: Vague wording: “from time to time” [rules, matched]",
+    "ambiguity: Vague wording: “reasonably” [rules, matched]",
+    "ambiguity: Vague wording: “promptly” [rules, matched]",
+    "ambiguity: Unclear meaning of “manifest error” [semantic/codex-cli, matched]",
+    "ambiguity: Unclear applicable policies [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: Undefined term: General Partner [rules, matched]",
+    "undefined_term: Undefined term: Carried Interest Clawback [rules, matched]",
+    "undefined_term: Undefined term “Interest” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “General Partner” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “Investor” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “Partnership Agreement” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “Partnership” [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term “Partnership expenses” [semantic/codex-cli, matched]",
+    "typo: Spelling: recieve [rules, matched]"
+  ],
+  "fields": "54 text, 7 radio, 5 checkbox, 555 paragraph; 18 uncertain",
+  "report": "exported",
+  "digitise": "66 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 8,
+    "of": 8,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "706c5184-68ef-4378-a022-a1ff92e8291f"
+}
+{
+  "file": "06-thoa-thuan-dang-ky-gop-von.docx",
+  "seconds": 76,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (34 blocks · 0 source issue(s) · verified)",
+    "routing: done (form · 7119 ms)",
+    "review: done (6 finding(s) · 4 unsupported candidate(s) rejected)",
+    "fields: done (9 input field(s), 11 paragraph region(s), 8 uncertain)"
+  ],
+  "language": "vi",
+  "source": "verified",
+  "coverage": "2/2 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "missing_reference: Missing Điều 12 [rules, matched]",
+    "ambiguity: Từ ngữ không rõ: “sớm” [rules, matched]",
+    "ambiguity: Từ ngữ không rõ: “hợp lý” [rules, matched]",
+    "ambiguity: Chưa rõ cách xác định “ngày nhận” thông báo [semantic/codex-cli, matched]",
+    "undefined_term: “Công ty Quản lý Quỹ” chưa được định nghĩa [semantic/codex-cli, matched]"
+  ],
+  "fields": "7 text, 1 radio, 1 checkbox, 11 paragraph; 8 uncertain",
+  "report": "exported",
+  "digitise": "9 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 4,
+    "of": 4,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "4c46ef8a-7dac-4987-b9ea-0b5368c9a5ad"
+}
+SUMMARY
+04-subscription-booklet-scrambled.pdf: job done, 78 s, 5 findings, planted 1/2 missed [contradiction: 30 June|31 July|closing date (semantic)], source needs_review (5/6 pages read, unread 3), report exported, 6 fields filled; draft QA passed; final final
+05-subscription-booklet-long.docx: job done, 154 s, 19 findings, planted 8/8, source verified (38/38 pages read), report exported, 66 fields filled; draft QA passed; final final
+05-subscription-booklet-long.pdf: job done, 164 s, 20 findings, planted 8/8, source verified (38/38 pages read), report exported, 66 fields filled; draft QA passed; final final
+06-thoa-thuan-dang-ky-gop-von.docx: job done, 76 s, 6 findings, planted 4/4, source verified (2/2 pages read), report exported, 9 fields filled; draft QA passed; final final
+TOTAL planted problems found 21/22 (95%), false alarms 0, total time 472 s
+
+{
+  "file": "07-subscription-form-fillable.pdf",
+  "seconds": 76,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (24 blocks · 0 source issue(s) · verified)",
+    "routing: done (form · 7270 ms)",
+    "review: done (7 finding(s) · 5 unsupported candidate(s) rejected)",
+    "fields: done (13 input field(s), 17 paragraph region(s), 11 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "2/2 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "ambiguity: Vague wording: “reasonable” [rules, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: “Business Days” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Capital Call Notice” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Investor” is undefined [semantic/codex-cli, matched]",
+    "typo: Spelling: recieve [rules, matched]"
+  ],
+  "fields": "8 text, 2 radio, 3 checkbox, 17 paragraph; 11 uncertain",
+  "report": "exported",
+  "digitise": "13 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 3,
+    "of": 3,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "672f003e-091b-401a-8549-54f5a1e6456c"
+}
+{
+  "file": "08-confidentiality-agreement-clean.pdf",
+  "seconds": 54,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (26 blocks · 0 source issue(s) · verified)",
+    "routing: done (contract · 10256 ms)",
+    "review: done (1 finding(s) · 0 unsupported candidate(s) rejected)",
+    "fields: done (3 input field(s), 13 paragraph region(s), 2 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "1/1 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "ambiguity: Unclear trigger for the five-Business-Day notice period [semantic/codex-cli, matched]"
+  ],
+  "fields": "3 text, 0 radio, 0 checkbox, 13 paragraph; 2 uncertain",
+  "report": "exported",
+  "digitise": "3 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 0,
+    "of": 0,
+    "missed": [],
+    "falseAlarms": [
+      "ambiguity: ."
+    ],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "3767fd11-ec49-4c45-b9b6-94b33b3e1d73"
+}
+{
+  "file": "09-fee-schedule-tables.docx",
+  "seconds": 174,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (32 blocks · 1 source issue(s) · needs review)",
+    "routing: done (form · 20949 ms)",
+    "review: done (13 finding(s) · 3 unsupported candidate(s) rejected)",
+    "fields: done (0 input field(s), 20 paragraph region(s), 0 uncertain)"
+  ],
+  "language": "en",
+  "source": "needs_review",
+  "coverage": "2/2 pages read",
+  "issues": [
+    "Text differs after conversion"
+  ],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting delivery terms [rules, matched]",
+    "contradiction: Conflicting investment-period Management Fee rates [semantic/codex-cli, matched]",
+    "missing_reference: Missing Exhibit D [rules, matched]",
+    "ambiguity: Vague wording: “from time to time” [rules, matched]",
+    "ambiguity: Unclear duration of the investment period [semantic/codex-cli, matched]",
+    "ambiguity: Undefined calculation of invested capital [semantic/codex-cli, matched]",
+    "ambiguity: Unspecified interest on excess-fee repayments [semantic/codex-cli, matched]",
+    "ambiguity: Unclear standard for financial-statement form [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: Organizational Expense Cap [rules, matched]",
+    "typo: Spelling: organisational [rules, matched]",
+    "typo: Spelling: seperate [rules, matched]",
+    "typo: Spelling: liabilty [rules, matched]",
+    "typo: Spelling: annum [rules, matched]"
+  ],
+  "fields": "0 text, 0 radio, 0 checkbox, 20 paragraph; 0 uncertain",
+  "report": "exported",
+  "digitise": "no input fields",
+  "accuracy": {
+    "found": 8,
+    "of": 8,
+    "missed": [],
+    "falseAlarms": [
+      "typo: organisation",
+      "typo: annum"
+    ],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "4621371b-308a-49b6-94e6-ef789cfa1d76"
+}
+{
+  "file": "10-redemption-terms-injection.pdf",
+  "seconds": 93,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (22 blocks · 0 source issue(s) · verified)",
+    "routing: done (form · 14798 ms)",
+    "review: done (9 finding(s) · 2 unsupported candidate(s) rejected)",
+    "fields: done (0 input field(s), 14 paragraph region(s), 0 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "1/1 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting payment deadlines [rules, matched]",
+    "missing_reference: Missing Annex 3 [rules, matched]",
+    "ambiguity: Vague wording: “as soon as practicable” [rules, matched]",
+    "ambiguity: Unclear net-assets measurement point [semantic/codex-cli, matched]",
+    "ambiguity: Unclear audit completion condition [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: General Partner [rules, matched]",
+    "undefined_term: “General Partner” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Partnership” is undefined [semantic/codex-cli, matched]",
+    "typo: Spelling: occured [rules, matched]"
+  ],
+  "fields": "0 text, 0 radio, 0 checkbox, 14 paragraph; 0 uncertain",
+  "report": "exported",
+  "digitise": "no input fields",
+  "accuracy": {
+    "found": 4,
+    "of": 4,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "92f3166a-f86e-405b-bbc3-aa9305ae8915"
+}
+SUMMARY
+07-subscription-form-fillable.pdf: job done, 76 s, 7 findings, planted 3/3, source verified (2/2 pages read), report exported, 13 fields filled; draft QA passed; final final
+08-confidentiality-agreement-clean.pdf: job done, 54 s, 1 findings, planted 0/0 FALSE ALARMS [ambiguity: .], source verified (1/1 pages read), report exported, 3 fields filled; draft QA passed; final final
+09-fee-schedule-tables.docx: job done, 174 s, 13 findings, planted 8/8 FALSE ALARMS [typo: organisation; typo: annum], source needs_review (2/2 pages read), report exported, no input fields
+10-redemption-terms-injection.pdf: job done, 93 s, 9 findings, planted 4/4, source verified (1/1 pages read), report exported, no input fields
+TOTAL planted problems found 15/15 (100%), false alarms 3, total time 397 s
+
+{
+  "file": "11-amendment-two-column.docx",
+  "seconds": 112,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (26 blocks · 1 source issue(s) · needs review)",
+    "routing: done (contract · 19987 ms)",
+    "review: done (28 finding(s) · 5 unsupported candidate(s) rejected)",
+    "fields: done (0 input field(s), 18 paragraph region(s), 0 uncertain)"
+  ],
+  "language": "en",
+  "source": "needs_review",
+  "coverage": "3/3 pages read",
+  "issues": [
+    "Text differs after conversion"
+  ],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "missing_reference: Missing Section 6 [rules, matched]",
+    "missing_reference: Missing Section 7 [rules, matched]",
+    "missing_reference: Missing Section 8 [rules, matched]",
+    "missing_reference: Missing Section 4 [rules, matched]",
+    "missing_reference: Missing Section 9 [rules, matched]",
+    "missing_reference: Missing Section 5 [rules, matched]",
+    "missing_reference: Missing Section 10 [rules, matched]",
+    "missing_reference: Missing Section 15 [rules, matched]",
+    "missing_reference: Missing Section 11 [rules, matched]",
+    "missing_reference: Missing Section 16 [rules, matched]",
+    "missing_reference: Missing Section 12 [rules, matched]",
+    "missing_reference: Missing Section 17 [rules, matched]",
+    "missing_reference: Missing Section 13 [rules, matched]",
+    "missing_reference: Missing Section 18 [rules, matched]",
+    "missing_reference: Missing Section 14 [rules, matched]",
+    "missing_reference: Missing Section 19 [rules, matched]",
+    "missing_reference: Missing Schedule 3 [rules, matched]",
+    "ambiguity: Vague wording: “reasonable” [rules, matched]",
+    "undefined_term: Undefined term: General Partner [rules, matched]",
+    "undefined_term: Undefined term: General The [rules, matched]",
+    "undefined_term: Undefined term: Closing The [rules, matched]",
+    "undefined_term: Undefined term: General The Original Agreement [rules, matched]",
+    "undefined_term: Undefined term: Closing Business Days [rules, matched]",
+    "undefined_term: Undefined term: The Original Agreement [rules, matched]",
+    "undefined_term: Undefined term: Key Person Event [rules, matched]",
+    "typo: Spelling: wilful [rules, matched]",
+    "typo: Spelling: unaudited [rules, matched]",
+    "typo: Spelling: accomodate [rules, matched]"
+  ],
+  "fields": "0 text, 0 radio, 0 checkbox, 18 paragraph; 0 uncertain",
+  "report": "exported",
+  "digitise": "no input fields",
+  "accuracy": {
+    "found": 4,
+    "of": 6,
+    "missed": [
+      "contradiction: \\(10\\)|\\(15\\)|capital call",
+      "contradiction: 25,000|20,000|subscription fee"
+    ],
+    "falseAlarms": [
+      "missing_reference: Section \\d",
+      "typo: favour|wilful",
+      "typo: unaudited"
+    ],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "0f592ae6-94f4-417a-afe8-57e94f60aa05"
+}
+{
+  "file": "12-side-letter-bilingual.docx",
+  "seconds": 81,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (24 blocks · 0 source issue(s) · verified)",
+    "routing: done (form · 3934 ms)",
+    "review: done (11 finding(s) · 6 unsupported candidate(s) rejected)",
+    "fields: done (0 input field(s), 16 paragraph region(s), 0 uncertain)"
+  ],
+  "language": "vi",
+  "source": "verified",
+  "coverage": "1/1 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "contradiction: Conflicting capital call deadlines [rules, matched]",
+    "missing_reference: Missing Section 9 [rules, matched]",
+    "ambiguity: Từ ngữ không rõ: “kịp thời” [rules, matched]",
+    "undefined_term: Thuật ngữ “Business Days” chưa được định nghĩa [semantic/codex-cli, matched]",
+    "typo: Spelling: fund [rules, matched]",
+    "typo: Spelling: means [rules, matched]",
+    "typo: Spelling: from [rules, matched]",
+    "typo: Spelling: each [rules, matched]",
+    "typo: Spelling: send [rules, matched]",
+    "typo: Spelling: laws [rules, matched]"
+  ],
+  "fields": "0 text, 0 radio, 0 checkbox, 16 paragraph; 0 uncertain",
+  "report": "exported",
+  "digitise": "no input fields",
+  "accuracy": {
+    "found": 3,
+    "of": 3,
+    "missed": [],
+    "falseAlarms": [
+      "typo: ."
+    ],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "0e408bfd-3eda-4577-81ab-a7277e74d683"
+}
+{
+  "file": "13-subscription-agreement-scanned.pdf",
+  "seconds": 15,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (0 blocks · 2 source issue(s) · needs review)",
+    "routing: skipped (No readable source text.)",
+    "review: skipped (No readable source text.)",
+    "fields: skipped (No readable source text.)"
+  ],
+  "language": "en",
+  "source": "needs_review",
+  "coverage": "0/2 pages read, unread 1,2",
+  "issues": [
+    "p1 Page 1 has no extractable text",
+    "p2 Page 2 has no extractable text"
+  ],
+  "semantic": "n/a",
+  "semanticNote": null,
+  "agent": "n/a",
+  "findings": [],
+  "fields": "0 text, 0 radio, 0 checkbox, 0 paragraph; 0 uncertain",
+  "report": "exported",
+  "digitise": "no input fields",
+  "accuracy": {
+    "found": 0,
+    "of": 0,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "8219fd58-7013-48b5-87aa-08c93b04aaba"
+}
+{
+  "file": "14-investor-questionnaire-corrupted.pdf",
+  "seconds": 13,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (0 blocks · 1 source issue(s) · blocked)",
+    "routing: skipped (No readable source text.)",
+    "review: skipped (No readable source text.)",
+    "fields: skipped (No readable source text.)"
+  ],
+  "language": "en",
+  "source": "blocked",
+  "coverage": "n/a",
+  "issues": [
+    "PDF could not be read"
+  ],
+  "semantic": "n/a",
+  "semanticNote": null,
+  "agent": "n/a",
+  "findings": [],
+  "fields": "0 text, 0 radio, 0 checkbox, 0 paragraph; 0 uncertain",
+  "report": "exported",
+  "digitise": "no input fields",
+  "accuracy": {
+    "found": 0,
+    "of": 0,
+    "missed": [],
+    "falseAlarms": [],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "df6993c1-0dfd-4c3c-9cef-830e2a4f1a66"
+}
+{
+  "file": "15-limited-partnership-agreement-100-pages.docx",
+  "seconds": 182,
+  "job": "done",
+  "error": null,
+  "steps": [
+    "received: done (Original stored unchanged.)",
+    "duplicates: done (No related versions found)",
+    "source: done (2110 blocks · 0 source issue(s) · verified)",
+    "routing: done (contract · 14519 ms)",
+    "review: done (35 finding(s) · 8 unsupported candidate(s) rejected)",
+    "fields: done (160 input field(s), 1764 paragraph region(s), 17 uncertain)"
+  ],
+  "language": "en",
+  "source": "verified",
+  "coverage": "100/100 pages read",
+  "issues": [],
+  "semantic": "run",
+  "semanticNote": null,
+  "agent": "online",
+  "findings": [
+    "missing_reference: Missing Section 47.3 [rules, matched]",
+    "missing_reference: Missing Schedule H [rules, matched]",
+    "missing_reference: Missing Schedule K [rules, matched]",
+    "ambiguity: Vague wording: “from time to time” [rules, matched]",
+    "ambiguity: Vague wording: “reasonably” [rules, matched]",
+    "ambiguity: Vague wording: “reasonable efforts” [rules, matched]",
+    "ambiguity: Vague wording: “reasonable” [rules, matched]",
+    "ambiguity: Vague wording: “as soon as practicable” [rules, matched]",
+    "ambiguity: Vague wording: “in a timely manner” [rules, matched]",
+    "ambiguity: Unclear distinction between “this Agreement” and the “Partnership Agreement” [semantic/codex-cli, matched]",
+    "ambiguity: “Manifest error” lacks an operative standard [semantic/codex-cli, matched]",
+    "ambiguity: “Material change” is not objectively delimited [semantic/codex-cli, matched]",
+    "ambiguity: Unspecified “purpose of the Partnership” controls unresolved matters [semantic/codex-cli, matched]",
+    "ambiguity: No method stated for calculating the 50% forfeiture [semantic/codex-cli, matched]",
+    "undefined_term: Undefined term: Partnership Agreement [rules, matched]",
+    "undefined_term: Undefined term: General Partner [rules, matched]",
+    "undefined_term: Undefined term: Hurdle Catch [rules, matched]",
+    "undefined_term: Undefined term: Excused Investor Pool [rules, matched]",
+    "undefined_term: Undefined term: Key Person Suspension Period [rules, matched]",
+    "undefined_term: Undefined term: Capital Call Notice [rules, matched]",
+    "undefined_term: Undefined term: Bank Secrecy Act [rules, matched]",
+    "undefined_term: “Business Days” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Commitment” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Interests” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Business Days” is undefined [semantic/codex-cli, matched]",
+    "undefined_term: “Commitment” is undefined [semantic/codex-cli, matched]",
+    "typo: Spelling: comittment [rules, matched]",
+    "typo: Spelling: seperate [rules, matched]",
+    "typo: Spelling: clawback [rules, matched]",
+    "typo: Spelling: transferee [rules, matched]",
+    "typo: Spelling: recieve [rules, matched]",
+    "typo: Spelling: liabilty [rules, matched]",
+    "typo: Spelling: accomodate [rules, matched]",
+    "typo: Spelling: occured [rules, matched]",
+    "typo: Spelling: annum [rules, matched]"
+  ],
+  "fields": "20 text, 7 radio, 2 checkbox, 971 paragraph; 12 uncertain",
+  "report": "exported",
+  "digitise": "29 fields filled; draft QA passed; final final",
+  "accuracy": {
+    "found": 12,
+    "of": 17,
+    "missed": [
+      "contradiction: 10 Business Days|15 Business Days|fifteen \\(15\\)|capital call",
+      "contradiction: ten \\(10\\) years|twelve \\(12\\) years|term",
+      "contradiction: 2\\.0%|1\\.75%|management fee (semantic)",
+      "contradiction: Delaware|New York|governing law (semantic)",
+      "missing_reference: Exhibit K"
+    ],
+    "falseAlarms": [
+      "typo: wilful|favour|authoris|capitalised"
+    ],
+    "fieldsWrong": [],
+    "sourceWrong": null
+  },
+  "versionId": "8835e588-44e9-471d-8a2b-1ca67a2f8ef8"
+}
+SUMMARY
+11-amendment-two-column.docx: job done, 112 s, 28 findings, planted 4/6 missed [contradiction: \(10\)|\(15\)|capital call; contradiction: 25,000|20,000|subscription fee] FALSE ALARMS [missing_reference: Section \d; typo: favour|wilful; typo: unaudited], source needs_review (3/3 pages read), report exported, no input fields
+12-side-letter-bilingual.docx: job done, 81 s, 11 findings, planted 3/3 FALSE ALARMS [typo: .], source verified (1/1 pages read), report exported, no input fields
+13-subscription-agreement-scanned.pdf: job done, 15 s, 0 findings, planted 0/0, source needs_review (0/2 pages read, unread 1,2), report exported, no input fields
+14-investor-questionnaire-corrupted.pdf: job done, 13 s, 0 findings, planted 0/0, source blocked (n/a), report exported, no input fields
+15-limited-partnership-agreement-100-pages.docx: job done, 182 s, 35 findings, planted 12/17 missed [contradiction: 10 Business Days|15 Business Days|fifteen \(15\)|capital call; contradiction: ten \(10\) years|twelve \(12\) years|term; contradiction: 2\.0%|1\.75%|management fee (semantic); contradiction: Delaware|New York|governing law (semantic); missing_reference: Exhibit K] FALSE ALARMS [typo: wilful|favour|authoris|capitalised], source verified (100/100 pages read), report exported, 29 fields filled; draft QA passed; final final
+TOTAL planted problems found 19/26 (73%), false alarms 5, total time 403 s

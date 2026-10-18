@@ -2,6 +2,7 @@
 
 ## 2026-10-19: Revised PDF from the review
 
+- Production test of every step with the worker online; fixed a job failure when a new version has two identical lines (duplicate field IDs), and Compare now flags AI reviewer findings that may only be reworded.
 - Decision / report: **Create revised PDF** writes the corrections for confirmed issues into a revised PDF (spelling fixes pre-filled), to download or upload as the next version; Compare then shows which findings it no longer contains.
 - Compare waits for the newer version's checks and keeps same-named findings as still present.
 - Review report and revised PDFs use DejaVu Sans, so Vietnamese letters are no longer dropped.

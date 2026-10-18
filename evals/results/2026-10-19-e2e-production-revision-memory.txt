@@ -1,0 +1,49 @@
+# node scripts/e2e-revision.mjs https://anduin-legal-reviewer.vercel.app  (19 Oct 2026, main b48e53b)
+--- 07-subscription-form-fillable.pdf
+PASS 07-subscription-form-fillable.pdf: v1 processed
+  source verified, agent online, semantic run
+PASS 07-subscription-form-fillable.pdf: 6 findings confirmed
+PASS 07-subscription-form-fillable.pdf: revised PDF returned — 200, 21935 bytes
+PASS 07-subscription-form-fillable.pdf: every correction applied — applied 2/2
+PASS 07-subscription-form-fillable.pdf: corrections present in the revised PDF
+PASS 07-subscription-form-fillable.pdf: revised PDF registered as v2
+PASS 07-subscription-form-fillable.pdf: v2 processed
+PASS 07-subscription-form-fillable.pdf: v2 source verified — v2 verified
+PASS 07-subscription-form-fillable.pdf: Compare shows corrected findings as gone (2)
+PASS 07-subscription-form-fillable.pdf: Compare keeps uncorrected rule findings
+PASS 07-subscription-form-fillable.pdf: corrected findings marked resolved
+PASS 07-subscription-form-fillable.pdf: answers saved (13 fields, Vietnamese in investor_details.investor_legal_name)
+PASS 07-subscription-form-fillable.pdf: draft QA passes
+PASS 07-subscription-form-fillable.pdf: final PDF contains the Vietnamese answer letter for letter — Nguyễn Thị Ánh Hồng
+PASS 07-subscription-form-fillable.pdf: review report exported
+--- 06-thoa-thuan-dang-ky-gop-von.docx
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: v1 processed
+  source verified, agent online, semantic run
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: 7 findings confirmed
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: revised PDF returned — 200, 24809 bytes
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: every correction applied — applied 1/1
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: corrections present in the revised PDF
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: revised PDF registered as v2
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: v2 processed
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: v2 source verified — v2 verified
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: Compare shows corrected findings as gone (1)
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: Compare keeps uncorrected rule findings
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: corrected findings marked resolved
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: answers saved (9 fields, Vietnamese in chu_ky.chu_ky)
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: draft QA passes
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: final PDF contains the Vietnamese answer letter for letter — Nguyễn Thị Ánh Hồng
+PASS 06-thoa-thuan-dang-ky-gop-von.docx: review report exported
+REVISION 30/30 checks passed
+
+# node scripts/e2e-memory.mjs https://anduin-legal-reviewer.vercel.app
+PASS v1 processed
+PASS decisions saved with a snapshot of their finding — Conflicting payment deadlines, Missing Section 9
+PASS past decisions cannot be rewritten — permission denied for table decision_events
+PASS the example flag can still be toggled
+PASS re-run processed
+PASS decisions survive the re-run — confirm:Conflicting payment deadlines:unlinked, dismiss:Missing Section 9:unlinked
+PASS next review received the workspace example — Semantic reviewer received 1 reviewer example(s) from this workspace.
+PASS v2 processed as version 2
+PASS annotations transferred from v1 — {"matched":10,"uncertain":2,"changed":1}
+PASS typo fixed in v2 is no longer reported — 4 findings in v2
+MEMORY 10/10 checks passed
