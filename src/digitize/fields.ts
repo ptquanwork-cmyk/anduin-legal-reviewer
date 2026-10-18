@@ -147,15 +147,25 @@ export function transferStates(
 ) {
   if (!previous.length) return detected;
   const textOf = new Map(blocks.map((b) => [b.idx, b.text]));
+  // Each earlier field is taken once (repeated lines such as two "Signature: ____" map one to one), and every id stays
+  // unique: annotations are unique per version and field ID.
+  const used = new Set<string>();
+  const take = (id: string, own: string) => {
+    let x = used.has(id) ? own : id;
+    for (let n = 2; used.has(x); n++) x = `${own}-${n}`;
+    used.add(x);
+    return x;
+  };
   return detected.map((d) => {
     const t = textOf.get(d.source_block_idx) ?? '';
-    const exact = previous.find((p) => norm(p.text) === norm(t) && p.type === d.type);
-    if (exact) return { ...d, field_id: exact.field_id, transfer_state: 'matched' as const, origin: 'transferred' as const, confirmed: true };
-    const near = previous
+    const free = previous.filter((p) => !used.has(p.field_id));
+    const exact = free.find((p) => norm(p.text) === norm(t) && p.type === d.type);
+    if (exact) return { ...d, field_id: take(exact.field_id, d.field_id), transfer_state: 'matched' as const, origin: 'transferred' as const, confirmed: true };
+    const near = free
       .map((p) => ({ p, s: jaccard(new Set(words(p.text)), new Set(words(t))) }))
       .sort((a, b) => b.s - a.s)[0];
-    if (near && near.s >= 0.6) return { ...d, field_id: near.p.type === d.type ? near.p.field_id : d.field_id, transfer_state: 'changed' as const, origin: 'transferred' as const, confirmed: false };
-    return d;
+    if (near && near.s >= 0.6) return { ...d, field_id: take(near.p.type === d.type ? near.p.field_id : d.field_id, d.field_id), transfer_state: 'changed' as const, origin: 'transferred' as const, confirmed: false };
+    return { ...d, field_id: take(d.field_id, d.field_id) };
   });
 }
 

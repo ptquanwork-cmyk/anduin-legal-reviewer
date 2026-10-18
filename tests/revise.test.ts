@@ -5,6 +5,7 @@ import { runRules } from '../src/review/checks';
 import { extractPdf } from '../src/review/extract';
 import type { Block } from '../src/review/model';
 import { applyEdits, proposedText } from '../src/review/revise';
+import { transferStates } from '../src/digitize/fields';
 import { assignSections } from '../src/review/sections';
 import { validate } from '../src/review/validate';
 
@@ -63,5 +64,20 @@ describe('revised version', () => {
     expect(after).not.toContain(typo.fingerprint);
     const kept = before.filter((f) => f !== typo);
     expect(kept.filter((f) => after.includes(f.fingerprint)).length).toBe(kept.length);
+  });
+});
+
+describe('field transfer to a new version', () => {
+  it('maps repeated lines one to one and never repeats a field ID', () => {
+    const ann = (field_id: string, idx: number) => ({ field_id, type: 'text_box' as const, label: 'Signature', options: [], page: 1, bbox: { x: 0, y: idx * 20, w: 200, h: 14 }, source_block_idx: idx, required: false, transfer_state: 'new' as const, origin: 'detected' as const, confirmed: false });
+    const blocks = [0, 1, 2].map((idx) => ({ idx, page: 1, kind: 'paragraph' as const, text: idx < 2 ? 'Signature: ________' : 'Name: ________', bbox: null, fonts: [], section_ref: null, section_title: null }));
+    const previous = [
+      { field_id: 'sig.a', label: 'Signature', type: 'text_box' as const, text: 'Signature: ________' },
+      { field_id: 'sig.b', label: 'Signature', type: 'text_box' as const, text: 'Signature: ________' },
+    ];
+    const out = transferStates([ann('sec.signature', 0), ann('sec.signature-2', 1), ann('sig.a', 2)], blocks, previous);
+    expect(out.map((d) => d.field_id)).toEqual(['sig.a', 'sig.b', 'sig.a-2']);
+    expect(out.slice(0, 2).every((d) => d.transfer_state === 'matched')).toBe(true);
+    expect(new Set(out.map((d) => d.field_id)).size).toBe(out.length);
   });
 });
