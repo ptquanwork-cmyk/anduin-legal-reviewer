@@ -247,7 +247,7 @@ function Speed() {
   const f = useCurrentFrame();
   const s = RESULTS.speed;
   const grow = (delay: number) => interpolate(f, [delay, delay + 40], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
-  const appMinutes = 4.5;
+  const appMinutes = s.appMinutes;
   const W = 1300;
   return (
     <AbsoluteFill>

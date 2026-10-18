@@ -161,15 +161,36 @@ for (const f of findings.filter((f) => !decided.some((d) => d.finding_id === f.i
 // ---- Decision / report, then the revision v2 and the comparison ------------------------------------------------------------
 await go('report', v);
 await shot('report', { outcome: await box(page.getByText(/Needs clarification|Revision needed|Review in progress/).first()), questions: await box(page.getByText('Questions for counsel')), compare: await box(button('Compare v1')) });
+// Create revised PDF: corrections for the confirmed issues (the spelling fix is pre-filled), uploaded as v2 from the dialog.
+await opt('revise', async () => {
+  const open = await box(button('Create revised PDF'));
+  await button('Create revised PDF').click();
+  await page.getByText(/change\(s\)/).waitFor();
+  const boxes = page.locator('[role="dialog"] textarea');
+  for (let i = 0; i < (await boxes.count()); i++) {
+    const text = await boxes.nth(i).inputValue();
+    if (text.includes('60 calendar days')) await boxes.nth(i).fill(text.replace('60 calendar days', '30 calendar days'));
+  }
+  await wait(600);
+  const upload = await box(button('Upload as new version'));
+  await shot('revise', { open, upload, editor: await box(page.locator('[role="dialog"] textarea').first()) });
+  await button('Upload as new version').click();
+  await page.getByText(/Checks are still running|mark resolved/).first().waitFor({ timeout: 60000 });
+  await page.keyboard.press('Escape');
+});
 await opt('compare', async () => {
   const { data: ver } = await sb.from('document_versions').select('document_id').eq('id', v).single();
-  const bytes = await readFile(new URL('../../public/demo/demo-agreement-v2.docx', import.meta.url));
-  const path = `${session.user.id}/${randomUUID()}/Demo agreement v2.docx`;
-  const up = await sb.storage.from('sources').upload(path, bytes, { contentType: DOCX });
-  if (up.error) throw up.error;
-  const reg = await call('/api/versions', { path, fileName: 'Demo agreement v2.docx', mime: DOCX, size: bytes.length, documentId: ver.document_id });
+  let { data: v2 } = await sb.from('document_versions').select('id').eq('document_id', ver.document_id).eq('version_no', 2).maybeSingle();
+  if (!v2) {
+    // Fallback when the dialog step was skipped: the prepared Word revision.
+    const bytes = await readFile(new URL('../../public/demo/demo-agreement-v2.docx', import.meta.url));
+    const path = `${session.user.id}/${randomUUID()}/Demo agreement v2.docx`;
+    const up = await sb.storage.from('sources').upload(path, bytes, { contentType: DOCX });
+    if (up.error) throw up.error;
+    v2 = { id: (await call('/api/versions', { path, fileName: 'Demo agreement v2.docx', mime: DOCX, size: bytes.length, documentId: ver.document_id })).versionId };
+  }
   for (let i = 0; i < 160; i++) {
-    const { data } = await sb.from('jobs').select('status').eq('version_id', reg.versionId).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    const { data } = await sb.from('jobs').select('status').eq('version_id', v2.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
     if (data && ['done', 'failed'].includes(data.status)) break;
     await new Promise((r) => setTimeout(r, 3000));
   }
@@ -267,7 +288,8 @@ await opt('export-clipped', async () => {
   await go('export', v);
   await shot('export-clipped', { checks: await box(page.getByText('QA checklist')) });
 });
-await sb.from('submissions').upsert({ version_id: v, answers: answers('Harbor Holdings LLC') }, { onConflict: 'owner,version_id' });
+// The passing export uses a Vietnamese name: every letter must survive the fill.
+await sb.from('submissions').upsert({ version_id: v, answers: answers('Công ty Ánh Dương') }, { onConflict: 'owner,version_id' });
 await call(`/api/versions/${v}/fill`, { final: false });
 await go('export', v);
 await shot('export', { final: await box(button(/Download final PDF|Export final PDF/)), checks: await box(page.getByText('QA checklist')) });

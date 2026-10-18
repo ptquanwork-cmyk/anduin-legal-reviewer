@@ -1,22 +1,22 @@
 # Introduction video
 
-An 89-second introduction to Anduin Legal Reviewer, built with [Remotion](https://www.remotion.dev/) from real screens of the app.
+A 94-second introduction to Anduin Legal Reviewer, built with [Remotion](https://www.remotion.dev/) from real screens of the app.
 
 ## What it shows
 
 Results come first, then the workflow in six chapters. Each chapter opens with a short title card (number, title, one-line summary, progress dots):
 
 1. **Title.**
-2. **Results:** six measured numbers from the [15-file scenario test](../../evals/results/2026-10-16-scenario-test-report.md), with a count-up and a ring for 54/57 planted problems found. The weakest number (34 of 129 findings wrong, 24 of them from a two-column layout) is shown on screen, with the source line.
-3. **Speed:** the 38-page booklet reviewed in 3–4.5 minutes against about 72 minutes to read it once. The footnote says how the reading time is estimated and that there was no timed human study.
+2. **Results:** six measured numbers from the [19 October production test](../../evals/results/2026-10-19-production-test-report.md), with a count-up and a ring for 69/74 planted problems found, and 95% Wilson intervals. The weakest numbers (AI-only conflicts 3 of 6, two conflicts lost to a two-column layout, 4 of 34 traps flagged) are shown on screen, with the source line.
+3. **Speed:** the 38-page booklet reviewed in 2.2–2.7 minutes against about 72 minutes to read it once. The footnote says how the reading time is estimated and that there was no timed human study.
 4. **Upload & check the source:** Intake with the six job checks; Word against the converted PDF.
 5. **Review with evidence:** relationships graph; a finding's exact passage; Dismiss with a reason.
-6. **Decide & report:** the outcome, next step and questions for counsel; revision v2 and a fixed finding resolved.
+6. **Decide, report & revise:** the outcome, next step and questions for counsel; Create revised PDF with the corrections, uploaded as v2; Compare proposes the corrected findings as resolved.
 7. **Digitize the form:** the annotation editor; the exported HTML form.
-8. **Verify & export:** a clipped answer caught; the fixed version passing every check and exported.
+8. **Verify & export:** a clipped answer caught; the fixed version, with a Vietnamese answer, passing every check and exported.
 9. **Memory & workspace:** decision history, the per-screen guide, full-screen mode; end card.
 
-Each shot is a screenshot of the running app, driven in Chrome with the synthetic demo agreement and its revision. The video adds a slow camera zoom and pan, the cursor with click ripples and click sounds, one short caption per shot, a section tag and fade transitions. Motion is not synced to the beat, so the screen stays calm.
+Each shot is a screenshot of the running app, driven in Chrome with the synthetic demo agreement and the revision made in the Create revised PDF dialog. The video adds a slow camera zoom and pan, the cursor with click ripples and click sounds, one short caption per shot, a section tag and fade transitions. Motion is not synced to the beat, so the screen stays calm.
 
 The numbers on screen live in `src/results.ts`; update them there when the report changes.
 
@@ -37,7 +37,7 @@ npm install
 ```
 
 ```bash
-node music.mjs 90
+node music.mjs 96
 ```
 
 ```bash

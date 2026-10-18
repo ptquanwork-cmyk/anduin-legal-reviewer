@@ -33,7 +33,7 @@ export const TRANSITION = 12;
 export const SECTIONS = [
   { n: 1, title: 'Upload & check the source', blurb: 'Word or PDF in, verified text out' },
   { n: 2, title: 'Review with evidence', blurb: 'Every finding quotes its source' },
-  { n: 3, title: 'Decide & report', blurb: 'You confirm, dismiss or ask counsel' },
+  { n: 3, title: 'Decide, report & revise', blurb: 'You decide; the corrected PDF follows' },
   { n: 4, title: 'Digitize the form', blurb: 'Four field types, full contract text' },
   { n: 5, title: 'Verify & export', blurb: 'The filled PDF is checked before export' },
   { n: 6, title: 'Memory & workspace', blurb: 'Decisions remembered, help on every screen' },
@@ -117,6 +117,16 @@ export const SCENES: Scene[] = [
     caption: 'One outcome, the next step, and questions for counsel.',
   },
   {
+    id: 'revise',
+    kind: 'shot',
+    section: 3,
+    dur: s(5),
+    layers: [{ img: 'report', from: 0 }, { img: 'revise', from: s(1) }],
+    cam: [{ f: 0, x: t('report', 'questions').x, y: t('report', 'questions').y + 200, z: 1.3 }, { f: s(1.3), x: t('revise', 'editor').x, y: t('revise', 'editor').y, z: 1.35 }, { f: s(5), x: MODAL.x, y: 620, z: 1.3 }],
+    cursor: [{ f: 0, x: 1500, y: 640 }, { f: s(0.8), x: t('revise', 'open').x, y: t('revise', 'open').y, click: true }, { f: s(4), x: t('revise', 'upload').x, y: t('revise', 'upload').y, click: true }],
+    caption: 'Write the corrections, then download the revised PDF or upload it as v2.',
+  },
+  {
     id: 'compare',
     kind: 'shot',
     section: 3,
@@ -124,7 +134,7 @@ export const SCENES: Scene[] = [
     layers: [{ img: 'report', from: 0 }, { img: 'compare', from: s(1) }, { img: 'compare-resolved', from: s(3.4) }],
     cam: [{ f: 0, x: 1500, y: 320, z: 1.25 }, { f: s(1.3), x: MODAL.x, y: 520, z: 1.3 }, { f: s(5), x: MODAL.x, y: 560, z: 1.38 }],
     cursor: [{ f: 0, x: 1500, y: 420 }, { f: s(0.8), x: t('compare', 'open').x, y: t('compare', 'open').y, click: true }, { f: s(3.2), x: t('compare', 'resolve').x, y: t('compare', 'resolve').y, click: true }],
-    caption: 'Upload the revision: fixed findings are proposed as resolved.',
+    caption: 'Compare v1 → v2: corrected findings are proposed as resolved.',
   },
 
   chapter(4),
@@ -166,7 +176,7 @@ export const SCENES: Scene[] = [
     layers: [{ img: 'export', from: 0 }],
     cam: [{ f: 0, x: t('export', 'checks').x, y: t('export', 'checks').y + 90, z: 1.45 }, { f: s(1.8), x: t('export', 'checks').x, y: t('export', 'checks').y + 90, z: 1.45 }, { f: s(3), x: t('export', 'final').x, y: t('export', 'final').y, z: 1.35 }],
     cursor: [{ f: s(2.2), x: 1400, y: 700 }, { f: s(3.3), x: t('export', 'final').x, y: t('export', 'final').y, click: true }],
-    caption: 'Fixed, every check passed, final PDF exported.',
+    caption: 'Every check passed; Vietnamese letters intact; final PDF exported.',
   },
 
   chapter(6),

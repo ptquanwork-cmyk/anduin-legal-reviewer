@@ -1,7 +1,7 @@
 {
   "width": 1920,
   "height": 1080,
-  "version": "d23bae7a-c2b6-4716-a300-f8e3a45ae8b5",
+  "version": "5d4d913f-c055-49fe-a980-f6ef2f90fc29",
   "shots": {
     "hub": {
       "targets": {
@@ -159,16 +159,6 @@
         }
       }
     },
-    "review-clarify": {
-      "targets": {
-        "open": {
-          "x": 1623,
-          "y": 934,
-          "w": 459,
-          "h": 42
-        }
-      }
-    },
     "review-confirmed": {
       "targets": {
         "confirm": {
@@ -182,9 +172,9 @@
     "report": {
       "targets": {
         "outcome": {
-          "x": 1285,
-          "y": 199,
-          "w": 264,
+          "x": 1330,
+          "y": 188,
+          "w": 391,
           "h": 33
         },
         "questions": {
@@ -201,6 +191,28 @@
         }
       }
     },
+    "revise": {
+      "targets": {
+        "open": {
+          "x": 1622,
+          "y": 769,
+          "w": 456,
+          "h": 26
+        },
+        "upload": {
+          "x": 1253,
+          "y": 991,
+          "w": 226,
+          "h": 42
+        },
+        "editor": {
+          "x": 960,
+          "y": 401,
+          "w": 776,
+          "h": 87
+        }
+      }
+    },
     "compare": {
       "targets": {
         "open": {
@@ -211,7 +223,7 @@
         },
         "resolve": {
           "x": 1175,
-          "y": 624,
+          "y": 432,
           "w": 240,
           "h": 38
         }
@@ -317,6 +329,9 @@
           "h": 27
         }
       }
+    },
+    "export-final": {
+      "targets": {}
     },
     "feedback": {
       "targets": {}

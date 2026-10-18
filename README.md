@@ -4,7 +4,7 @@
 
 My entry for **The Legal Reviewer** challenge (Legal track) of Anduin's Cybernetics hackathon.
 
-**[Live application](https://anduin-legal-reviewer.vercel.app)** · **[Introduction video (89 s)](demo/video/anduin-legal-reviewer-intro.mp4)** · **[Test reports](evals/results/)** · **[Judge reading guide](docs/judging/README.md)** · **[Build logs](progress/build-log/)**
+**[Live application](https://anduin-legal-reviewer.vercel.app)** · **[Introduction video (94 s)](demo/video/anduin-legal-reviewer-intro.mp4)** · **[Test reports](evals/results/)** · **[Judge reading guide](docs/judging/README.md)** · **[Build logs](progress/build-log/)**
 
 ---
 
@@ -12,7 +12,7 @@ My entry for **The Legal Reviewer** challenge (Legal track) of Anduin's Cybernet
 
 https://github.com/user-attachments/assets/48a10deb-1db1-4e8d-8055-efa1b6e6cafb
 
-*Introduction video (89 s): test results first, then the workflow in six short chapters. [Full-resolution 1080p file](demo/video/anduin-legal-reviewer-intro.mp4).*
+*Introduction video (94 s): test results first, then the workflow in six short chapters. [Full-resolution 1080p file](demo/video/anduin-legal-reviewer-intro.mp4).*
 
 Before a fund document is turned into an online form, someone has to read it for typos, broken references, conflicting clauses and unclear terms. Found late, these cause rework and questions to outside counsel. Anduin Legal Reviewer is a **pre-digitization gate** for that review:
 
@@ -34,17 +34,18 @@ I wrote synthetic fund documents and **planted known problems** in each one (typ
 
 | Level | How | Result |
 | --- | --- | --- |
-| Unit tests | `npm test`: rules, evidence gate, annotation QA, form export and import, source checks, revised PDF | 18 passed, 1 manual test skipped |
-| Rules alone, offline | `npx vitest run --dir evals`: no AI, no network | 53/53 rule-detectable problems found; 94/94 fabricated quotes rejected |
-| Full pipeline on the live app | `scripts/e2e-contracts.mjs` uploads all 15 files to production and runs every step to a confirmed final PDF | **54/57 planted problems found (95%)**; 129/129 findings quote the source verbatim |
+| Unit tests | `npm test`: rules, evidence gate, annotation QA, form export and import, source checks, revised PDF, Vietnamese fill, long documents | 23 passed, 1 manual test skipped (19 Oct) |
+| Rules alone, offline | `npx vitest run --dir evals`: no AI, no network | 68/68 rule-detectable problems found; 116/116 fabricated quotes rejected (19 Oct) |
+| Full pipeline on the live app | `scripts/e2e-contracts.mjs` uploads all 15 files (16 runs) to production and runs every step to a confirmed final PDF | **69/74 planted problems found (93%, 95% CI 85–97%)**; 167/167 findings quote the source verbatim (95% CI 98–100%); 16/16 runs finished (19 Oct) |
+| New features on the live app | `scripts/e2e-revision.mjs`: revised PDF → v2 → Compare; Vietnamese answers read back from the final PDF | 30/30 checks passed (19 Oct) |
 | Hard cases | Prompt injection, two-column layout, bilingual text, tables, a scanned page, a corrupted PDF | Injection ignored (4/4 found); scan and corrupted file reported as unreadable, never crashed |
-| Manual check | I read all 129 findings | **34 were wrong**: 24 from the two-column file (text merged across columns), 8 spelling flags on British, legal or bilingual wording, 2 needless wording questions |
+| Manual check (16 Oct run) | I read all 129 findings | **34 were wrong**: 24 from the two-column file (text merged across columns), 8 spelling flags on British, legal or bilingual wording, 2 needless wording questions |
 
-**Speed.** The 38-page, 17,146-word booklet goes from upload to a finished review in 3–4.5 minutes; reading it once takes about 72 minutes at an average reading rate. No timed human study was run, so I don't claim a speed-up factor.
+**Speed.** The 38-page, 17,146-word booklet goes from upload to a finished review in 2.2–2.7 minutes (19 Oct; 3–4.5 minutes on 16 Oct), and the 100-page agreement in 3–4 minutes; reading it once takes about 72 minutes at an average reading rate. No timed human study was run, so I don't claim a speed-up factor.
 
 **Known limits:** two-column PDFs are extracted poorly; scanned pages are reported, not read (no OCR); one 38-page Word run hit the 300-second server limit and needed a retry.
 
-Full method and per-file results: [scenario test report (15 files)](evals/results/2026-10-16-scenario-test-report.md) and [judge test report (8 files)](evals/results/2026-10-16-judge-test-report.md). All documents are synthetic; this is not a benchmark of real contracts.
+Full method and per-file results: [production test report, 19 Oct](evals/results/2026-10-19-production-test-report.md), [scenario test report (15 files, 16 Oct)](evals/results/2026-10-16-scenario-test-report.md) and [judge test report (8 files)](evals/results/2026-10-16-judge-test-report.md). All documents are synthetic; this is not a benchmark of real contracts.
 
 ---
 
@@ -223,7 +224,7 @@ Details: [architecture and workflow map](docs/architecture/overview.md) (each st
 | `evals/revision-roundtrip.test.ts` | Revised PDF from step 05 on the 14 readable demo contracts: corrections applied, PDF re-read like a new upload, rules re-run | 19 Oct 2026: every word kept, every applied spelling fix gone, every untouched finding still matched by Compare ([results](evals/results/revision-roundtrip-latest.json)) |
 | `scripts/e2e-memory.mjs` | Decisions stored with snapshots, history append-only, decisions survive re-runs, examples reach the next review, v2 transfer | Production, 19 Oct 2026: **10/10 checks passed** (also 15 Oct) |
 | `scripts/e2e-revision.mjs` | Revised PDF → upload as v2 → Compare, and Vietnamese answers read back from the final PDF | Production, 19 Oct 2026: **30/30 checks passed** ([log](evals/results/2026-10-19-e2e-production-revision-memory.txt)) |
-| Production rerun, 19 Oct 2026 | All 15 files (16 runs) with the worker online, after the revised-PDF change | 54/57 on the 14-file scenario set (unchanged); 100-page agreement 12/17; every job finished; final PDFs for every file with fields ([log](evals/results/2026-10-19-e2e-production-contracts.txt)) |
+| Production rerun, 19 Oct 2026 | All 15 files (16 runs) with the worker online, after the revised-PDF, rule and long-document changes | **69/74 (93%, 95% CI 85–97%)**; 54/57 on the 14-file scenario set (unchanged); 100-page agreement 15/17 with all 160 fields filled; 4 of 34 traps hit; every job finished ([report](evals/results/2026-10-19-production-test-report.md)) |
 | Browser checks | Live UI screens, CSP violations, 3D frame rate and GPU context on a laptop Intel GPU, long-document responsiveness | Recorded in the [build logs](progress/build-log/) |
 
 Per-contract results, timings and the one miss (a closing-date conflict inside a single paragraph of the scrambled PDF) are in the [15 October build log](progress/build-log/2026-10-15.md#follow-up-security-review-speed-and-accuracy). These are synthetic documents written for this project, not a benchmark of real contracts. See [evals](evals/README.md) for the scope of what is and isn't measured.

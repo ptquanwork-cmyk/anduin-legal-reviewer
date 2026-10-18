@@ -95,11 +95,20 @@ async function fillPdf(ws, versionId) {
   const sub = await retry(() => ws.sb.from('submissions').upsert({ version_id: versionId, answers }, { onConflict: 'owner,version_id' }), 'answers');
   if (sub.error) return `answers failed: ${sub.error.message}`;
   try {
-    const draft = await call(ws, `/api/versions/${versionId}/fill`, { final: false });
+    let draft = await call(ws, `/api/versions/${versionId}/fill`, { final: false });
+    // A reviewer shortens an answer that QA reports as clipped (a narrow table cell, for example) and runs QA again.
+    const clipped = (draft.qa?.issues ?? []).filter((i) => i.field_id && /clipped/i.test(i.title)).map((i) => i.field_id);
+    if (clipped.length) {
+      for (const id of clipped) answers[id] = 'LP';
+      const again = await retry(() => ws.sb.from('submissions').upsert({ version_id: versionId, answers }, { onConflict: 'owner,version_id' }), 'answers');
+      if (again.error) return `answers failed: ${again.error.message}`;
+      draft = await call(ws, `/api/versions/${versionId}/fill`, { final: false });
+    }
+    const note = clipped.length ? `; QA caught ${clipped.length} clipped answer(s), shortened` : '';
     const failed = (draft.qa?.checks ?? []).filter((c) => c.status !== 'pass').map((c) => `${c.label} (${c.status})`);
-    if (failed.length) return `draft QA: ${failed.join(', ')}; ${draft.qa.issues.length} issue(s), final blocked`;
+    if (failed.length) return `draft QA: ${failed.join(', ')}; ${draft.qa.issues.length} issue(s), final blocked${note}`;
     const final = await call(ws, `/api/versions/${versionId}/fill`, { final: true, confirmed: true });
-    return `${fields.length} fields filled; draft QA passed; final ${final.kind}`;
+    return `${fields.length} fields filled${note}; draft QA passed; final ${final.kind}`;
   } catch (e) {
     return `fill failed: ${e.message}`;
   }
